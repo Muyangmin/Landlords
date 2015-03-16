@@ -11,11 +11,12 @@ import android.graphics.BitmapFactory;
 
 /**
  * 代表已被加载到内存中的Bitmap对象。
+ * 通过 重载的scaleTo方法可以将位图尺寸进行重新缩放。
  * @author Muyangmin
  * @create 2015-3-15
  */
 public final class LiveBitmap {
-	private final Bitmap bitmap;
+	private Bitmap bitmap;
 	private final int rawWidth;
 	private final int rawHeight;
 
@@ -33,7 +34,7 @@ public final class LiveBitmap {
 	 * @param assets 要加载的Bitmap文件名（必须是Assets文件）。
 	 * @return 加载得到的位图；如果失败，返回null。
 	 */
-	public static final LiveBitmap loadBitmap(Context context, String assets) {
+	protected static final LiveBitmap loadBitmap(Context context, String assets) {
 		return loadBitmap(context, assets, 0, 0);
 	}
 
@@ -45,7 +46,7 @@ public final class LiveBitmap {
 	 * @param height 目标高度。
 	 * @return 加载得到的位图；如果失败，返回null。
 	 */
-	public static final LiveBitmap loadBitmap(Context context, String assets,
+	protected static final LiveBitmap loadBitmap(Context context, String assets,
 			int width, int height) {
 		LiveBitmap instance = null;
 		AssetManager am = context.getAssets();
@@ -74,5 +75,31 @@ public final class LiveBitmap {
 
 	public int getRawHeight() {
 		return rawHeight;
+	}
+	
+	public int getWidth(){
+		return bitmap.getWidth();
+	}
+	
+	public int getHeight(){
+		return bitmap.getHeight();
+	}
+	
+	/**
+	 * 缩放图片到指定比例。
+	 * @param scalew 横向缩放比例
+	 * @param scaleh 纵向缩放比例
+	 */
+	public void scaleTo(float scalew, float scaleh){
+		bitmap = BitmapUtil.scaleBitmap(bitmap, scalew, scaleh);
+	}
+	
+	/**
+	 * 缩放图片到指定尺寸。
+	 * @param width 目标宽度
+	 * @param height 目标高度
+	 */
+	public void scaleTo(int width, int height){
+		bitmap = BitmapUtil.scaleBitmap(bitmap, width, height);
 	}
 }

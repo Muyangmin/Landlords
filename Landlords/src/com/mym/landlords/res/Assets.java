@@ -122,7 +122,6 @@ public final class Assets {
 		}
 		instance = new Assets();
 		instance.load(context, listener);
-		listener.onLoadCompleted();
 	}
 	
 	/**
@@ -131,6 +130,7 @@ public final class Assets {
 	private final void load(Context context, LoadingProgressListener listener){
 		loadBitmap(context, listener);
 		loadSound(context, listener);
+		listener.onLoadCompleted();
 	}
 	
 	private final void loadSound(Context context, LoadingProgressListener listener){

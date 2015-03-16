@@ -48,6 +48,11 @@ public final class GlobalSoundPool {
 		return -1;
 	}
 	
-	public void play(int soundId){
+	/**
+	 * 播放指定的音效。
+	 * @param soundId 通过load方法加载得到的soundId。
+	 */
+	public void playSound(int soundId){
+		soundPool.play(soundId, 0.5F, 0.5F, 0, 0, 1.0F);
 	}
 }
