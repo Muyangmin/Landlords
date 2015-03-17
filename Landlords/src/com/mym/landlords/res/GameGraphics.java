@@ -17,7 +17,7 @@ public final class GameGraphics {
 	private static final int BASELINE_WIDTH = 800; // X轴基准比例
 	private static final int BASELINE_HEIGHT = 480; // Y轴基准比例
 
-	private Bitmap frameBuffer; // 底色
+//	private Bitmap frameBuffer; // 底色
 //	private Canvas canvas; // 画布对象
 	private Paint paint; // 画笔对象
 	private float scaleX; // X缩放比
@@ -39,7 +39,7 @@ public final class GameGraphics {
 	 */
 	protected GameGraphics(Bitmap frameBuffer, float scaleX, float scaleY) {
 		super();
-		this.frameBuffer = frameBuffer;
+//		this.frameBuffer = frameBuffer;
 //		this.canvas = new Canvas(frameBuffer);
 		this.scaleX = scaleX;
 		this.paint = new Paint();
@@ -54,6 +54,8 @@ public final class GameGraphics {
 	protected static final float computeScaleX(int targetWidth) {
 		return targetWidth / (float) BASELINE_WIDTH;
 	}
+	
+	
 
 	/**
 	 * 计算缩放比例。
@@ -133,4 +135,12 @@ public final class GameGraphics {
 //		int y = center.y - (int) (bitmap.getRawHeight() / 2 + 0.5f);
 //		drawBitmap(bitmap, x, y);
 //	}
+
+	public float getScaleX() {
+		return scaleX;
+	}
+
+	public float getScaleY() {
+		return scaleY;
+	}
 }

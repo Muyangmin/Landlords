@@ -1,10 +1,12 @@
 package com.mym.landlords.widget;
 
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.LiveBitmap;
+import com.mym.landlords.ui.MappedTouchEvent;
 
 /**
  * 虚拟的按钮控件，使用Android的控件思想进行封装。
@@ -51,8 +53,9 @@ public final class BitmapButton implements BitmapView{
 		this.bitmapPressed = bitmapPressed;
 	}
 	
-	public final void onTouch(MotionEvent event){
+	public final void onTouch(MappedTouchEvent event){
 		if (inBounds(event)){
+			Log.d("BitmapButton", "event in bounds caught:"+event.toString());
 			if (event.getAction()==MotionEvent.ACTION_DOWN){
 				isPressed = true;
 			}
@@ -73,11 +76,11 @@ public final class BitmapButton implements BitmapView{
 	/**
 	 * 判断指定的事件是否在自己的区域中。
 	 */
-	private boolean inBounds(MotionEvent event){
+	private boolean inBounds(MappedTouchEvent event){
 		int width = bitmapNormal.getRawWidth();
 		int height = bitmapNormal.getRawHeight();
-        if(event.getX() > x && event.getX() < x + width - 1 && 
-           event.getY() > y && event.getY() < y + height - 1){
+        if(event.x > x && event.x < x + width - 1 && 
+           event.y > y && event.y < y + height - 1){
         	return true;
         }
         else{

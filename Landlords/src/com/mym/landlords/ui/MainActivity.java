@@ -6,17 +6,16 @@ import java.util.List;
 import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.Assets.LoadingProgressListener;
 import com.mym.landlords.res.GameGraphics;
+import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.widget.BitmapButton;
+import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameView;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 
 public class MainActivity extends AbsGameActivity implements GameScreen{
 	
@@ -45,12 +44,17 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		Point outPoint = new Point();
 		getWindowManager().getDefaultDisplay().getSize(outPoint);	//测量大小
 		graphics = new GameGraphics(gameBkg, outPoint);
+		MappedTouchEvent.initMapper(graphics.getScaleX(), graphics.getScaleY());
 		gameView = new GameView(this, graphics, this);
 		button = new BitmapButton(graphics, 120, 200, Assets.getInstance().cardbg);
-//		setContentView(gameView);
+		button.setListener(new onClickListener() {
+			
+			@Override
+			public void onClicked(BitmapButton btn) {
+				GlobalSoundPool.getInstance(MainActivity.this).playSound(Assets.getInstance().cardJokerS);
+			}
+		});
 		setContentView(gameView);
-//		gameView.redraw();
-//		findViewById(R.id.root).setBackgroundDrawable(new BitmapDrawable(gameBkg));
 	}
 
 	@Override
@@ -62,7 +66,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	
 	@Override
 	public void updateUI(GameGraphics graphics, Canvas canvas) {
-		graphics.drawBitmap(canvas, Assets.getInstance().spades[1], 100, 120);
+//		graphics.drawBitmap(canvas, Assets.getInstance().spades[1], 100, 120);
 		button.onDraw(canvas);
 	}
 }

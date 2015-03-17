@@ -76,13 +76,12 @@ public final class LiveBitmap {
 		AssetManager am = context.getAssets();
 		try {
 			Bitmap bitmap = BitmapFactory.decodeStream(am.open(assets));
-			if (width == 0 || height == 0) {
-				instance = new LiveBitmap(bitmap, bitmap.getWidth(),
-						bitmap.getHeight());
-			} else {
+			int rawWidth = bitmap.getWidth();
+			int rawHeight = bitmap.getHeight();
+			if (width != 0 && height != 0) {
 				bitmap = BitmapUtil.scaleBitmap(bitmap, width, height);
-				instance = new LiveBitmap(bitmap, width, height);
 			}
+			instance = new LiveBitmap(bitmap, rawWidth, rawHeight);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -126,4 +125,15 @@ public final class LiveBitmap {
 	public void scaleTo(int width, int height){
 		bitmap = BitmapUtil.scaleBitmap(bitmap, width, height);
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("LiveBitmap [getRawWidth()=").append(getRawWidth())
+				.append(", getRawHeight()=").append(getRawHeight())
+				.append(", getWidth()=").append(getWidth())
+				.append(", getHeight()=").append(getHeight()).append("]");
+		return builder.toString();
+	}
+	
 }

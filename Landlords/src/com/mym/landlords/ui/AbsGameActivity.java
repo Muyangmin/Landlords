@@ -51,8 +51,7 @@ public abstract class AbsGameActivity extends Activity implements GameScreen{
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		if (bitmapButtons!=null){
 			for (BitmapButton button: bitmapButtons){
-				Log.d(LOG_TAG, "button==null?"+(button==null));
-				button.onTouch(ev);
+				button.onTouch(MappedTouchEvent.translateEvent(ev));
 			}
 		}
 		return super.dispatchTouchEvent(ev);
