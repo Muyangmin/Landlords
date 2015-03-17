@@ -31,7 +31,7 @@ public final class Card implements Serializable, Comparable<Card>{
 	
 	private static final long serialVersionUID = 1L;
 	
-	private CardType type;		//卡牌花色
+	private CardSuit type;		//卡牌花色
 	private int value;			//卡牌数值。即上面的大小值之一。
 	private String valueStr;		//卡牌数值的字符描述，主要用于提示或日志输出，使用频繁，故在构造函数中初始化。
 
@@ -40,7 +40,7 @@ public final class Card implements Serializable, Comparable<Card>{
 	 * @param type 卡牌的花色。
 	 * @param value 卡牌的面值，必须为 {@value #CARD_VALUE_3} ~ {@value #CARD_VALUE_JOKER_B}之间的值。
 	 */
-	public Card(CardType type, int value) {
+	public Card(CardSuit type, int value) {
 		if (type == null || value < CARD_VALUE_3 || value > CARD_VALUE_JOKER_B) {
 			throw new IllegalArgumentException("invalid card!type="+type+", value="+value);
 		}

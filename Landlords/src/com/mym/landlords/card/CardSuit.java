@@ -5,7 +5,7 @@ package com.mym.landlords.card;
  * @author Muyangmin
  * @create 2015-3-14
  */
-public enum CardType {
+public enum CardSuit {
 	/**
 	 * 黑桃，A~K，13张.
 	 */

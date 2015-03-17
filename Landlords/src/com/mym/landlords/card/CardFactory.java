@@ -16,19 +16,19 @@ public final class CardFactory {
 	public static ArrayList<Card> newCardPack(){
 		ArrayList<Card> cards = new ArrayList<>();
 		for (int i=Card.CARD_VALUE_3; i<=Card.CARD_VALUE_2; i++){
-			cards.add(new Card(CardType.Spade, i));
+			cards.add(new Card(CardSuit.Spade, i));
 		}
 		for (int i=Card.CARD_VALUE_3; i<=Card.CARD_VALUE_2; i++){
-			cards.add(new Card(CardType.Heart, i));
+			cards.add(new Card(CardSuit.Heart, i));
 		}
 		for (int i=Card.CARD_VALUE_3; i<=Card.CARD_VALUE_2; i++){
-			cards.add(new Card(CardType.Club, i));
+			cards.add(new Card(CardSuit.Club, i));
 		}
 		for (int i=Card.CARD_VALUE_3; i<=Card.CARD_VALUE_2; i++){
-			cards.add(new Card(CardType.Diamond, i));
+			cards.add(new Card(CardSuit.Diamond, i));
 		}
-		cards.add(new Card(CardType.Joker, Card.CARD_VALUE_JOKER_S));
-		cards.add(new Card(CardType.Joker, Card.CARD_VALUE_JOKER_B));
+		cards.add(new Card(CardSuit.Joker, Card.CARD_VALUE_JOKER_S));
+		cards.add(new Card(CardSuit.Joker, Card.CARD_VALUE_JOKER_B));
 		return cards;
 	}
 }

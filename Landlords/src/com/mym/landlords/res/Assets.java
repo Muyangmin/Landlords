@@ -2,7 +2,7 @@ package com.mym.landlords.res;
 
 import com.mym.landlords.R;
 import com.mym.landlords.card.Card;
-import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.CardSuit;
 
 import android.content.Context;
 
@@ -75,7 +75,7 @@ public final class Assets {
 	/** 牌型音效：三带对。 */
 	public int cardThree2;
 	/** 牌型音效：飞机。 */
-	public int cardAir;
+	public int cardPlane;
 	/** 牌型音效：顺子。 */
 	public int cardShun1;
 	/** 牌型音效：双顺（连对）。 */
@@ -91,6 +91,8 @@ public final class Assets {
 	public int[] playBigger;
 	/** 牌局音效：炸弹爆炸。 */
 	public int playBoom;
+	/** 牌局音效：飞机。 */
+	public int playPlane;
 	/** 牌局音效：胜。 */
 	public int playWin;
 	/** 牌局音效：负。 */
@@ -136,7 +138,7 @@ public final class Assets {
 	private final void loadSound(Context context, LoadingProgressListener listener){
 		GlobalSoundPool sp = GlobalSoundPool.getInstance(context);
 		String loadingSound = context.getString(R.string.str_loading_task_sound);
-		final int totalSoundCount = 23;	//数出来的
+		final int totalSoundCount = 24;	//数出来的
 		int completed = 0;	//复位
 		landloadP1 = sp.loadSound(context, "landlord_p1.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
@@ -146,7 +148,7 @@ public final class Assets {
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		landloadPass = sp.loadSound(context, "landlord_pass.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardAir = sp.loadSound(context, "feiji.wav");
+		cardPlane = sp.loadSound(context, "feiji.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		cardBoom = sp.loadSound(context, "zhadan.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
@@ -182,6 +184,8 @@ public final class Assets {
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		playBoom = sp.loadSound(context, "boom.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		playPlane = sp.loadSound(context, "plane.mp3");
+		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		playLose = sp.loadSound(context, "lose.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		playWin = sp.loadSound(context, "win.mp3");
@@ -200,9 +204,9 @@ public final class Assets {
 				// 加载黑桃图片
 				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
 					spades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Spade, value, false));
+							getCardAssetsName(CardSuit.Spade, value, false));
 					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Spade, value, true));
+							getCardAssetsName(CardSuit.Spade, value, true));
 					completed += 2;
 					notifyProgressChanged(completed, totalBitmap, listener,
 							loadingBitmap);
@@ -210,9 +214,9 @@ public final class Assets {
 				// 加载红桃图片
 				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
 					hearts[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Heart, value, false));
+							getCardAssetsName(CardSuit.Heart, value, false));
 					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Spade, value, true));
+							getCardAssetsName(CardSuit.Spade, value, true));
 					completed += 2;
 					notifyProgressChanged(completed, totalBitmap, listener,
 							loadingBitmap);
@@ -220,9 +224,9 @@ public final class Assets {
 				// 加载梅花图片
 				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
 					clubs[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Club, value, false));
+							getCardAssetsName(CardSuit.Club, value, false));
 					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Spade, value, true));
+							getCardAssetsName(CardSuit.Spade, value, true));
 					completed += 2;
 					notifyProgressChanged(completed, totalBitmap, listener,
 							loadingBitmap);
@@ -230,17 +234,17 @@ public final class Assets {
 				// 加载方片图片
 				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
 					diamonds[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Diamond, value, false));
+							getCardAssetsName(CardSuit.Diamond, value, false));
 					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardType.Spade, value, true));
+							getCardAssetsName(CardSuit.Spade, value, true));
 					completed += 2;
 					notifyProgressChanged(completed, totalBitmap, listener,
 							loadingBitmap);
 				}
 				jokerS = LiveBitmap.loadBitmap(context, 
-						getCardAssetsName(CardType.Joker, Card.CARD_VALUE_JOKER_S, false));
+						getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_S, false));
 				jokerB = LiveBitmap.loadBitmap(context, 
-						getCardAssetsName(CardType.Joker, Card.CARD_VALUE_JOKER_B, false));
+						getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_B, false));
 				completed += 2;
 				notifyProgressChanged(completed, totalBitmap, listener,
 						loadingBitmap);
@@ -263,7 +267,7 @@ public final class Assets {
 	 * @param isSmaller 是整张还是仅左上角。
 	 * @return 返回拼接好的文件名。
 	 */
-	private String getCardAssetsName(CardType type, int value, boolean isSmaller){
+	private String getCardAssetsName(CardSuit type, int value, boolean isSmaller){
 		StringBuilder sb = new StringBuilder();
 		char typePrefix;
 		switch (type) {
