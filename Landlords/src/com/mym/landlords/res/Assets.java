@@ -4,7 +4,11 @@ import com.mym.landlords.R;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardSuit;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
+import android.util.Log;
+import android.view.WindowManager;
 
 /**
  * 负责加载并存储从Assets文件中加载到内存中的资源。
@@ -23,7 +27,12 @@ import android.content.Context;
  */
 public final class Assets {
 	
+	private static final String LOG_TAG = "Assets";
+	
 	private static Assets instance;
+	
+	/** 牌桌背景。  */
+	public LiveBitmap bkgGameTable;
 	
 	/** 黑桃卡牌，按卡牌从小到大排序。  */
 	public LiveBitmap[] spades = new LiveBitmap[13];;
@@ -184,7 +193,7 @@ public final class Assets {
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		playBoom = sp.loadSound(context, "boom.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playPlane = sp.loadSound(context, "plane.mp3");
+		playPlane = sp.loadSound(context, "plane.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		playLose = sp.loadSound(context, "lose.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
@@ -195,64 +204,92 @@ public final class Assets {
 		}
 	}
 	
-	private final void loadBitmap(Context context, LoadingProgressListener listener){
-		//54 = 一副牌，52=一副牌的较小版本，再加上卡牌背面图片
-				final int totalBitmap = 54 + 52 + 1;
-				
-				String loadingBitmap = context.getString(R.string.str_loading_task_bitmap);
-				int completed = 0;
-				// 加载黑桃图片
-				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-					spades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Spade, value, false));
-					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Spade, value, true));
-					completed += 2;
-					notifyProgressChanged(completed, totalBitmap, listener,
-							loadingBitmap);
-				}
-				// 加载红桃图片
-				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-					hearts[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Heart, value, false));
-					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Spade, value, true));
-					completed += 2;
-					notifyProgressChanged(completed, totalBitmap, listener,
-							loadingBitmap);
-				}
-				// 加载梅花图片
-				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-					clubs[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Club, value, false));
-					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Spade, value, true));
-					completed += 2;
-					notifyProgressChanged(completed, totalBitmap, listener,
-							loadingBitmap);
-				}
-				// 加载方片图片
-				for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-					diamonds[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Diamond, value, false));
-					smallSpades[i] = LiveBitmap.loadBitmap(context,
-							getCardAssetsName(CardSuit.Spade, value, true));
-					completed += 2;
-					notifyProgressChanged(completed, totalBitmap, listener,
-							loadingBitmap);
-				}
-				jokerS = LiveBitmap.loadBitmap(context, 
-						getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_S, false));
-				jokerB = LiveBitmap.loadBitmap(context, 
-						getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_B, false));
-				completed += 2;
-				notifyProgressChanged(completed, totalBitmap, listener,
-						loadingBitmap);
-				cardbg = LiveBitmap.loadBitmap(context, "cardbg.png");
-				notifyProgressChanged(++completed, totalBitmap, listener,
-						loadingBitmap);
+	private final void loadBitmap(Context context,
+			LoadingProgressListener listener) {
+		if (!(context instanceof Activity)) {
+			throw new IllegalArgumentException(
+					"This context must be instance of activity.");
+		}
+		WindowManager wm = ((Activity) context).getWindowManager();
+		Point point = new Point();
+		wm.getDefaultDisplay().getSize(point);
+		Log.d(LOG_TAG, "window point:" + point.toString());
+		final float scaleX = GameGraphics.computeScaleX(point.x);
+		final float scaleY = GameGraphics.computeScaleY(point.y);
+		Log.d(LOG_TAG, "scalex = "+scaleX+", scaleY="+scaleY);
+		// 54 = 一副牌，52=一副牌的较小版本，再加上卡牌背面图片和牌桌背景图片
+		final int totalBitmap = 54 + 52 + 1 + 1;
+
+		String loadingBitmap = context
+				.getString(R.string.str_loading_task_bitmap);
+		int completed = 0;
+		// 加载黑桃图片
+		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
+			spades[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Spade, value, false), scaleX,
+					scaleY);
+			smallSpades[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
+					scaleY);
+			completed += 2;
+			notifyProgressChanged(completed, totalBitmap, listener,
+					loadingBitmap);
+		}
+		// 加载红桃图片
+		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
+			hearts[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Heart, value, false), scaleX,
+					scaleY);
+			smallSpades[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
+					scaleY);
+			completed += 2;
+			notifyProgressChanged(completed, totalBitmap, listener,
+					loadingBitmap);
+		}
+		// 加载梅花图片
+		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
+			clubs[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Club, value, false), scaleX,
+					scaleY);
+			smallSpades[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
+					scaleY);
+			completed += 2;
+			notifyProgressChanged(completed, totalBitmap, listener,
+					loadingBitmap);
+		}
+		// 加载方片图片
+		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
+			diamonds[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Diamond, value, false), scaleX,
+					scaleY);
+			smallSpades[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
+					scaleY);
+			completed += 2;
+			notifyProgressChanged(completed, totalBitmap, listener,
+					loadingBitmap);
+		}
+		jokerS = LiveBitmap.loadBitmap(
+				context,
+				getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_S,
+						false), scaleX, scaleY);
+		jokerB = LiveBitmap.loadBitmap(
+				context,
+				getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_B,
+						false), scaleX, scaleY);
+		completed += 2;
+		notifyProgressChanged(completed, totalBitmap, listener, loadingBitmap);
+		cardbg = LiveBitmap.loadBitmap(context, "cardbg.png", scaleX, scaleY);
+		notifyProgressChanged(++completed, totalBitmap, listener, loadingBitmap);
+		bkgGameTable = LiveBitmap.loadBitmap(context, "bkg_table.png", scaleX, scaleY);
+		notifyProgressChanged(++completed, totalBitmap, listener, loadingBitmap);
+		if (completed!=totalBitmap){
+			throw new RuntimeException("Load bitmap completed "+completed+" while total is "+totalBitmap);
+		}
 	}
-	
+
 	//通知加载的进度
 	private final void notifyProgressChanged(int completed, int total,
 			LoadingProgressListener listener, String currentTask) {

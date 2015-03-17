@@ -39,6 +39,30 @@ public final class LiveBitmap {
 	}
 
 	/**
+	 * 按原有尺寸加载图片，再按指定比例缩放。
+	 * @param context 上下文信息。
+	 * @param assets 要加载的Bitmap文件名（必须是Assets文件）。
+	 * @param scalex x缩放比。
+	 * @param scaley y缩放比。
+	 * @return 加载得到的位图；如果失败，返回null。
+	 */
+	protected static final LiveBitmap loadBitmap(Context context, String assets,
+			float scalex, float scaley) {
+		LiveBitmap instance = null;
+		AssetManager am = context.getAssets();
+		try {
+			Bitmap bitmap = BitmapFactory.decodeStream(am.open(assets));
+			int rawWidth = bitmap.getWidth();
+			int rawHeight = bitmap.getHeight();
+			bitmap = BitmapUtil.scaleBitmap(bitmap, scalex, scaley);
+			instance = new LiveBitmap(bitmap, rawWidth, rawHeight);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return instance;
+	}
+	
+	/**
 	 * 按原有尺寸加载图片，再缩放到指定尺寸。
 	 * @param context 上下文信息。
 	 * @param assets 要加载的Bitmap文件名（必须是Assets文件）。
