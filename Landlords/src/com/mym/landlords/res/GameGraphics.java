@@ -26,47 +26,27 @@ public final class GameGraphics {
 	private float scaleY; // Y缩放比
 	private Rect srcRect = new Rect(); // 源矩阵对象
 	private Rect dstRect = new Rect(); // 目标矩阵对象
-
-	/**
-	 * 构造一个适配指定屏幕大小的Graphics对象。
-	 * @param frameBuffer 背景图像。
-	 * @param outSize 屏幕大小。这个对象应该是使用 {@link Display#getSize(Point)}测量得到的值。
-	 */
-	public GameGraphics(Bitmap frameBuffer, Point outSize) {
-		this(frameBuffer, computeScaleX(outSize.x), computeScaleY(outSize.y));
-	}
-
-	/**
-	 * 构造一个指定缩放比的Graphics对象。
-	 */
-	protected GameGraphics(Bitmap frameBuffer, float scaleX, float scaleY) {
-		super();
-//		this.frameBuffer = frameBuffer;
-//		this.canvas = new Canvas(frameBuffer);
-		this.scaleX = scaleX;
-		this.paint = new Paint();
-		this.scaleY = scaleY;
-	}
-
-	/**
-	 * 计算缩放比例。
-	 * @param targetWidth 目标尺寸宽度。
-	 * @return X轴缩放比例。
-	 */
-	protected static final float computeScaleX(int targetWidth) {
-		return targetWidth / (float) BASE_SCREEN_WIDTH;
-	}
 	
+	private static GameGraphics instance;
 	
+	//初始化屏幕缩放比例。该方法仅被Assets调用。
+	protected static synchronized void initGraphicsScale(Point outSize){
+		instance = new GameGraphics(outSize);
+	}
 
 	/**
-	 * 计算缩放比例。
-	 * 
-	 * @param targetHeight 目标尺寸高度。
-	 * @return Y轴缩放比例。
+	 * 获得画笔对象。
 	 */
-	protected static final float computeScaleY(int targetHeight) {
-		return targetHeight / (float) BASE_SCREEN_HEIGHT;
+	public static GameGraphics newInstance(){
+		if (instance==null){
+			throw new RuntimeException("must call initGraphicsScale() before create instance.");
+		}
+		return instance;
+	}
+	private GameGraphics(Point outSize){
+		scaleX = outSize.x / (float) BASE_SCREEN_WIDTH;
+		scaleY = outSize.y / (float) BASE_SCREEN_HEIGHT;
+//		this.paint = new Paint();
 	}
 
 //	/**

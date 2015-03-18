@@ -3,6 +3,7 @@ package com.mym.landlords.res;
 import com.mym.landlords.R;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardSuit;
+import com.mym.landlords.widget.MappedTouchEvent;
 
 import android.app.Activity;
 import android.content.Context;
@@ -126,7 +127,10 @@ public final class Assets {
 	 */
 	public static synchronized void loadAssets(Context context, LoadingProgressListener listener){
 		if (instance!=null){
-			throw new RuntimeException("Assets resources have been already loaded.");
+//			throw new RuntimeException("Assets resources have been already loaded.");
+			//这里不假定instance不为Null即代表其所持有的内存资源没有被释放，为了安全起见，强制重新加载。
+			Log.e(LOG_TAG, "Assets resources have been already loaded.Force reloading...");
+			instance = null;
 		}
 		if (context==null || listener==null){
 			throw new NullPointerException("params cannot be null.");
@@ -214,9 +218,13 @@ public final class Assets {
 		Point point = new Point();
 		wm.getDefaultDisplay().getSize(point);
 		Log.d(LOG_TAG, "window point:" + point.toString());
-		final float scaleX = GameGraphics.computeScaleX(point.x);
-		final float scaleY = GameGraphics.computeScaleY(point.y);
+		//重要：这里将画笔工具和事件捕捉类的缩放比例一起设置。
+		GameGraphics.initGraphicsScale(point);
+		GameGraphics graphics = GameGraphics.newInstance();
+		final float scaleX = graphics.getScaleX();
+		final float scaleY = graphics.getScaleY();
 		Log.d(LOG_TAG, "scalex = "+scaleX+", scaleY="+scaleY);
+		MappedTouchEvent.initMapper(scaleX, scaleY);
 		// 54 = 一副牌，52=一副牌的较小版本，再加上卡牌背面图片和牌桌背景图片
 		final int totalBitmap = 54 + 52 + 1 + 1;
 

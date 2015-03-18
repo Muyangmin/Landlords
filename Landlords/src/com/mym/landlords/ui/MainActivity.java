@@ -13,6 +13,8 @@ import com.mym.landlords.widget.MappedTouchEvent;
 import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameView;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -25,28 +27,18 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	private GameGraphics graphics;
 	private BitmapButton button;
 	private GameView gameView;
+	
+	protected static Intent getIntent(Context context){
+		Intent intent = new Intent(context, MainActivity.class);
+		return intent;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Assets.loadAssets(this, new LoadingProgressListener() {
-			
-			@Override
-			public void onProgressChanged(int progress, String currentTaskDescription) {
-				// TODO Auto-generated method stub
-//				Log.d(LOG_TAG, currentTaskDescription+" "+progress);
-			}
-			
-			@Override
-			public void onLoadCompleted() {
-				Log.d(LOG_TAG, "loading completed.");
-			}
-		});
-		Bitmap gameBkg = Assets.getInstance().bkgGameTable.getBitmap();
 		Point outPoint = new Point();
 		getWindowManager().getDefaultDisplay().getSize(outPoint);	//测量大小
-		graphics = new GameGraphics(gameBkg, outPoint);
-		MappedTouchEvent.initMapper(graphics.getScaleX(), graphics.getScaleY());
+		graphics = GameGraphics.newInstance();
 		gameView = new GameView(this, graphics, this);
 		button = new BitmapButton(graphics, 120, 200, Assets.getInstance().cardbg);
 		button.setListener(new onClickListener() {
