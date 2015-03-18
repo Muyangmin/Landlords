@@ -35,77 +35,77 @@ public final class Assets {
 	public LiveBitmap bkgGameTable;
 	
 	/** 黑桃卡牌，按卡牌从小到大排序。  */
-	public LiveBitmap[] spades = new LiveBitmap[13];;
+	public LiveBitmap[] cardSpades = new LiveBitmap[13];;
 	/** 红桃卡牌，按卡牌从小到大排序。  */
-	public LiveBitmap[] hearts = new LiveBitmap[13];;
+	public LiveBitmap[] cardHearts = new LiveBitmap[13];;
 	/** 梅花卡牌，按卡牌从小到大排序。  */
-	public LiveBitmap[] clubs = new LiveBitmap[13];;
+	public LiveBitmap[] cardClubs = new LiveBitmap[13];;
 	/** 方片卡牌，按卡牌从小到大排序。  */
-	public LiveBitmap[] diamonds = new LiveBitmap[13];;
+	public LiveBitmap[] cardDiamonds = new LiveBitmap[13];;
 	
 	/** 小型黑桃卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
-	public LiveBitmap[] smallSpades = new LiveBitmap[13];;
+	public LiveBitmap[] cardSmallSpades = new LiveBitmap[13];;
 	/** 小型红桃卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
-	public LiveBitmap[] smallHearts = new LiveBitmap[13];;
+	public LiveBitmap[] cardSmallHearts = new LiveBitmap[13];;
 	/** 小型梅花卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
-	public LiveBitmap[] smallClubs = new LiveBitmap[13];;
+	public LiveBitmap[] cardSmallClubs = new LiveBitmap[13];;
 	/** 小型方片卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
-	public LiveBitmap[] smallDiamonds = new LiveBitmap[13];;
+	public LiveBitmap[] cardSmallDiamonds = new LiveBitmap[13];;
 	
 	/** 小王卡牌。 */
-	public LiveBitmap jokerS;
+	public LiveBitmap cardJokerS;
 	/** 大王卡牌。 */
-	public LiveBitmap jokerB;
+	public LiveBitmap cardJokerB;
 	
 	/** 卡牌背面图。 */
 	public LiveBitmap cardbg;
 	
 	/** 叫地主音效：不叫。 */
-	public int landloadPass;
+	public int soundLandloadPass;
 	/** 叫地主音效：1分。 */
-	public int landloadP1;
+	public int soundLandloadP1;
 	/** 叫地主音效：2分。 */
-	public int landloadP2;
+	public int soundLandloadP2;
 	/** 叫地主音效：3分。 */
-	public int landloadP3;
+	public int soundLandloadP3;
 	
 	/** 牌型音效：单。 */
-	public int cardSingle;
+	public int soundCardSingle;
 	/** 牌型音效：对。 */
-	public int cardTwo;
+	public int soundCardTwo;
 	/** 牌型音效：小王。 */
-	public int cardJokerS;
+	public int soundCardJokerS;
 	/** 牌型音效：大王。 */
-	public int cardJokerB;
+	public int soundCardJokerB;
 	/** 牌型音效：三不带。 */
-	public int cardThree;
+	public int soundCardThree;
 	/** 牌型音效：三带一。 */
-	public int cardThree1;
+	public int soundCardThree1;
 	/** 牌型音效：三带对。 */
-	public int cardThree2;
+	public int soundCardThree2;
 	/** 牌型音效：飞机。 */
-	public int cardPlane;
+	public int soundCardPlane;
 	/** 牌型音效：顺子。 */
-	public int cardShun1;
+	public int soundCardShun1;
 	/** 牌型音效：双顺（连对）。 */
-	public int cardShun2;
+	public int soundCardShun2;
 	/** 牌型音效：炸弹。 */
-	public int cardBoom;
+	public int soundCardBoom;
 	/** 牌型音效： 王炸（有些地方称为火箭）。 */
-	public int cardRocket;
+	public int soundCardRocket;
 	
 	/** 牌局音效：过。 */
-	public int playPass;
+	public int soundPlayPass;
 	/** 牌局音效：跟牌压牌。 */
-	public int[] playBigger;
+	public int[] soundPlayBigger;
 	/** 牌局音效：炸弹爆炸。 */
-	public int playBoom;
+	public int soundPlayBoom;
 	/** 牌局音效：飞机。 */
-	public int playPlane;
+	public int soundPlayPlane;
 	/** 牌局音效：胜。 */
-	public int playWin;
+	public int soundPlayWin;
 	/** 牌局音效：负。 */
-	public int playLose;
+	public int soundPlayLose;
 	
 	/**
 	 * 获取该类的唯一实例。
@@ -149,55 +149,55 @@ public final class Assets {
 		String loadingSound = context.getString(R.string.str_loading_task_sound);
 		final int totalSoundCount = 24;	//数出来的
 		int completed = 0;	//复位
-		landloadP1 = sp.loadSound(context, "landlord_p1.mp3");
+		soundLandloadP1 = sp.loadSound(context, "landlord_p1.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		landloadP2 = sp.loadSound(context, "landlord_p2.mp3");
+		soundLandloadP2 = sp.loadSound(context, "landlord_p2.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		landloadP3 = sp.loadSound(context, "landlord_p3.mp3");
+		soundLandloadP3 = sp.loadSound(context, "landlord_p3.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		landloadPass = sp.loadSound(context, "landlord_pass.mp3");
+		soundLandloadPass = sp.loadSound(context, "landlord_pass.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardPlane = sp.loadSound(context, "feiji.wav");
+		soundCardPlane = sp.loadSound(context, "feiji.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardBoom = sp.loadSound(context, "zhadan.wav");
+		soundCardBoom = sp.loadSound(context, "zhadan.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardJokerS = sp.loadSound(context, "xiaowang.wav");
+		soundCardJokerS = sp.loadSound(context, "xiaowang.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardJokerB = sp.loadSound(context, "dawang.wav");
+		soundCardJokerB = sp.loadSound(context, "dawang.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardRocket = sp.loadSound(context, "wangzha.wav");
+		soundCardRocket = sp.loadSound(context, "wangzha.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardShun1 = sp.loadSound(context, "shunzi.wav");
+		soundCardShun1 = sp.loadSound(context, "shunzi.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardShun2 = sp.loadSound(context, "liandui.wav");
+		soundCardShun2 = sp.loadSound(context, "liandui.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardSingle = sp.loadSound(context, "givecard.wav");
+		soundCardSingle = sp.loadSound(context, "givecard.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardThree = sp.loadSound(context, "givecard.wav");
+		soundCardThree = sp.loadSound(context, "givecard.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardThree1 = sp.loadSound(context, "sandaiyi.wav");
+		soundCardThree1 = sp.loadSound(context, "sandaiyi.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardThree2 = sp.loadSound(context, "sandaiyidui.wav");
+		soundCardThree2 = sp.loadSound(context, "sandaiyidui.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		cardTwo = sp.loadSound(context, "givecard.wav");
+		soundCardTwo = sp.loadSound(context, "givecard.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		
-		playBigger = new int[3];
-		playBigger[0] = sp.loadSound(context, "dani1.wav");
+		soundPlayBigger = new int[3];
+		soundPlayBigger[0] = sp.loadSound(context, "dani1.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playBigger[1] = sp.loadSound(context, "dani2.wav");
+		soundPlayBigger[1] = sp.loadSound(context, "dani2.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playBigger[2] = sp.loadSound(context, "dani3.wav");
+		soundPlayBigger[2] = sp.loadSound(context, "dani3.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playPass = sp.loadSound(context, "buyao.wav");
+		soundPlayPass = sp.loadSound(context, "buyao.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playBoom = sp.loadSound(context, "boom.wav");
+		soundPlayBoom = sp.loadSound(context, "boom.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playPlane = sp.loadSound(context, "plane.wav");
+		soundPlayPlane = sp.loadSound(context, "plane.wav");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playLose = sp.loadSound(context, "lose.mp3");
+		soundPlayLose = sp.loadSound(context, "lose.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		playWin = sp.loadSound(context, "win.mp3");
+		soundPlayWin = sp.loadSound(context, "win.mp3");
 		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
 		if (completed!=totalSoundCount){
 			throw new RuntimeException("There is a bug. completed "+completed+" while total is "+totalSoundCount);
@@ -225,10 +225,10 @@ public final class Assets {
 		int completed = 0;
 		// 加载黑桃图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-			spades[i] = LiveBitmap.loadBitmap(context,
+			cardSpades[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Spade, value, false), scaleX,
 					scaleY);
-			smallSpades[i] = LiveBitmap.loadBitmap(context,
+			cardSmallSpades[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
 					scaleY);
 			completed += 2;
@@ -237,10 +237,10 @@ public final class Assets {
 		}
 		// 加载红桃图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-			hearts[i] = LiveBitmap.loadBitmap(context,
+			cardHearts[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Heart, value, false), scaleX,
 					scaleY);
-			smallSpades[i] = LiveBitmap.loadBitmap(context,
+			cardSmallSpades[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
 					scaleY);
 			completed += 2;
@@ -249,10 +249,10 @@ public final class Assets {
 		}
 		// 加载梅花图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-			clubs[i] = LiveBitmap.loadBitmap(context,
+			cardClubs[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Club, value, false), scaleX,
 					scaleY);
-			smallSpades[i] = LiveBitmap.loadBitmap(context,
+			cardSmallSpades[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
 					scaleY);
 			completed += 2;
@@ -261,21 +261,21 @@ public final class Assets {
 		}
 		// 加载方片图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
-			diamonds[i] = LiveBitmap.loadBitmap(context,
+			cardDiamonds[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Diamond, value, false), scaleX,
 					scaleY);
-			smallSpades[i] = LiveBitmap.loadBitmap(context,
+			cardSmallSpades[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
 					scaleY);
 			completed += 2;
 			notifyProgressChanged(completed, totalBitmap, listener,
 					loadingBitmap);
 		}
-		jokerS = LiveBitmap.loadBitmap(
+		cardJokerS = LiveBitmap.loadBitmap(
 				context,
 				getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_S,
 						false), scaleX, scaleY);
-		jokerB = LiveBitmap.loadBitmap(
+		cardJokerB = LiveBitmap.loadBitmap(
 				context,
 				getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_B,
 						false), scaleX, scaleY);
