@@ -14,8 +14,10 @@ import android.view.Display;
  */
 public final class GameGraphics {
 
-	private static final int BASELINE_WIDTH = 800; // X轴基准比例
-	private static final int BASELINE_HEIGHT = 480; // Y轴基准比例
+	/** 基准屏幕宽度。 */
+	public static final int BASE_SCREEN_WIDTH = 800;
+	/** 基准屏幕高度。 */
+	public static final int BASE_SCREEN_HEIGHT = 480;
 
 //	private Bitmap frameBuffer; // 底色
 //	private Canvas canvas; // 画布对象
@@ -52,7 +54,7 @@ public final class GameGraphics {
 	 * @return X轴缩放比例。
 	 */
 	protected static final float computeScaleX(int targetWidth) {
-		return targetWidth / (float) BASELINE_WIDTH;
+		return targetWidth / (float) BASE_SCREEN_WIDTH;
 	}
 	
 	
@@ -64,7 +66,7 @@ public final class GameGraphics {
 	 * @return Y轴缩放比例。
 	 */
 	protected static final float computeScaleY(int targetHeight) {
-		return targetHeight / (float) BASELINE_HEIGHT;
+		return targetHeight / (float) BASE_SCREEN_HEIGHT;
 	}
 
 //	/**

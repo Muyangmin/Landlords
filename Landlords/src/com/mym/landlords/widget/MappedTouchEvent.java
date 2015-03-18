@@ -1,4 +1,4 @@
-package com.mym.landlords.ui;
+package com.mym.landlords.widget;
 
 import android.view.MotionEvent;
 

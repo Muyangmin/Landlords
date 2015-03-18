@@ -1,4 +1,4 @@
-package com.mym.landlords.ui;
+package com.mym.landlords.widget;
 
 /**
  * 用于实现游戏的虚拟屏幕。

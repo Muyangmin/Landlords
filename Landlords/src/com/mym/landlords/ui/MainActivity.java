@@ -8,6 +8,8 @@ import com.mym.landlords.res.Assets.LoadingProgressListener;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.widget.BitmapButton;
+import com.mym.landlords.widget.GameScreen;
+import com.mym.landlords.widget.MappedTouchEvent;
 import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameView;
 
@@ -51,7 +53,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 			
 			@Override
 			public void onClicked(BitmapButton btn) {
-				GlobalSoundPool.getInstance(MainActivity.this).playSound(Assets.getInstance().cardJokerS);
+				GlobalSoundPool.getInstance(MainActivity.this).playSound(Assets.getInstance().soundCardJokerB);
 			}
 		});
 		setContentView(gameView);

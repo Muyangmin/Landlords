@@ -8,8 +8,6 @@ import android.view.SurfaceView;
 
 import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
-import com.mym.landlords.ui.RedrawableView;
-import com.mym.landlords.ui.GameScreen;
 
 /**
  * 主游戏界面绘制控件。

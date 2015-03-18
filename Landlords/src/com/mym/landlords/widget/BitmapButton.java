@@ -6,7 +6,6 @@ import android.view.MotionEvent;
 
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.LiveBitmap;
-import com.mym.landlords.ui.MappedTouchEvent;
 
 /**
  * 虚拟的按钮控件，使用Android的控件思想进行封装。

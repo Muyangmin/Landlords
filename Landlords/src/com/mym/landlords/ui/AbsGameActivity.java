@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.widget.BitmapButton;
+import com.mym.landlords.widget.GameScreen;
+import com.mym.landlords.widget.MappedTouchEvent;
 
 import android.app.Activity;
 import android.graphics.Canvas;
