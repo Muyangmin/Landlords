@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.mym.landlords.card.Card;
+import com.mym.landlords.card.HandCard;
 
 /**
  * 代表玩家的实体类。
@@ -12,19 +13,38 @@ import com.mym.landlords.card.Card;
  * @create 2015-3-18
  */
 public final class Player {
-	private ArrayList<Card> handCards;	//手牌列表
+	private ArrayList<HandCard> handCards;	//手牌列表
 	private boolean isLandlord;			//是否是地主
 	private Player priorPlayer; 		//上手玩家
 	private Player nextPlayer;			//下手玩家
 	
-	public ArrayList<Card> getHandCards() {
+	public ArrayList<HandCard> getHandCards() {
 		return handCards;
 	}
 	/**
 	 * 设置手牌并自动排序。
-	 * @param handCards 手牌列表
+	 * @param cards 卡牌列表，不能为null。
 	 */
-	public void setHandCards(ArrayList<Card> handCards) {
+	public void setHandCards(List<Card> cards) {
+		if (cards == null) {
+			throw new RuntimeException("handCards cannot be null.");
+		}
+		if (handCards == null) {
+			handCards = new ArrayList<>();
+		} else {
+			handCards.clear();
+		}
+		for (Card card : cards) {
+			handCards.add(new HandCard(card));
+		}
+		Collections.sort(handCards);
+	}
+	
+	/**
+	 * 设置手牌并自动排序。
+	 * @param handCards 手牌列表，不能为null。
+	 */
+	public void setHandCards(ArrayList<HandCard> handCards) {
 		if (handCards ==null){
 			throw new RuntimeException("handCards cannot be null.");
 		}
@@ -37,14 +57,16 @@ public final class Player {
 	}
 	/**
 	 * 设置为地主并将底牌加入手中。
-	 * @param awardCards 底牌列表
+	 * @param awardCards 底牌列表，不能为null。
 	 */
 	public void setLandlord(List<Card> awardCards) {
-		if (awardCards ==null){
+		if (awardCards == null) {
 			throw new RuntimeException("awardCards cannot be null.");
 		}
 		this.isLandlord = true;
-		handCards.addAll(awardCards);
+		for (Card card : awardCards) {
+			handCards.add(new HandCard(card));
+		}
 		Collections.sort(this.handCards);
 	}
 	

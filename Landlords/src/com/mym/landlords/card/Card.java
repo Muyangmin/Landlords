@@ -34,7 +34,6 @@ public final class Card implements Serializable, Comparable<Card>{
 	private CardSuit suit;		//卡牌花色
 	private int value;			//卡牌数值。即上面的大小值之一。
 	private String valueStr;	//卡牌数值的字符描述，主要用于提示或日志输出，使用频繁，故在构造函数中初始化。
-	private boolean isPicked;	//该卡牌是否被选中,后期如果手牌属性较多可以考虑独立为HandCard类。
 
 	/**
 	 * 创建一张新的卡牌。
@@ -48,7 +47,6 @@ public final class Card implements Serializable, Comparable<Card>{
 		this.suit = suit;
 		this.value = value;
 		this.valueStr = getValueLiteral(value);
-		this.isPicked = false;
 	}
 
 	@Override
@@ -110,15 +108,7 @@ public final class Card implements Serializable, Comparable<Card>{
 		return builder.toString();
 	}
 
-	public boolean isPicked() {
-		return isPicked;
-	}
-
-	public void setPicked(boolean isPicked) {
-		this.isPicked = isPicked;
-	}
-
-	public CardSuit getType() {
+	public CardSuit getSuit() {
 		return suit;
 	}
 

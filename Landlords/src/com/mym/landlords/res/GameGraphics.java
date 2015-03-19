@@ -18,6 +18,12 @@ public final class GameGraphics {
 	public static final int BASE_SCREEN_WIDTH = 800;
 	/** 基准屏幕高度。 */
 	public static final int BASE_SCREEN_HEIGHT = 480;
+	/** 卡牌原始宽度。 */
+	public static final int CARD_WIDTH = 92;
+	/** 卡牌原始高度。 */
+	public static final int CARD_HEIGHT = 126;
+	/** 卡牌被选中后向上抽出的高度。 */
+	public static final int Card_PICKED_OFFSET = 10;
 
 //	private Bitmap frameBuffer; // 底色
 //	private Canvas canvas; // 画布对象
@@ -94,24 +100,24 @@ public final class GameGraphics {
 	public void drawBitmap(Canvas canvas, LiveBitmap bitmap, int x, int y) {
 		canvas.drawBitmap(bitmap.getBitmap(), x * scaleX, y * scaleY, null);
 	}
-//
-//	/**
-//	 * 绘制指定的Bitmap
-//	 * @param bitmap 要绘制的Bitmap。
-//	 * @param x 目标左边缘位置
-//	 * @param y 目标上边缘位置
-//	 * @param srcWidth 缩放前宽度
-//	 * @param srcHeight 缩放前高度
-//	 */
-//	public void drawBitmap(LiveBitmap bitmap, int x, int y, int srcWidth,
-//			int srcHeight) {
-//		dstRect.left = (int) (x * scaleX + 0.5f);
-//		dstRect.top = (int) (y * scaleY + 0.5);
-//		dstRect.right = (int) ((x + srcWidth - 1) * scaleX + 0.5f);
-//		dstRect.bottom = (int) ((y + srcHeight - 1) * scaleY + 0.5f);
-//		canvas.drawBitmap(bitmap.getBitmap(), null, dstRect, null);
-//	}
-//
+
+	/**
+	 * 绘制指定的Bitmap
+	 * @param bitmap 要绘制的Bitmap。
+	 * @param x 目标左边缘位置
+	 * @param y 目标上边缘位置
+	 * @param srcWidth 缩放前宽度
+	 * @param srcHeight 缩放前高度
+	 */
+	public void drawBitmap(Canvas canvas, LiveBitmap bitmap, int x, int y, int srcWidth,
+			int srcHeight) {
+		dstRect.left = (int) (x * scaleX + 0.5f);
+		dstRect.top = (int) (y * scaleY + 0.5);
+		dstRect.right = (int) ((x + srcWidth - 1) * scaleX + 0.5f);
+		dstRect.bottom = (int) ((y + srcHeight - 1) * scaleY + 0.5f);
+		canvas.drawBitmap(bitmap.getBitmap(), null, dstRect, null);
+	}
+
 //	public void drawBitmapInParentCenter(LiveBitmap bitmap, Point center) {
 //		int x = center.x - (int) (bitmap.getRawWidth() / 2 + 0.5f);
 //		int y = center.y - (int) (bitmap.getRawHeight() / 2 + 0.5f);

@@ -340,7 +340,36 @@ public final class Assets {
 		return sb.toString();
 	}
 	
-	/**g
+	/**
+	 * 获得卡牌对应的位图引用。
+	 * @param card 卡牌对象
+	 * @return 返回卡牌对应的位图。
+	 */
+	public final LiveBitmap getCorrespondBitmap(Card card){
+		if (card==null){
+			return null;
+		}
+		switch (card.getSuit()) {
+			case Spade:
+				return cardSpades[card.getValue() - Card.CARD_VALUE_3];
+			case Heart:
+				return cardHearts[card.getValue() - Card.CARD_VALUE_3];
+			case Club:
+				return cardClubs[card.getValue() - Card.CARD_VALUE_3];
+			case Diamond:
+				return cardDiamonds[card.getValue() - Card.CARD_VALUE_3];
+			case Joker:
+				if (card.getValue() == Card.CARD_VALUE_JOKER_B) {
+					return cardJokerB;
+				} else {
+					return cardJokerS;
+				}
+			default:
+				return null;
+		}
+	}
+	
+	/**
 	 * 监听Assets资源的加载进度。
 	 * @author Muyangmin
 	 * @create 2015-3-16
