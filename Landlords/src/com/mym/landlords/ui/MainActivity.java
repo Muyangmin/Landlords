@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.mym.landlords.ai.Game;
+import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.ai.Player;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardFactory;
@@ -16,12 +18,14 @@ import com.mym.landlords.widget.BitmapButton;
 import com.mym.landlords.widget.GameScreen;
 import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameView;
+import com.mym.landlords.widget.MappedTouchEvent;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 public class MainActivity extends AbsGameActivity implements GameScreen{
@@ -40,9 +44,11 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	
 	private ArrayList<Card> cardPack;			//总的卡牌包
 	private List<Card> landlordCards;			//地主底牌
+	private Game currentGame;		//当前游戏记录
 	
-	//用于计算卡牌间距，判断玩家点选的是哪张卡牌。
-    private Rect cardsTouchZone = new Rect();
+    private Rect cardsTouchZone = new Rect();	//用于判断点击事件是否在玩家手牌区域内
+    private float cardOffset;	//用于判断玩家点选的是哪张卡牌
+    Handler handler = new Handler();
 	
 	protected static Intent getIntent(Context context){
 		Intent intent = new Intent(context, MainActivity.class);
@@ -57,10 +63,11 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		setContentView(gameView);
 		soundPool = GlobalSoundPool.getInstance(this);
 		assets = Assets.getInstance();
-		
+		currentGame = Game.newGame();
+		currentGame.status = Status.Preparing;
 		initPlayerSeats();
 		shuffleAndDealCards();
-		
+//		currentGame.status = Status.Playing;
 		Log.d(LOG_TAG, "player1 cards:"+playerLeft.getHandCards().toString());
 		Log.d(LOG_TAG, "player2 cards:"+playerHuman.getHandCards().toString());
 		Log.d(LOG_TAG, "player3 cards:"+playerRight.getHandCards().toString());
@@ -74,6 +81,14 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 				GlobalSoundPool.getInstance(MainActivity.this).playSound(Assets.getInstance().soundCardJokerB);
 			}
 		});
+		handler.postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				currentGame.status = Status.Playing;
+			}
+		}, 1000);
 	}
 	
 	//初始化玩家并分配座位
@@ -116,13 +131,41 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
     		g.drawBitmap(canvas, assets.cardbg, x + offsetX * 25, y + offsetY * 8, 35, 48);
     	}
     }
-	
+    /**
+     * 绘制底牌。
+     */
+	private void drawBottomCards(GameGraphics g, Canvas canvas)
+    {
+		int offset;
+		switch (currentGame.status) {
+		case Preparing:
+		case CallingLandlord:
+			offset = assets.cardbg.getRawWidth() + 5;
+    		for (int i = 0; i < 3; i++)
+    		{
+    			g.drawBitmap(canvas, assets.cardbg, 290 + i * offset, 115);
+    		}
+			break;
+		case Playing:
+		case Gameover:
+			offset = 30 + 3;
+    		for (int i = 0; i < 3; i++)
+    		{
+    			 Card card = landlordCards.get(i);
+    			 g.drawBitmap(canvas, assets.getCorrespondSmallBitmap(card), 300 + i * offset, 5, 30, 40);
+    		}
+			break;
+		default:
+			break;
+		}
+    }
+	//绘制玩家的卡牌（即正面的卡牌）
 	private void drawHumanPlayerCards(GameGraphics g, Canvas canvas){
 		ArrayList<HandCard> list = playerHuman.getHandCards();
 		int len = list.size();
         int offsetX = 35;
         int offsetY = GameGraphics.BASE_SCREEN_HEIGHT - 15 - GameGraphics.CARD_HEIGHT;
-        float cardOffset = (float) (GameGraphics.BASE_SCREEN_WIDTH - (offsetX + offsetX + GameGraphics.CARD_WIDTH)) / (len - 1);
+        cardOffset = (float) (GameGraphics.BASE_SCREEN_WIDTH - (offsetX + offsetX + GameGraphics.CARD_WIDTH)) / (len - 1);
         if (cardOffset > 55)
         {
         	offsetX = (GameGraphics.BASE_SCREEN_WIDTH - (len - 1) * 55 - GameGraphics.CARD_WIDTH) / 2;
@@ -149,6 +192,36 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		cardsTouchZone.right = right;
 		cardsTouchZone.bottom = bottom;
 	}
+
+	/**
+	 * 用于判断点击事件是否发生在卡牌点击区域内。
+	 * @param event 映射后的点击事件
+	 * @return 如果在指定区域内，则返回true
+	 */
+	private boolean inCardsTouchZone(MappedTouchEvent event) {
+		int x = event.x;
+		int y = event.y;
+		if (x > cardsTouchZone.left && x < cardsTouchZone.right
+				&& y < cardsTouchZone.bottom && y > cardsTouchZone.top) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private int getCardsIndex(int x) {
+		int index = (int) ((x - cardsTouchZone.left) / cardOffset);
+		int size = playerHuman.getHandCards().size();
+
+		if (x > (cardsTouchZone.right - (GameGraphics.CARD_WIDTH - cardOffset))) {
+			return size - 1;
+		} else if (index < size && index >= 0) {
+			return index;
+		} else {
+			return -1;
+		}
+	}
+	
 	@Override
 	protected List<BitmapButton> getBitmapButtons() {
 		List<BitmapButton> buttons = new ArrayList<BitmapButton>();
@@ -159,6 +232,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	@Override
 	public void updateUI(GameGraphics graphics, Canvas canvas) {
 //		button.onDraw(canvas);
+		drawBottomCards(graphics, canvas);
 		drawBackLittleCards(graphics, canvas, 0, 0, 10);
 		drawHumanPlayerCards(graphics, canvas);
 	}

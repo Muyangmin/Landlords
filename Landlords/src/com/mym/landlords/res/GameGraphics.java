@@ -98,7 +98,7 @@ public final class GameGraphics {
 	 * @param y 上边缘位置
 	 */
 	public void drawBitmap(Canvas canvas, LiveBitmap bitmap, int x, int y) {
-		canvas.drawBitmap(bitmap.getBitmap(), x * scaleX, y * scaleY, null);
+		canvas.drawBitmap(bitmap.getBitmap(), x * scaleX, y * scaleY, null);//不需要Paint对象
 	}
 
 	/**
