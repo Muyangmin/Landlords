@@ -44,18 +44,18 @@ public final class Assets {
 	/** 方片卡牌，按卡牌从小到大排序。  */
 	public LiveBitmap[] cardDiamonds = new LiveBitmap[13];;
 	
-	/** 小型黑桃卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
+	/** 小型黑桃卡牌（仅有左上角的数字和花色，主要用于展示底牌），按卡牌从小到大排序。  */
 	public LiveBitmap[] cardSmallSpades = new LiveBitmap[13];;
-	/** 小型红桃卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
+	/** 小型红桃卡牌（仅有左上角的数字和花色，主要用于展示底牌），按卡牌从小到大排序。  */
 	public LiveBitmap[] cardSmallHearts = new LiveBitmap[13];;
-	/** 小型梅花卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
+	/** 小型梅花卡牌（仅有左上角的数字和花色，主要用于展示底牌），按卡牌从小到大排序。  */
 	public LiveBitmap[] cardSmallClubs = new LiveBitmap[13];;
-	/** 小型方片卡牌（仅有左上角的数字和花色），按卡牌从小到大排序。  */
+	/** 小型方片卡牌（仅有左上角的数字和花色，主要用于展示底牌），按卡牌从小到大排序。  */
 	public LiveBitmap[] cardSmallDiamonds = new LiveBitmap[13];;
 	
-	/** 小王卡牌。 */
+	/** 小王卡牌。注意：王不分大小图。 */
 	public LiveBitmap cardJokerS;
-	/** 大王卡牌。 */
+	/** 大王卡牌。 注意：王不分大小图。*/
 	public LiveBitmap cardJokerB;
 	
 	/** 卡牌背面图。 */
@@ -248,8 +248,8 @@ public final class Assets {
 			cardHearts[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Heart, value, false), scaleX,
 					scaleY);
-			cardSmallSpades[i] = LiveBitmap.loadBitmap(context,
-					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
+			cardSmallHearts[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Heart, value, true), scaleX,
 					scaleY);
 			completed += 2;
 			notifyProgressChanged(completed, totalBitmap, listener,
@@ -260,8 +260,8 @@ public final class Assets {
 			cardClubs[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Club, value, false), scaleX,
 					scaleY);
-			cardSmallSpades[i] = LiveBitmap.loadBitmap(context,
-					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
+			cardSmallClubs[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Club, value, true), scaleX,
 					scaleY);
 			completed += 2;
 			notifyProgressChanged(completed, totalBitmap, listener,
@@ -272,8 +272,8 @@ public final class Assets {
 			cardDiamonds[i] = LiveBitmap.loadBitmap(context,
 					getCardAssetsName(CardSuit.Diamond, value, false), scaleX,
 					scaleY);
-			cardSmallSpades[i] = LiveBitmap.loadBitmap(context,
-					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
+			cardSmallDiamonds[i] = LiveBitmap.loadBitmap(context,
+					getCardAssetsName(CardSuit.Diamond, value, true), scaleX,
 					scaleY);
 			completed += 2;
 			notifyProgressChanged(completed, totalBitmap, listener,
@@ -335,6 +335,7 @@ public final class Assets {
 		sb.append(typePrefix).append(value);
 		if (isSmaller){
 			sb.append('s');
+			Log.d(LOG_TAG, "small pic:"+sb.toString());
 		}
 		sb.append(".png");
 		return sb.toString();
@@ -358,6 +359,35 @@ public final class Assets {
 				return cardClubs[card.getValue() - Card.CARD_VALUE_3];
 			case Diamond:
 				return cardDiamonds[card.getValue() - Card.CARD_VALUE_3];
+			case Joker:
+				if (card.getValue() == Card.CARD_VALUE_JOKER_B) {
+					return cardJokerB;
+				} else {
+					return cardJokerS;
+				}
+			default:
+				return null;
+		}
+	}
+	
+	/**
+	 * 获得卡牌对应的小图引用。
+	 * @param card 卡牌对象
+	 * @return 返回卡牌对应的位图。
+	 */
+	public final LiveBitmap getCorrespondSmallBitmap(Card card){
+		if (card==null){
+			return null;
+		}
+		switch (card.getSuit()) {
+			case Spade:
+				return cardSmallSpades[card.getValue() - Card.CARD_VALUE_3];
+			case Heart:
+				return cardSmallHearts[card.getValue() - Card.CARD_VALUE_3];
+			case Club:
+				return cardSmallClubs[card.getValue() - Card.CARD_VALUE_3];
+			case Diamond:
+				return cardSmallDiamonds[card.getValue() - Card.CARD_VALUE_3];
 			case Joker:
 				if (card.getValue() == Card.CARD_VALUE_JOKER_B) {
 					return cardJokerB;
