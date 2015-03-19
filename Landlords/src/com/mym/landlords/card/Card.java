@@ -31,27 +31,35 @@ public final class Card implements Serializable, Comparable<Card>{
 	
 	private static final long serialVersionUID = 1L;
 	
-	private CardSuit type;		//卡牌花色
+	private CardSuit suit;		//卡牌花色
 	private int value;			//卡牌数值。即上面的大小值之一。
-	private String valueStr;		//卡牌数值的字符描述，主要用于提示或日志输出，使用频繁，故在构造函数中初始化。
+	private String valueStr;	//卡牌数值的字符描述，主要用于提示或日志输出，使用频繁，故在构造函数中初始化。
+	private boolean isPicked;	//该卡牌是否被选中,后期如果手牌属性较多可以考虑独立为HandCard类。
 
 	/**
 	 * 创建一张新的卡牌。
-	 * @param type 卡牌的花色。
+	 * @param suit 卡牌的花色。
 	 * @param value 卡牌的面值，必须为 {@value #CARD_VALUE_3} ~ {@value #CARD_VALUE_JOKER_B}之间的值。
 	 */
-	public Card(CardSuit type, int value) {
-		if (type == null || value < CARD_VALUE_3 || value > CARD_VALUE_JOKER_B) {
-			throw new IllegalArgumentException("invalid card!type="+type+", value="+value);
+	public Card(CardSuit suit, int value) {
+		if (suit == null || value < CARD_VALUE_3 || value > CARD_VALUE_JOKER_B) {
+			throw new IllegalArgumentException("invalid card!suit="+suit+", value="+value);
 		}
-		this.type = type;
+		this.suit = suit;
 		this.value = value;
 		this.valueStr = getValueLiteral(value);
+		this.isPicked = false;
 	}
 
 	@Override
 	public int compareTo(Card another) {
-		return Integer.valueOf(value).compareTo(another.value);
+		//先比较大小
+		int compareResult = Integer.valueOf(value).compareTo(another.value);
+		if (compareResult==0){
+			//如果大小相同则判断花色，保证手中所有大小相同的牌都按花色有序
+			compareResult = Integer.valueOf(suit.ordinal()).compareTo(another.suit.ordinal());
+		}
+		return compareResult;
 	}
 	
 	private final String getValueLiteral(int value){
@@ -98,7 +106,23 @@ public final class Card implements Serializable, Comparable<Card>{
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		//仅输出类似 "SPADE A"之类文本。
-		builder.append("Card [").append(type).append(" ").append(valueStr).append("]");
+		builder.append("Card [").append(suit).append(" ").append(valueStr).append("]");
 		return builder.toString();
+	}
+
+	public boolean isPicked() {
+		return isPicked;
+	}
+
+	public void setPicked(boolean isPicked) {
+		this.isPicked = isPicked;
+	}
+
+	public CardSuit getType() {
+		return suit;
+	}
+
+	public int getValue() {
+		return value;
 	}
 }
