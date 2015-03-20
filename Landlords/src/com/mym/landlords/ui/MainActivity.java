@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 
 public class MainActivity extends AbsGameActivity implements GameScreen{
 	
@@ -48,7 +49,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	
     private Rect cardsTouchZone = new Rect();	//用于判断点击事件是否在玩家手牌区域内
     private float cardOffset;	//用于判断玩家点选的是哪张卡牌
-    Handler handler = new Handler();
+    Handler handler = new Handler();		//temporary
 	
 	protected static Intent getIntent(Context context){
 		Intent intent = new Intent(context, MainActivity.class);
@@ -209,6 +210,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		}
 	}
 
+	//从玩家的点击位置判断其点选的卡牌的位置索引
 	private int getCardsIndex(int x) {
 		int index = (int) ((x - cardsTouchZone.left) / cardOffset);
 		int size = playerHuman.getHandCards().size();
@@ -223,6 +225,21 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	}
 	
 	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		if (ev.getAction()==MotionEvent.ACTION_UP){
+			MappedTouchEvent event = MappedTouchEvent.translateEvent(ev);
+			if (inCardsTouchZone(event)){
+				int index = getCardsIndex(event.x);
+				if (index >=0){
+					HandCard handCard = playerHuman.getHandCards().get(index);
+					handCard.setPicked(!handCard.isPicked());
+				}
+			}
+		}
+		return super.dispatchTouchEvent(ev);
+	}
+	
+	@Override
 	protected List<BitmapButton> getBitmapButtons() {
 		List<BitmapButton> buttons = new ArrayList<BitmapButton>();
 		buttons.add(button);
@@ -231,9 +248,19 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	
 	@Override
 	public void updateUI(GameGraphics graphics, Canvas canvas) {
+		if (currentGame==null){
+			Log.w(LOG_TAG, "updateUI called before game instance created.");
+			return ;
+		}
 //		button.onDraw(canvas);
 		drawBottomCards(graphics, canvas);
-		drawBackLittleCards(graphics, canvas, 0, 0, 10);
+		if (currentGame.status != Status.ShowingAICards){
+			drawBackLittleCards(graphics, canvas, 3 + 10, 130, playerLeft.getHandCards().size());
+			drawBackLittleCards(graphics, canvas, 
+					//TODO 增加玩家和AI的形象
+					GameGraphics.BASE_SCREEN_WIDTH - 3 + 10-84/*- Assets.playerD.getRawWidth()*/,
+					130, playerRight.getHandCards().size());
+		}
 		drawHumanPlayerCards(graphics, canvas);
 	}
 }

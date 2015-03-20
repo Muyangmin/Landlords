@@ -18,6 +18,8 @@ public final class Game {
 		CallingLandlord,
 		/** 进行阶段 */
 		Playing,
+		/** 牌局结束展示AI手牌 */
+		ShowingAICards,
 		/** 游戏结束阶段 */
 		Gameover;
 	}
