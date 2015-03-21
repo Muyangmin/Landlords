@@ -13,24 +13,20 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 public class LoadingActivity extends Activity {
 
 	protected static final String LOG_TAG = "LoadingActivity";
 
 	private ProgressBar progressBar;
-	private TextView tvTask;
 	
-	private AsyncTask<Void, Object, Void> loadTask = new AsyncTask<Void, Object, Void>() {
+	private AsyncTask<Void, Integer, Void> loadTask = new AsyncTask<Void, Integer, Void>() {
 		protected Void doInBackground(Void... params) {
 			Assets.loadAssets(LoadingActivity.this, new LoadingProgressListener() {
 
 				@Override
-				public void onProgressChanged(int progress,
-						String currentTaskDescription) {
-					publishProgress(progress, currentTaskDescription);
-					Log.d(LOG_TAG, currentTaskDescription + " " + progress);
+				public void onProgressChanged(int progress) {
+					publishProgress(progress);
 				}
 
 				@Override
@@ -41,10 +37,8 @@ public class LoadingActivity extends Activity {
 			return null;
 		};
 		
-		protected void onProgressUpdate(Object... values) {
-			//参数必定是2个
+		protected void onProgressUpdate(Integer... values) {
 			progressBar.setProgress((int)values[0]);
-			tvTask.setText((String) values[1]);
 		};
 		
 		protected void onPostExecute(Void result) {
@@ -62,7 +56,6 @@ public class LoadingActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_loading);
 		progressBar = (ProgressBar) findViewById(R.id.loading_prg);
-		tvTask = (TextView) findViewById(R.id.loading_tv_taskdesc);
 		handler.sendEmptyMessageDelayed(LoadHandler.MSG_START_LOADING, 1000);//Splash显示时间
 	}
 	

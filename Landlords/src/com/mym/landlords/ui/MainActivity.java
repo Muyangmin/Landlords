@@ -33,7 +33,6 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	
 	private static final String LOG_TAG = "MainActivity";
 	private GameGraphics graphics;
-	private BitmapButton button;
 	private GameView gameView;
 	
 	private GlobalSoundPool soundPool;
@@ -74,14 +73,6 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		Log.d(LOG_TAG, "player3 cards:"+playerRight.getHandCards().toString());
 		Log.d(LOG_TAG, "landlord cards:"+landlordCards.toString());
 		
-		button = new BitmapButton(graphics, 120, 200, Assets.getInstance().cardbg);
-		button.setListener(new onClickListener() {
-			
-			@Override
-			public void onClicked(BitmapButton btn) {
-				GlobalSoundPool.getInstance(MainActivity.this).playSound(Assets.getInstance().soundCardJokerB);
-			}
-		});
 		handler.postDelayed(new Runnable() {
 			
 			@Override
@@ -242,7 +233,6 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	@Override
 	protected List<BitmapButton> getBitmapButtons() {
 		List<BitmapButton> buttons = new ArrayList<BitmapButton>();
-		buttons.add(button);
 		return buttons;
 	}
 	
@@ -252,7 +242,6 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 			Log.w(LOG_TAG, "updateUI called before game instance created.");
 			return ;
 		}
-//		button.onDraw(canvas);
 		drawBottomCards(graphics, canvas);
 		if (currentGame.status != Status.ShowingAICards){
 			drawBackLittleCards(graphics, canvas, 3 + 10, 130, playerLeft.getHandCards().size());
@@ -261,6 +250,10 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 					GameGraphics.BASE_SCREEN_WIDTH - 3 + 10-84/*- Assets.playerD.getRawWidth()*/,
 					130, playerRight.getHandCards().size());
 		}
+		graphics.drawText(canvas, assets.bitmapNumbers, String.valueOf(playerLeft.getHandCards().size()), 
+				GameGraphics.AIPLAYER_LEFT_CARDNUM_X, GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
+		graphics.drawText(canvas, assets.bitmapNumbers, String.valueOf(playerRight.getHandCards().size()), 
+				GameGraphics.AIPLAYER_RIGHT_CARDNUM_X, GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
 		drawHumanPlayerCards(graphics, canvas);
 	}
 }

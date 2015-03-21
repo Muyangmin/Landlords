@@ -4,7 +4,5 @@
     <string name="app_name">Landlords</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_loading">LoadingActivity</string>
-    <string name="str_loading_task_bitmap">正在加载图片&#8230;</string>
-    <string name="str_loading_task_sound">正在加载音效&#8230;</string>
 
 </resources>

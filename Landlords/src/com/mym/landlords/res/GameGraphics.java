@@ -23,7 +23,18 @@ public final class GameGraphics {
 	/** 卡牌原始高度。 */
 	public static final int CARD_HEIGHT = 126;
 	/** 卡牌被选中后向上抽出的高度。 */
-	public static final int Card_PICKED_OFFSET = 10;
+	public static final int Card_PICKED_OFFSET = 10;	
+	//AI 玩家图片的水平边距[离屏幕左右边界]
+	public static final int AIPLAYER_AVATAR_MARGIN_RIGHT = 3;
+	//AI 玩家图片的垂直边距[离屏幕上边界]
+	public static final int AIPLAYER_AVATAR_MARGIN_TOP = 3;
+	//AI 玩家所剩手牌数目文字X坐标
+	public static final int AIPLAYER_LEFT_CARDNUM_X =30;
+	//AI 玩家所剩手牌数目文字X坐标
+	public static final int AIPLAYER_RIGHT_CARDNUM_X=750;
+	//AI 玩家所剩手牌数目文字Y坐标
+	public static final int AIPLAYER_CARDNUM_MARGIN_Y=100;
+	
 
 //	private Bitmap frameBuffer; // 底色
 //	private Canvas canvas; // 画布对象
@@ -55,30 +66,31 @@ public final class GameGraphics {
 //		this.paint = new Paint();
 	}
 
-//	/**
-//	 * 绘制指定的Bitmap。
-//	 * @param bitmap 要绘制的图片。
-//	 * @param x 目标左边缘位置
-//	 * @param y 目标上边缘位置
-//	 * @param srcX 缩放前左边缘位置
-//	 * @param srcY 缩放前上边缘位置
-//	 * @param srcWidth 缩放前宽度
-//	 * @param srcHeight 缩放前高度
-//	 */
-//	public void drawBitmap(LiveBitmap bitmap, int x, int y, int srcX, int srcY,
-//			int srcWidth, int srcHeight) {
-//		srcRect.left = (int) (srcX * scaleX + 0.5f);
-//		srcRect.top = (int) (srcY * scaleY + 0.5f);
-//		srcRect.right = (int) ((srcX + srcWidth - 1) * scaleX + 0.5f);
-//		srcRect.bottom = (int) ((srcY + srcHeight - 1) * scaleY + 0.5f);
-//
-//		dstRect.left = (int) (x * scaleX + 0.5f);
-//		dstRect.top = (int) (y * scaleY + 0.5);
-//		dstRect.right = (int) ((x + srcWidth - 1) * scaleX + 0.5f);
-//		dstRect.bottom = (int) ((y + srcHeight - 1) * scaleY + 0.5f);
-//
-//		canvas.drawBitmap(bitmap.getBitmap(), srcRect, dstRect, null);
-//	}
+	/**
+	 * 绘制指定的Bitmap。
+	 * @param canvas 画布
+	 * @param bitmap 要绘制的图片。
+	 * @param x 目标左边缘位置
+	 * @param y 目标上边缘位置
+	 * @param srcX 缩放前左边缘位置
+	 * @param srcY 缩放前上边缘位置
+	 * @param srcWidth 缩放前宽度
+	 * @param srcHeight 缩放前高度
+	 */
+	public void drawBitmap(Canvas canvas, LiveBitmap bitmap, int x, int y, int srcX, int srcY,
+			int srcWidth, int srcHeight) {
+		srcRect.left = (int) (srcX * scaleX + 0.5f);
+		srcRect.top = (int) (srcY * scaleY + 0.5f);
+		srcRect.right = (int) ((srcX + srcWidth - 1) * scaleX + 0.5f);
+		srcRect.bottom = (int) ((srcY + srcHeight - 1) * scaleY + 0.5f);
+
+		dstRect.left = (int) (x * scaleX + 0.5f);
+		dstRect.top = (int) (y * scaleY + 0.5);
+		dstRect.right = (int) ((x + srcWidth - 1) * scaleX + 0.5f);
+		dstRect.bottom = (int) ((y + srcHeight - 1) * scaleY + 0.5f);
+
+		canvas.drawBitmap(bitmap.getBitmap(), srcRect, dstRect, null);
+	}
 //
 //
 //	/**
@@ -123,7 +135,33 @@ public final class GameGraphics {
 //		int y = center.y - (int) (bitmap.getRawHeight() / 2 + 0.5f);
 //		drawBitmap(bitmap, x, y);
 //	}
+	/**
+	 * 绘制数字形式的文本。
+	 * @param msg 要绘制的消息，只能包含数字或空格，否则将抛出异常。
+	 * @param numbeBitmap 要绘制的数字图片。
+	 * @param x 文字的起点坐标
+	 * @param y 文字的起点坐标
+	 */
+    public void drawText(Canvas canvas, LiveBitmap numbeBitmap, String msg, int x, int y) {
+        if (!msg.matches("[0-9 ]*")){
+			throw new IllegalArgumentException("drawable msg should contain only numbers and spaces. msg="+msg);
+		}
+		int len = msg.length();
+        for (int i = 0; i < len; i++) {
+            char character = msg.charAt(i);
 
+            if (character == ' ') {
+                x += 20;						//留白
+                continue;
+            }
+
+            int srcX = (character - '0') * 17;
+            int srcWidth = 17;					//字宽
+                
+            drawBitmap(canvas, numbeBitmap, x, y, srcX, 0, srcWidth, 21);
+            x += srcWidth;
+        }
+    }
 	public float getScaleX() {
 		return scaleX;
 	}

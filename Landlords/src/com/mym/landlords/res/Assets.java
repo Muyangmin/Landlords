@@ -60,6 +60,8 @@ public final class Assets {
 	
 	/** 卡牌背面图。 */
 	public LiveBitmap cardbg;
+	/** 数字信息图片。 */
+	public LiveBitmap bitmapNumbers;
 	
 	/** 叫地主音效：不叫。 */
 	public int soundLandloadPass;
@@ -143,72 +145,83 @@ public final class Assets {
 	 * 执行实际的加载操作，由于公有方法中做了参数检查，这里不再检查。
 	 */
 	private final void load(Context context, LoadingProgressListener listener){
-		loadBitmap(context, listener);
-		loadSound(context, listener);
+		// 54 = 一副牌，52=一副牌的较小版本，再加上卡牌背面图、牌桌背景图、数字图
+		final int totalBitmap = 54 + 52 + 1 + 1 + 1;
+		final int totalSoundCount = 24;		//数出来的
+		int total = totalBitmap + totalSoundCount;
+		int loadedBitmap = loadBitmap(0, total, context, listener);
+		int loadedRes = loadSound(loadedBitmap, total, context, listener);
+		if (loadedRes!=total){
+			throw new RuntimeException("Resource loaded "+loadedRes+", but it was declared to be "+total);
+		}
 		listener.onLoadCompleted();
 	}
 	
-	private final void loadSound(Context context, LoadingProgressListener listener){
+	/**
+	 * 加载声音资源
+	 * @param hasCompleted 已加载的资源数目
+	 * @param total 全部资源总数
+	 * @return 返回已加载的资源数目。
+	 */
+	private final int loadSound(final int hasCompleted, final int total,
+			Context context, LoadingProgressListener listener) {
 		GlobalSoundPool sp = GlobalSoundPool.getInstance(context);
-		String loadingSound = context.getString(R.string.str_loading_task_sound);
-		final int totalSoundCount = 24;	//数出来的
-		int completed = 0;	//复位
+		int completed = hasCompleted;	//复位
 		soundLandloadP1 = sp.loadSound(context, "landlord_p1.mp3");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundLandloadP2 = sp.loadSound(context, "landlord_p2.mp3");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundLandloadP3 = sp.loadSound(context, "landlord_p3.mp3");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundLandloadPass = sp.loadSound(context, "landlord_pass.mp3");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardPlane = sp.loadSound(context, "feiji.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardBoom = sp.loadSound(context, "zhadan.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardJokerS = sp.loadSound(context, "xiaowang.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardJokerB = sp.loadSound(context, "dawang.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardRocket = sp.loadSound(context, "wangzha.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardShun1 = sp.loadSound(context, "shunzi.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardShun2 = sp.loadSound(context, "liandui.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardSingle = sp.loadSound(context, "givecard.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardThree = sp.loadSound(context, "givecard.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardThree1 = sp.loadSound(context, "sandaiyi.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardThree2 = sp.loadSound(context, "sandaiyidui.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundCardTwo = sp.loadSound(context, "givecard.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		
 		soundPlayBigger = new int[3];
 		soundPlayBigger[0] = sp.loadSound(context, "dani1.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundPlayBigger[1] = sp.loadSound(context, "dani2.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundPlayBigger[2] = sp.loadSound(context, "dani3.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundPlayPass = sp.loadSound(context, "buyao.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundPlayBoom = sp.loadSound(context, "boom.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundPlayPlane = sp.loadSound(context, "plane.wav");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundPlayLose = sp.loadSound(context, "lose.mp3");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
+		notifyProgressChanged(++completed, total, listener);
 		soundPlayWin = sp.loadSound(context, "win.mp3");
-		notifyProgressChanged(++completed, totalSoundCount, listener, loadingSound);
-		if (completed!=totalSoundCount){
-			throw new RuntimeException("There is a bug. completed "+completed+" while total is "+totalSoundCount);
-		}
+		notifyProgressChanged(++completed, total, listener);
+		return completed;
 	}
 	
-	private final void loadBitmap(Context context,
+	private final int loadBitmap(final int hasCompleted, final int total,
+			Context context,
 			LoadingProgressListener listener) {
 		if (!(context instanceof Activity)) {
 			throw new IllegalArgumentException(
@@ -225,12 +238,8 @@ public final class Assets {
 		final float scaleY = graphics.getScaleY();
 		Log.d(LOG_TAG, "scalex = "+scaleX+", scaleY="+scaleY);
 		MappedTouchEvent.initMapper(scaleX, scaleY);
-		// 54 = 一副牌，52=一副牌的较小版本，再加上卡牌背面图片和牌桌背景图片
-		final int totalBitmap = 54 + 52 + 1 + 1;
-
-		String loadingBitmap = context
-				.getString(R.string.str_loading_task_bitmap);
-		int completed = 0;
+		
+		int completed = hasCompleted;
 		// 加载黑桃图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
 			cardSpades[i] = LiveBitmap.loadBitmap(context,
@@ -240,8 +249,7 @@ public final class Assets {
 					getCardAssetsName(CardSuit.Spade, value, true), scaleX,
 					scaleY);
 			completed += 2;
-			notifyProgressChanged(completed, totalBitmap, listener,
-					loadingBitmap);
+			notifyProgressChanged(completed, total, listener);
 		}
 		// 加载红桃图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
@@ -252,8 +260,7 @@ public final class Assets {
 					getCardAssetsName(CardSuit.Heart, value, true), scaleX,
 					scaleY);
 			completed += 2;
-			notifyProgressChanged(completed, totalBitmap, listener,
-					loadingBitmap);
+			notifyProgressChanged(completed, total, listener);
 		}
 		// 加载梅花图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
@@ -264,8 +271,7 @@ public final class Assets {
 					getCardAssetsName(CardSuit.Club, value, true), scaleX,
 					scaleY);
 			completed += 2;
-			notifyProgressChanged(completed, totalBitmap, listener,
-					loadingBitmap);
+			notifyProgressChanged(completed, total, listener);
 		}
 		// 加载方片图片
 		for (int i = 0, value = Card.CARD_VALUE_3; i < 13; i++, value++) {
@@ -276,8 +282,7 @@ public final class Assets {
 					getCardAssetsName(CardSuit.Diamond, value, true), scaleX,
 					scaleY);
 			completed += 2;
-			notifyProgressChanged(completed, totalBitmap, listener,
-					loadingBitmap);
+			notifyProgressChanged(completed, total, listener);
 		}
 		cardJokerS = LiveBitmap.loadBitmap(
 				context,
@@ -288,21 +293,21 @@ public final class Assets {
 				getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_B,
 						false), scaleX, scaleY);
 		completed += 2;
-		notifyProgressChanged(completed, totalBitmap, listener, loadingBitmap);
+		notifyProgressChanged(completed, total, listener);
 		cardbg = LiveBitmap.loadBitmap(context, "cardbg.png", scaleX, scaleY);
-		notifyProgressChanged(++completed, totalBitmap, listener, loadingBitmap);
+		notifyProgressChanged(++completed, total, listener);
 		bkgGameTable = LiveBitmap.loadBitmap(context, "bkg_table.png", scaleX, scaleY);
-		notifyProgressChanged(++completed, totalBitmap, listener, loadingBitmap);
-		if (completed!=totalBitmap){
-			throw new RuntimeException("Load bitmap completed "+completed+" while total is "+totalBitmap);
-		}
+		notifyProgressChanged(++completed, total, listener);
+		bitmapNumbers = LiveBitmap.loadBitmap(context, "numbers.png", scaleX, scaleY);
+		notifyProgressChanged(++completed, total, listener);
+		return completed;
 	}
 
 	//通知加载的进度
 	private final void notifyProgressChanged(int completed, int total,
-			LoadingProgressListener listener, String currentTask) {
+			LoadingProgressListener listener) {
 		int progress = (int) (completed/(double)total*100);
-		listener.onProgressChanged(progress, currentTask);
+		listener.onProgressChanged(progress);
 	}
 	
 	/**
@@ -411,7 +416,7 @@ public final class Assets {
 		 * @param progress 当前进度，取值在0~100之间。
 		 * @param currentTaskDescription 当前任务描述。
 		 */
-		void onProgressChanged(int progress, String currentTaskDescription);
+		void onProgressChanged(int progress/*, String currentTaskDescription*/);
 		/**
 		 * 当所有加载资源完成时调用。
 		 */

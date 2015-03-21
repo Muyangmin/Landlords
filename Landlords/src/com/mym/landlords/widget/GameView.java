@@ -37,6 +37,10 @@ public class GameView extends SurfaceView implements RedrawableView,
 		Canvas canvas = null;
 		try {
 			canvas = holder.lockCanvas();
+			if (graphics==null || canvas==null){
+				Log.w(LOG_TAG, "attempt redrawing:graphics=null?"
+						+ (graphics == null) + ";canvas=null?" + (canvas == null));
+			}
 			graphics.drawBitmap(canvas, Assets.getInstance().bkgGameTable, 0, 0);
 			if (gamescreen!=null){
 				gamescreen.updateUI(graphics, canvas);
@@ -59,7 +63,7 @@ public class GameView extends SurfaceView implements RedrawableView,
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(LOG_TAG, "surfaceCreated");
-		this.holder = holder;
+		this.holder = getHolder();
 //		redraw();
 		renderThread = new RenderThread();
 		renderThread.start();
