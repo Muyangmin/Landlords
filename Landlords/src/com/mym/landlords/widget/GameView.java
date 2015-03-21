@@ -22,7 +22,7 @@ public class GameView extends SurfaceView implements RedrawableView,
 	private SurfaceHolder holder;
 	private GameGraphics graphics;
 	private GameScreen gamescreen;
-	private Thread renderThread;	//渲染线程。为加入Activity的生命周期支持，在这里不赋值
+	private RenderThread renderThread;	//渲染线程。为加入Activity的生命周期支持，在这里不赋值
 
 	public GameView(Context context, GameGraphics graphics, GameScreen listener) {
 		super(context);
@@ -72,12 +72,14 @@ public class GameView extends SurfaceView implements RedrawableView,
 	
 	@Override
 	public void onWindowFocusChanged(boolean hasWindowFocus) {
-		if (!hasWindowFocus){
-			if (renderThread!=null && renderThread.isAlive()){
+		if (!hasWindowFocus) {
+			if (renderThread != null && renderThread.isAlive()) {
 				try {
-					renderThread.join();	//销毁线程。
+					// Important:join方法会等待线程完成工作后再结束线程，但如果是死循环则永远不会结束。
+					renderThread.stopThread();
+					renderThread.join(); // 销毁线程。
 				} catch (Exception e) {
-					
+
 				}
 			}
 			renderThread = null;
@@ -86,13 +88,20 @@ public class GameView extends SurfaceView implements RedrawableView,
 	
 	private final class RenderThread extends Thread{
 		
+		private boolean hasStopped;
+		
 		public RenderThread() {
 			super("RenderThread");
+			hasStopped = false;
+		}
+		
+		protected final void stopThread(){
+			hasStopped = true;
 		}
 		
 		public void run() {
 			long startTime, endTime, freeTime;
-			while (true) {
+			while (!hasStopped) {
 				try {
 //					Log.v(LOG_TAG, "I'm rendering...");
 					startTime = System.currentTimeMillis();
