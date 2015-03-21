@@ -3,6 +3,7 @@ package com.mym.landlords.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import com.mym.landlords.ai.Game;
 import com.mym.landlords.ai.Game.Status;
@@ -19,6 +20,7 @@ import com.mym.landlords.widget.GameScreen;
 import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameView;
 import com.mym.landlords.widget.MappedTouchEvent;
+import com.mym.util.PollingThread;
 
 import android.content.Context;
 import android.content.Intent;
@@ -44,11 +46,68 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	
 	private ArrayList<Card> cardPack;			//总的卡牌包
 	private List<Card> landlordCards;			//地主底牌
-	private Game currentGame;		//当前游戏记录
+	private Game currentGame;					//当前游戏记录
 	
     private Rect cardsTouchZone = new Rect();	//用于判断点击事件是否在玩家手牌区域内
-    private float cardOffset;	//用于判断玩家点选的是哪张卡牌
+    private float cardOffset;					//用于判断玩家点选的是哪张卡牌
+    private GameLogicThread logicThread;
+    private boolean isWaitingForUser;			//当前逻辑线程是否被玩家阻塞
+    private long timeLimit;						//出牌时间倒计时限制
+    private static final long LOGIC_THREAD_INTERVAL = 50;	//逻辑线程的间隔时间
+    private static final long USER_OPRTIME_LIMIT = 30000;	//最大阻塞时间，即用户的出牌时间，30秒
+    
     Handler handler = new Handler();		//temporary
+    
+    private class GameLogicThread extends PollingThread{
+
+    	public GameLogicThread() {
+			super("GameLogicThread", LOGIC_THREAD_INTERVAL);
+		}
+    	
+    	@Override
+    	protected void action() {
+    		switch (currentGame.status) {
+			case Preparing://该阶段无逻辑需要控制
+				break;
+			case CallingLandlord:
+				callLandlord();
+				break;
+			case Playing:
+				break;
+			case ShowingAICards:
+				break;
+			case Gameover:
+				break;
+			default:
+				break;
+			}
+    	}
+		//模拟叫牌
+    	private void callLandlord(){	
+    		if (isWaitingForUser){	//如果已经在等候玩家操作，则不做处理
+    			return ;
+    		}
+			Random random = new Random(System.currentTimeMillis());
+			int x = random.nextInt(3);
+			Player startPlayer = (x == 0) ? playerLeft
+					: (x == 1 ? playerHuman : playerRight);
+			if (!startPlayer.isAiPlayer()){
+				isWaitingForUser = true;
+				timeLimit = USER_OPRTIME_LIMIT;
+				return ;
+			}
+			else{
+				startPlayer.nextRound(currentGame);
+				int calledScore = startPlayer.getCalledScore();
+				performCallLandlord(startPlayer, calledScore);
+				if (calledScore == Game.BASIC_SCORE_THREE){
+					currentGame.status = Status.Playing;
+					startPlayer.setLandlord(landlordCards);
+				}
+				//TODO 增加人类玩家的倒计时。
+			}
+    	}
+    }
 	
 	protected static Intent getIntent(Context context){
 		Intent intent = new Intent(context, MainActivity.class);
@@ -72,23 +131,26 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		Log.d(LOG_TAG, "player2 cards:"+playerHuman.getHandCards().toString());
 		Log.d(LOG_TAG, "player3 cards:"+playerRight.getHandCards().toString());
 		Log.d(LOG_TAG, "landlord cards:"+landlordCards.toString());
+		logicThread = new GameLogicThread();
+		logicThread.start();
+		currentGame.status = Status.CallingLandlord;
 		
 		handler.postDelayed(new Runnable() {
 			
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				currentGame.status = Status.Playing;
-				playerHuman.setLandlord(landlordCards);
+//				currentGame.status = Status.Playing;
+//				playerHuman.setLandlord(landlordCards);
 			}
 		}, 1000);
 	}
 	
 	//初始化玩家并分配座位
 	private void initPlayerSeats(){
-		playerLeft = new Player();
-		playerHuman= new Player();
-		playerRight = new Player();
+		playerLeft = Player.newAiPlayer();
+		playerHuman= Player.newHumanPlayer();
+		playerRight = Player.newAiPlayer();
 		playerLeft.setSeat(playerRight, playerHuman);
 		playerHuman.setSeat(playerLeft, playerRight);
 		playerRight.setSeat(playerHuman, playerLeft);
@@ -107,6 +169,32 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		playerHuman.setHandCards(cardPack.subList(17, 34));
 		playerRight.setHandCards(cardPack.subList(34, 51));
 		landlordCards = cardPack.subList(51, 54);
+	}
+	
+	/**
+	 * 执行叫地主的操作。
+	 * @param player 指定的玩家
+	 * @param score 玩家叫的分数
+	 */
+	private void performCallLandlord(Player player, int score){
+		int soundId;
+		switch (score) {
+		case Game.BASIC_SCORE_NONE:
+			soundId=assets.soundLandloadPass;
+			break;
+		case Game.BASIC_SCORE_ONE:
+			soundId=assets.soundLandloadP1;
+			break;
+		case Game.BASIC_SCORE_TWO:
+			soundId=assets.soundLandloadP2;
+			break;
+		case Game.BASIC_SCORE_THREE:
+			soundId=assets.soundLandloadP3;
+			break;
+		default:
+			throw new RuntimeException("unhanlded score "+score);
+		}
+		soundPool.playSound(soundId);
 	}
 	
 	/**

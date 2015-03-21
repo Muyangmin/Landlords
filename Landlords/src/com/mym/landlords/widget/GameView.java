@@ -26,6 +26,9 @@ public class GameView extends SurfaceView implements RedrawableView,
 
 	public GameView(Context context, GameGraphics graphics, GameScreen listener) {
 		super(context);
+		if (graphics==null){
+			throw new NullPointerException("graphics object cannot be null.");
+		}
 		this.graphics = graphics;
 		this.holder = getHolder();
 		this.holder.addCallback(this);
@@ -37,9 +40,9 @@ public class GameView extends SurfaceView implements RedrawableView,
 		Canvas canvas = null;
 		try {
 			canvas = holder.lockCanvas();
-			if (graphics==null || canvas==null){
-				Log.w(LOG_TAG, "attempt redrawing:graphics=null?"
-						+ (graphics == null) + ";canvas=null?" + (canvas == null));
+			if (canvas==null){
+				Log.w(LOG_TAG, "cancel drawing on null canvas.");
+				return ;
 			}
 			graphics.drawBitmap(canvas, Assets.getInstance().bkgGameTable, 0, 0);
 			if (gamescreen!=null){
@@ -62,32 +65,25 @@ public class GameView extends SurfaceView implements RedrawableView,
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		Log.d(LOG_TAG, "surfaceCreated");
+		Log.d(LOG_TAG, "surfaceCreated.");
 		this.holder = getHolder();
-//		redraw();
 		renderThread = new RenderThread();
 		renderThread.start();
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		
-	}
-	
-	@Override
-	public void onWindowFocusChanged(boolean hasWindowFocus) {
-		if (!hasWindowFocus) {
-			if (renderThread != null && renderThread.isAlive()) {
-				try {
-					// Important:join方法会等待线程完成工作后再结束线程，但如果是死循环则永远不会结束。
-					renderThread.stopThread();
-					renderThread.join(); // 销毁线程。
-				} catch (Exception e) {
+		Log.d(LOG_TAG, "surfaceDestroyed.");
+		if (renderThread != null && renderThread.isAlive()) {
+			try {
+				// Important:join方法会等待线程完成工作后再结束线程，但如果是死循环则永远不会结束。
+				renderThread.stopThread();
+				renderThread.join(); // 销毁线程。
+			} catch (Exception e) {
 
-				}
 			}
-			renderThread = null;
 		}
+		renderThread = null;
 	}
 	
 	private final class RenderThread extends Thread{
@@ -99,7 +95,7 @@ public class GameView extends SurfaceView implements RedrawableView,
 			hasStopped = false;
 		}
 		
-		protected final void stopThread(){
+		protected synchronized final void stopThread(){
 			hasStopped = true;
 		}
 		
@@ -107,7 +103,6 @@ public class GameView extends SurfaceView implements RedrawableView,
 			long startTime, endTime, freeTime;
 			while (!hasStopped) {
 				try {
-//					Log.v(LOG_TAG, "I'm rendering...");
 					startTime = System.currentTimeMillis();
 					redraw();
 					endTime = System.currentTimeMillis();

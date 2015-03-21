@@ -23,6 +23,11 @@ public final class Game {
 		/** 游戏结束阶段 */
 		Gameover;
 	}
+	/** 如取此值，表示不叫。 */
+	public static final int BASIC_SCORE_NONE = 0;
+	public static final int BASIC_SCORE_ONE = 1;
+	public static final int BASIC_SCORE_TWO = 2;
+	public static final int BASIC_SCORE_THREE = 3;
 	
 	/** 炸弹总数 */
 	public int boomCount;	
