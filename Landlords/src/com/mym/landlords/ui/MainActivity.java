@@ -79,6 +79,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 			public void run() {
 				// TODO Auto-generated method stub
 				currentGame.status = Status.Playing;
+				playerHuman.setLandlord(landlordCards);
 			}
 		}, 1000);
 	}
@@ -185,6 +186,34 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		cardsTouchZone.bottom = bottom;
 	}
 
+	/**画玩家和AI形象。 */
+	private void drawPlayers(GameGraphics g, Canvas canvas) {
+		int playerLX = GameGraphics.SCREEN_PADDING_HORIZONTAL;
+		int playerLY = GameGraphics.SCREEN_MARGIN_VERTICAL;
+		int playerRX = GameGraphics.BASE_SCREEN_WIDTH
+				- GameGraphics.SCREEN_PADDING_HORIZONTAL
+				- assets.playerRight.getRawWidth();
+		int playerRY = GameGraphics.SCREEN_MARGIN_VERTICAL;
+		int playerMX = GameGraphics.SCREEN_PADDING_HORIZONTAL;
+		int playerMY = GameGraphics.BASE_SCREEN_HEIGHT - 15
+				- GameGraphics.CARD_HEIGHT - 10
+				- assets.playerHuman.getRawHeight();
+		g.drawBitmap(canvas, assets.playerLeft, playerLX, playerLY);
+		g.drawBitmap(canvas, assets.playerHuman, playerMX, playerMY);
+		g.drawBitmap(canvas, assets.playerRight, playerRX, playerRY);
+		
+		// 画地主标记
+		if (playerLeft.isLandlord()) {
+			g.drawBitmap(canvas, assets.iconLandlord, playerLX
+					+ assets.playerLeft.getRawWidth(), playerLY);
+		} else if (playerHuman.isLandlord()) {
+			g.drawBitmap(canvas, assets.iconLandlord, playerMX
+					+ assets.playerHuman.getRawWidth(), playerMY);
+		} else if (playerRight.isLandlord()) {
+			g.drawBitmap(canvas, assets.iconLandlord, playerRX
+					- assets.iconLandlord.getRawWidth(), playerRY);
+		}
+	}
 	/**
 	 * 用于判断点击事件是否发生在卡牌点击区域内。
 	 * @param event 映射后的点击事件
@@ -243,17 +272,27 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 			return ;
 		}
 		drawBottomCards(graphics, canvas);
+		//画手牌背面和数字
 		if (currentGame.status != Status.ShowingAICards){
-			drawBackLittleCards(graphics, canvas, 3 + 10, 130, playerLeft.getHandCards().size());
+			drawBackLittleCards(graphics, canvas,
+					GameGraphics.SCREEN_PADDING_HORIZONTAL + 10, 130,
+					playerLeft.getHandCards().size());
 			drawBackLittleCards(graphics, canvas, 
-					//TODO 增加玩家和AI的形象
-					GameGraphics.BASE_SCREEN_WIDTH - 3 + 10-84/*- Assets.playerD.getRawWidth()*/,
+					GameGraphics.BASE_SCREEN_WIDTH
+							- GameGraphics.SCREEN_PADDING_HORIZONTAL + 10
+							- assets.playerRight.getRawWidth(),
 					130, playerRight.getHandCards().size());
+			graphics.drawText(canvas, assets.bitmapNumbers,
+					String.valueOf(playerLeft.getHandCards().size()),
+					GameGraphics.AIPLAYER_LEFT_CARDNUM_X,
+					GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
+			graphics.drawText(canvas, assets.bitmapNumbers,
+					String.valueOf(playerRight.getHandCards().size()),
+					GameGraphics.AIPLAYER_RIGHT_CARDNUM_X,
+					GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
 		}
-		graphics.drawText(canvas, assets.bitmapNumbers, String.valueOf(playerLeft.getHandCards().size()), 
-				GameGraphics.AIPLAYER_LEFT_CARDNUM_X, GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
-		graphics.drawText(canvas, assets.bitmapNumbers, String.valueOf(playerRight.getHandCards().size()), 
-				GameGraphics.AIPLAYER_RIGHT_CARDNUM_X, GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
+		drawPlayers(graphics, canvas);
 		drawHumanPlayerCards(graphics, canvas);
 	}
+	
 }

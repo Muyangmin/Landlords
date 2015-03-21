@@ -1,6 +1,5 @@
 package com.mym.landlords.res;
 
-import com.mym.landlords.R;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardSuit;
 import com.mym.landlords.widget.MappedTouchEvent;
@@ -62,6 +61,14 @@ public final class Assets {
 	public LiveBitmap cardbg;
 	/** 数字信息图片。 */
 	public LiveBitmap bitmapNumbers;
+	/** AI形象左。 */
+	public LiveBitmap playerLeft;
+	/** 玩家形象。 */
+	public LiveBitmap playerHuman;
+	/** AI形象右。 */
+	public LiveBitmap playerRight;
+	/** 地主图标 */
+	public LiveBitmap iconLandlord;
 	
 	/** 叫地主音效：不叫。 */
 	public int soundLandloadPass;
@@ -145,12 +152,15 @@ public final class Assets {
 	 * 执行实际的加载操作，由于公有方法中做了参数检查，这里不再检查。
 	 */
 	private final void load(Context context, LoadingProgressListener listener){
-		// 54 = 一副牌，52=一副牌的较小版本，再加上卡牌背面图、牌桌背景图、数字图
-		final int totalBitmap = 54 + 52 + 1 + 1 + 1;
+		final int totalBitmap = 54 + 52		//54=一副牌，52=一副牌的较小版本
+							+ 1 + 1			//卡牌背面图、牌桌背景图
+							+ 1				//数字图
+							+ 3 + 1;		//人物形象图、地主图标
 		final int totalSoundCount = 24;		//数出来的
 		int total = totalBitmap + totalSoundCount;
 		int loadedBitmap = loadBitmap(0, total, context, listener);
 		int loadedRes = loadSound(loadedBitmap, total, context, listener);
+		//安全检查，避免有遗漏忘记加载的资源。
 		if (loadedRes!=total){
 			throw new RuntimeException("Resource loaded "+loadedRes+", but it was declared to be "+total);
 		}
@@ -292,6 +302,7 @@ public final class Assets {
 				context,
 				getCardAssetsName(CardSuit.Joker, Card.CARD_VALUE_JOKER_B,
 						false), scaleX, scaleY);
+		
 		completed += 2;
 		notifyProgressChanged(completed, total, listener);
 		cardbg = LiveBitmap.loadBitmap(context, "cardbg.png", scaleX, scaleY);
@@ -300,6 +311,15 @@ public final class Assets {
 		notifyProgressChanged(++completed, total, listener);
 		bitmapNumbers = LiveBitmap.loadBitmap(context, "numbers.png", scaleX, scaleY);
 		notifyProgressChanged(++completed, total, listener);
+		
+		playerLeft = LiveBitmap.loadBitmap(context, "playerLeft.png", scaleX, scaleY);
+		playerHuman = LiveBitmap.loadBitmap(context, "playerHuman.png", scaleX, scaleY);
+		playerRight = LiveBitmap.loadBitmap(context, "playerRight.png", scaleX, scaleY);
+		completed +=3 ;
+		notifyProgressChanged(completed, total, listener);
+		iconLandlord = LiveBitmap.loadBitmap(context, "icLandlord.png", scaleX, scaleY);
+		notifyProgressChanged(++completed, total, listener);
+		
 		return completed;
 	}
 

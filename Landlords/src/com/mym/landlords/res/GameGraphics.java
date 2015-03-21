@@ -1,11 +1,9 @@
 package com.mym.landlords.res;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.view.Display;
 
 /**
  * 负责图像的绘制和自动缩放控制。
@@ -24,15 +22,15 @@ public final class GameGraphics {
 	public static final int CARD_HEIGHT = 126;
 	/** 卡牌被选中后向上抽出的高度。 */
 	public static final int Card_PICKED_OFFSET = 10;	
-	//AI 玩家图片的水平边距[离屏幕左右边界]
-	public static final int AIPLAYER_AVATAR_MARGIN_RIGHT = 3;
-	//AI 玩家图片的垂直边距[离屏幕上边界]
-	public static final int AIPLAYER_AVATAR_MARGIN_TOP = 3;
-	//AI 玩家所剩手牌数目文字X坐标
-	public static final int AIPLAYER_LEFT_CARDNUM_X =30;
-	//AI 玩家所剩手牌数目文字X坐标
-	public static final int AIPLAYER_RIGHT_CARDNUM_X=750;
-	//AI 玩家所剩手牌数目文字Y坐标
+	/** 游戏屏幕的水平内边距[离屏幕左右边界]。 */
+	public static final int SCREEN_PADDING_HORIZONTAL = 3;
+	/** 游戏屏幕的垂直内边距[离屏幕上下边界]。 */
+	public static final int SCREEN_MARGIN_VERTICAL = 3;
+	/** AI 玩家所剩手牌数目文字X坐标。 */
+	public static final int AIPLAYER_LEFT_CARDNUM_X =25; // org=30 
+	/** AI 玩家所剩手牌数目文字X坐标。 */
+	public static final int AIPLAYER_RIGHT_CARDNUM_X=730;//org=750
+	/** AI 玩家所剩手牌数目文字Y坐标。 */
 	public static final int AIPLAYER_CARDNUM_MARGIN_Y=100;
 	
 
