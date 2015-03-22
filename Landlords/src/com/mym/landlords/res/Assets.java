@@ -139,6 +139,9 @@ public final class Assets {
 //			throw new RuntimeException("Assets resources have been already loaded.");
 			//这里不假定instance不为Null即代表其所持有的内存资源没有被释放，为了安全起见，强制重新加载。
 			Log.e(LOG_TAG, "Assets resources have been already loaded.Force reloading...");
+			//强制释放旧的资源，否则如果短时间多次频繁开关应用，会导致OOM。
+			instance.recycleOldBitmap();
+			Log.d(LOG_TAG, "old resources cleared.");
 			instance = null;
 		}
 		if (context==null || listener==null){
@@ -146,6 +149,44 @@ public final class Assets {
 		}
 		instance = new Assets();
 		instance.load(context, listener);
+	}
+	
+	private final synchronized void recycleOldBitmap(){
+		recycleBitmap(bitmapNumbers);
+		recycleBitmap(bkgGameTable);
+		recycleBitmap(cardSpades);
+		recycleBitmap(cardHearts);
+		recycleBitmap(cardClubs);
+		recycleBitmap(cardDiamonds);
+		recycleBitmap(cardSmallSpades);
+		recycleBitmap(cardSmallHearts);
+		recycleBitmap(cardSmallClubs);
+		recycleBitmap(cardDiamonds);
+		recycleBitmap(cardJokerB);
+		recycleBitmap(cardJokerS);
+		recycleBitmap(iconLandlord);
+		recycleBitmap(playerHuman);
+		recycleBitmap(playerLeft);
+		recycleBitmap(playerRight);
+	}
+	
+	private final void recycleBitmap(LiveBitmap[] array){
+		if (array!=null){
+			for (LiveBitmap bitmap : array){
+				recycleBitmap(bitmap);
+			}
+		}
+	}
+	
+	private final void recycleBitmap(LiveBitmap bitmap){
+		try {
+			if (bitmap!=null){
+				bitmap.getBitmap().recycle();
+			}
+		} catch (Exception e) {
+			Log.w(LOG_TAG, "exception while recycling bitmap");
+			e.printStackTrace();
+		}
 	}
 	
 	/**
