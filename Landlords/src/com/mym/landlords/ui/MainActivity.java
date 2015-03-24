@@ -17,7 +17,6 @@ import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.res.LiveBitmap;
 import com.mym.landlords.widget.BitmapButton;
 import com.mym.landlords.widget.GameScreen;
-import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameView;
 import com.mym.landlords.widget.MappedTouchEvent;
 import com.mym.util.PollingThread;
@@ -52,13 +51,18 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
     private float cardOffset;					//用于判断玩家点选的是哪张卡牌
     private GameLogicThread logicThread;
     private boolean isWaitingForUser;			//当前逻辑线程是否被玩家阻塞
-    private long timeLimit;						//出牌时间倒计时限制
-    private static final long LOGIC_THREAD_INTERVAL = 50;	//逻辑线程的间隔时间
-    private static final long USER_OPRTIME_LIMIT = 30000;	//最大阻塞时间，即用户的出牌时间，30秒
     
     Handler handler = new Handler();		//temporary
     
+    /**
+     * 逻辑控制线程。
+     * @author Muyangmin
+     * @create 2015-3-22
+     */
     private class GameLogicThread extends PollingThread{
+        private static final long LOGIC_THREAD_INTERVAL = 100;	//逻辑线程的间隔时间
+    	private Player currentPlayer = null;	//记录当前已经进行的循环值
+    	private Player startPlayer;				//当前循环第一次操作的玩家
 
     	public GameLogicThread() {
 			super("GameLogicThread", LOGIC_THREAD_INTERVAL);
@@ -83,32 +87,72 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 			}
     	}
 		//模拟叫牌
-    	private void callLandlord(){	
-    		if (isWaitingForUser){	//如果已经在等候玩家操作，则不做处理
-    			return ;
+    	private void callLandlord(){
+			if (isWaitingForUser){	//如果已经在等候玩家操作，则不做处理
+    			Log.v(LOG_TAG, "waiting for user...");
+   				return ;
     		}
-			Random random = new Random(System.currentTimeMillis());
-			int x = random.nextInt(3);
-			Player startPlayer = (x == 0) ? playerLeft
-					: (x == 1 ? playerHuman : playerRight);
-			if (!startPlayer.isAiPlayer()){
-				isWaitingForUser = true;
-				timeLimit = USER_OPRTIME_LIMIT;
-				return ;
-			}
-			else{
-				startPlayer.nextRound(currentGame);
-				int calledScore = startPlayer.getCalledScore();
-				performCallLandlord(startPlayer, calledScore);
-				if (calledScore == Game.BASIC_SCORE_THREE){
+    		if (startPlayer!=null){	//循环已经开始
+    			//只有AI才需要执行回合，非AI玩家的操作已经在UI线程执行。
+    			if (currentPlayer.isAiPlayer()){
+    				currentPlayer.nextRound(currentGame);
+    			}
+    			//得到该玩家的叫牌分数
+    			int calledScore = currentPlayer.getCalledScore();
+				performCallLandlord(currentPlayer, calledScore);
+				//如果已经叫到三分或已经是最后一个，开始游戏
+				if (calledScore == Game.BASIC_SCORE_THREE
+						|| currentPlayer.getNextPlayer() == startPlayer) {
+					// TODO
 					currentGame.status = Status.Playing;
-					startPlayer.setLandlord(landlordCards);
+					return;
 				}
-				//TODO 增加人类玩家的倒计时。
-			}
+				else{
+					//如果刚刚进行操作的是玩家，则让AI等待一段时间再操作（主要是避免音效重叠）。
+					if (!currentPlayer.isAiPlayer()){
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					//由下一个人叫地主
+					currentPlayer = currentPlayer.getNextPlayer();
+					if (!currentPlayer.isAiPlayer()){
+						isWaitingForUser = true;
+						sendEmulatedHumanActionDelayed();
+					}
+				}
+				
+    		}
+    		else{	//循环尚未开始，做初始化工作。
+    			Log.d(LOG_TAG, "loopinit");
+    			Random random = new Random(System.currentTimeMillis());
+    			int x = random.nextInt(3);
+    			startPlayer = (x == 0) ? playerLeft
+    					: (x == 1 ? playerHuman : playerRight);
+    			Log.d(LOG_TAG, "startPlayer index = "+x);
+				currentPlayer = startPlayer;
+    			if (!currentPlayer.isAiPlayer()){
+    				isWaitingForUser = true;
+    				sendEmulatedHumanActionDelayed();
+    			}
+    		}
+    	}
+    	//test method
+    	private void sendEmulatedHumanActionDelayed(){
+    		handler.postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					currentPlayer.setCalledScore(Game.BASIC_SCORE_TWO);
+					isWaitingForUser = false;
+					Log.d(LOG_TAG, "human player operation completed.");
+				}
+			}, 2000);
     	}
     }
-	
+    
 	protected static Intent getIntent(Context context){
 		Intent intent = new Intent(context, MainActivity.class);
 		return intent;

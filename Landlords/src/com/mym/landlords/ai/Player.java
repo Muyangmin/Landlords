@@ -92,11 +92,12 @@ public final class Player {
 				return;
 			}
 			int last = priorPlayer.getCalledScore();
-			calledScore = AI.callLandlord(handCards,
-					last == Integer.MIN_VALUE ? 0 : last);// 如果是第一家，则只需要大于0就可以
+			// 如果是第一家，则只需要大于0；否则需要大于上家
+			calledScore = AI.callLandlord(handCards, last >= 0 ? last : 0);
 			return;
 		}
 	}
+	
 
 	/**
 	 * 设置手牌并自动排序。
@@ -161,5 +162,9 @@ public final class Player {
 	public void setSeat(Player prior, Player next) {
 		this.priorPlayer = prior;
 		this.nextPlayer = next;
+	}
+
+	public void setCalledScore(int calledScore) {
+		this.calledScore = calledScore;
 	}
 }
