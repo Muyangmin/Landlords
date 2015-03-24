@@ -7,7 +7,7 @@ import java.io.Serializable;
  * @author Muyangmin
  * @create 2015-3-14
  */
-public final class Card implements Serializable, Comparable<Card>{
+public final class Card implements Serializable, Comparable<Card>, Pickable{
 	//-------------- 卡牌数值大小定义 BEGIN --------
 	//NOTE:这里将所有卡牌按单打的大小依次+1，便于在构造器中检查参数合法性。
 	public static final int CARD_VALUE_3 = 3;
@@ -33,7 +33,8 @@ public final class Card implements Serializable, Comparable<Card>{
 	
 	private CardSuit suit;		//卡牌花色
 	private int value;			//卡牌数值。即上面的大小值之一。
-	private String valueStr;	//卡牌数值的字符描述，主要用于提示或日志输出，使用频繁，故在构造函数中初始化。
+	private String valueStr;	//卡牌数值的字符描述，主要用于提示或日志输出
+	private boolean isPicked; // 该卡牌是否被选中。
 
 	/**
 	 * 创建一张新的卡牌。
@@ -59,6 +60,32 @@ public final class Card implements Serializable, Comparable<Card>{
 		}
 		return compareResult;
 	}
+	
+	/**
+	 * 比较两张牌的点数大小，忽略花色。注意:不建议使用该方法比较大小王。
+	 */
+	public final int compareIgnoreSuit(Card another){
+		return Integer.valueOf(value).compareTo(another.value);
+	}
+
+	/**
+	 * 比较两张牌的点数是否相同，该方法比 {@link #compareIgnoreSuit(Card)}方法更高效。
+	 * 注意:不建议使用该方法比较大小王。
+	 */
+	public final boolean isSameValueAs(Card another){
+		return value==another.value;
+	}
+
+	@Override
+	public boolean isPicked() {
+		return isPicked;
+	}
+
+	@Override
+	public void setPicked(boolean isPicked) {
+		this.isPicked = isPicked;
+	}
+
 	
 	private final String getValueLiteral(int value){
 		String str;
@@ -115,4 +142,13 @@ public final class Card implements Serializable, Comparable<Card>{
 	public int getValue() {
 		return value;
 	}
+}
+/**
+ * 实现逻辑上的可选择接口。
+ * @author Muyangmin
+ * @create 2015-3-24
+ */
+interface Pickable{
+	public boolean isPicked();
+	public void setPicked(boolean isPicked);
 }

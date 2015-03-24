@@ -2,7 +2,7 @@ package com.mym.landlords.ai;
 
 import java.util.ArrayList;
 
-import com.mym.landlords.card.HandCard;
+import com.mym.landlords.card.Card;
 
 /**
  * 处理游戏的AI逻辑。
@@ -13,7 +13,7 @@ final class AI {
 	
 	private AI(){}
 	
-	private static final int callLandlord(ArrayList<HandCard> cards){
+	private static final int callLandlord(ArrayList<Card> cards){
 		return Game.BASIC_SCORE_THREE;
 	}
 	
@@ -23,7 +23,7 @@ final class AI {
 	 * @param minScore 最低分（不包含）。这个分数通常是上一个玩家叫的分数。
 	 * @return 返回一个比minScore更大的分数，或者 是{@link Game#BASIC_SCORE_NONE}，表示不叫。
 	 */
-	protected static final int callLandlord(ArrayList<HandCard> cards, int minScore) {
+	protected static final int callLandlord(ArrayList<Card> cards, int minScore) {
 		int alalysis = callLandlord(cards);
 		return alalysis > minScore ? alalysis : Game.BASIC_SCORE_NONE;
 	}

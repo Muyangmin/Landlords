@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.card.Card;
-import com.mym.landlords.card.HandCard;
 
 /**
  * 代表玩家的实体类。
@@ -15,7 +14,7 @@ import com.mym.landlords.card.HandCard;
  * @create 2015-3-18
  */
 public final class Player {
-	private ArrayList<HandCard> handCards; // 手牌列表
+	private ArrayList<Card> handCards; // 手牌列表
 	private boolean isLandlord; // 是否是地主
 	private boolean isAiPlayer; // 是否是AI玩家
 	private Player priorPlayer; // 上手玩家
@@ -45,7 +44,7 @@ public final class Player {
 		return calledScore;
 	}
 
-	public ArrayList<HandCard> getHandCards() {
+	public ArrayList<Card> getHandCards() {
 		return handCards;
 	}
 
@@ -101,37 +100,37 @@ public final class Player {
 
 	/**
 	 * 设置手牌并自动排序。
-	 * 
-	 * @param handCards
-	 *            手牌列表，不能为null。
+	 * @param handCards 手牌列表，不能为null。
 	 */
-	public void setHandCards(ArrayList<HandCard> handCards) {
+	public void setHandCards(List<Card> handCards) {
 		if (handCards == null) {
 			throw new RuntimeException("handCards cannot be null.");
 		}
-		this.handCards = handCards;
+		this.handCards = new ArrayList<>(handCards.size());
+		this.handCards.addAll(handCards);
 		Collections.sort(this.handCards);
 	}
 
 	/**
 	 * 设置手牌并自动排序。
-	 * 
-	 * @param cards
-	 *            卡牌列表，不能为null。
+	 * @param cards 卡牌列表，不能为null。
 	 */
-	public void setHandCards(List<Card> cards) {
+	public void setHandCards(ArrayList<Card> cards) {
 		if (cards == null) {
 			throw new RuntimeException("handCards cannot be null.");
 		}
-		if (handCards == null) {
-			handCards = new ArrayList<>();
-		} else {
-			handCards.clear();
-		}
-		for (Card card : cards) {
-			handCards.add(new HandCard(card));
-		}
+//		handCards.clear();
+		handCards = cards;
 		Collections.sort(handCards);
+//		if (handCards == null) {
+//			handCards = new ArrayList<>();
+//		} else {
+//			handCards.clear();
+//		}
+//		for (Card card : cards) {
+//			handCards.add(new HandCard(card));
+//		}
+//		Collections.sort(handCards);
 	}
 
 	/**
@@ -140,14 +139,15 @@ public final class Player {
 	 * @param awardCards
 	 *            底牌列表，不能为null。
 	 */
-	public void setLandlord(List<Card> awardCards) {
+	public void setLandlord(ArrayList<Card> awardCards) {
 		if (awardCards == null) {
 			throw new RuntimeException("awardCards cannot be null.");
 		}
-		this.isLandlord = true;
-		for (Card card : awardCards) {
-			handCards.add(new HandCard(card));
-		}
+//		this.isLandlord = true;
+//		for (Card card : awardCards) {
+//			handCards.add(new HandCard(card));
+//		}
+		handCards = awardCards;
 		Collections.sort(this.handCards);
 	}
 

@@ -10,7 +10,6 @@ import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.ai.Player;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardFactory;
-import com.mym.landlords.card.HandCard;
 import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
@@ -286,7 +285,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
     }
 	//绘制玩家的卡牌（即正面的卡牌）
 	private void drawHumanPlayerCards(GameGraphics g, Canvas canvas){
-		ArrayList<HandCard> list = playerHuman.getHandCards();
+		ArrayList<Card> list = playerHuman.getHandCards();
 		int len = list.size();
         int offsetX = 35;
         int offsetY = GameGraphics.BASE_SCREEN_HEIGHT - 15 - GameGraphics.CARD_HEIGHT;
@@ -299,12 +298,12 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
         setCardsTouchZone(offsetX, offsetY, GameGraphics.BASE_SCREEN_WIDTH - offsetX, GameGraphics.BASE_SCREEN_HEIGHT - 5);
         for(int i = 0; i < len; i++) {
         	int drawY = offsetY;
-        	HandCard card = list.get(i);
+        	Card card = list.get(i);
         	if (card.isPicked())
         	{
         		drawY -= GameGraphics.Card_PICKED_OFFSET;
         	}
-        	LiveBitmap bitmap = assets.getCorrespondBitmap(card.getCard());
+        	LiveBitmap bitmap = assets.getCorrespondBitmap(card);
 			g.drawBitmap(canvas, bitmap, offsetX + i * ((int) cardOffset),
 					drawY, GameGraphics.CARD_WIDTH, GameGraphics.CARD_HEIGHT);
         }
@@ -383,7 +382,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 			if (inCardsTouchZone(event)){
 				int index = getCardsIndex(event.x);
 				if (index >=0){
-					HandCard handCard = playerHuman.getHandCards().get(index);
+					Card handCard = playerHuman.getHandCards().get(index);
 					handCard.setPicked(!handCard.isPicked());
 				}
 			}
