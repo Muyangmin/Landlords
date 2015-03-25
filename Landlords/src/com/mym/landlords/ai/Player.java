@@ -119,18 +119,8 @@ public final class Player {
 		if (cards == null) {
 			throw new RuntimeException("handCards cannot be null.");
 		}
-//		handCards.clear();
 		handCards = cards;
 		Collections.sort(handCards);
-//		if (handCards == null) {
-//			handCards = new ArrayList<>();
-//		} else {
-//			handCards.clear();
-//		}
-//		for (Card card : cards) {
-//			handCards.add(new HandCard(card));
-//		}
-//		Collections.sort(handCards);
 	}
 
 	/**
@@ -139,15 +129,12 @@ public final class Player {
 	 * @param awardCards
 	 *            底牌列表，不能为null。
 	 */
-	public void setLandlord(ArrayList<Card> awardCards) {
+	public void setLandlord(List<Card> awardCards) {
 		if (awardCards == null) {
 			throw new RuntimeException("awardCards cannot be null.");
 		}
-//		this.isLandlord = true;
-//		for (Card card : awardCards) {
-//			handCards.add(new HandCard(card));
-//		}
-		handCards = awardCards;
+		this.isLandlord = true;
+		this.handCards.addAll(awardCards);
 		Collections.sort(this.handCards);
 	}
 

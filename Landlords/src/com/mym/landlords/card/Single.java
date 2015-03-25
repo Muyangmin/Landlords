@@ -1,15 +1,17 @@
 package com.mym.landlords.card;
 
+import java.util.ArrayList;
+
 /**
  * @author Muyangmin
  * @create 2015-3-23
  */
 public final class Single extends CardType implements NonBombType {
-	public final Card card;
 	
 	public Single(Card card) {
 		super();
-		this.card = card;
+		cardList = new ArrayList<>(1);
+		cardList.add(card);
 	}
 
 	/**
@@ -26,6 +28,7 @@ public final class Single extends CardType implements NonBombType {
 		if (!(another instanceof Single)){
 			throw new ClassCastException("compare to wrong object.");
 		}
-		return card.compareIgnoreSuit(((Single)another).card);
+		return cardList.get(0).compareIgnoreSuit(
+				((Single) another).cardList.get(0));
 	}
 }

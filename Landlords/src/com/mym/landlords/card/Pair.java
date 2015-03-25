@@ -7,7 +7,6 @@ import java.util.ArrayList;
  * @create 2015-3-23
  */
 public final class Pair extends CardType implements NonBombType {
-	public final ArrayList<Card> cardList;
 
 	public Pair(ArrayList<Card> list) {
 		if (list == null || list.size() != 2
