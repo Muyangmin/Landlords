@@ -15,11 +15,13 @@ import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.res.LiveBitmap;
 import com.mym.landlords.widget.BitmapButton;
+import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameScreen;
 import com.mym.landlords.widget.GameView;
 import com.mym.landlords.widget.MappedTouchEvent;
 import com.mym.util.PollingThread;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -28,8 +30,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Button;
 
-public class MainActivity extends AbsGameActivity implements GameScreen{
+public class MainActivity extends/* AbsGame*/ Activity implements GameScreen{
 	
 	private static final String LOG_TAG = "MainActivity";
 	private GameGraphics graphics;
@@ -52,6 +55,8 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
     private boolean isWaitingForUser;			//当前逻辑线程是否被玩家阻塞
     
     Handler handler = new Handler();		//temporary
+    
+    private ArrayList<BitmapButton> btnCallLandlords;//叫地主系列按钮
     
     /**
      * 逻辑控制线程。
@@ -136,7 +141,8 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 					currentPlayer = currentPlayer.getNextPlayer();
 					if (!currentPlayer.isAiPlayer()){
 						isWaitingForUser = true;
-						sendEmulatedHumanActionDelayed();
+						setActiveCallButtons();
+//						sendEmulatedHumanActionD/elayed();
 					}
 				}
 				
@@ -152,10 +158,47 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 				currentPlayer = startPlayer;
     			if (!currentPlayer.isAiPlayer()){
     				isWaitingForUser = true;
-    				sendEmulatedHumanActionDelayed();
+    				//TODO add buttons
+    				setActiveCallButtons();
+//    				sendEmulatedHumanActionDelayed();
     			}
     		}
     	}
+    	
+    	//init human action buttons
+    	private void setActiveCallButtons(){
+    		BitmapButton btnCallPass = new BitmapButton(graphics, 95, 240, assets.bitmapLandlordPass);
+			BitmapButton btnCallP1 = new BitmapButton(graphics, 260, 240, assets.bitmapLandlordP1);
+			BitmapButton btnCallP2 = new BitmapButton(graphics, 380, 240, assets.bitmapLandlordP2);
+			BitmapButton btnCallP3 = new BitmapButton(graphics, 500, 240, assets.bitmapLandlordP3);
+			btnCallLandlords = new ArrayList<>(4);
+			btnCallLandlords.add(btnCallPass);
+			btnCallLandlords.add(btnCallP1);
+			btnCallLandlords.add(btnCallP2);
+			btnCallLandlords.add(btnCallP3);
+			for (int i=0; i<btnCallLandlords.size(); i++){
+				final int point = i;
+				btnCallLandlords.get(i).setListener(new onClickListener() {
+					
+					@Override
+					public void onClicked(BitmapButton btn) {
+						Log.d(LOG_TAG, "btn on click");
+						currentPlayer.setCalledScore(point);
+						isWaitingForUser = false;
+						Log.d(LOG_TAG, "human player operation completed.");
+						//TODO 现有设计将导致并发修改异常。
+						synchronized (activeButtons) {
+							activeButtons.removeAll(btnCallLandlords);
+							Log.d(LOG_TAG, "btns clear.");
+						}
+//						activeButtons.clear();
+					}
+				});
+			}
+			activeButtons.addAll(btnCallLandlords);
+			Log.d(LOG_TAG, "activeButton added.now size is "+activeButtons.size());
+    	}
+    	
     	//test method
     	private void sendEmulatedHumanActionDelayed(){
     		handler.postDelayed(new Runnable() {
@@ -409,6 +452,9 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
+		for (BitmapButton button: activeButtons){
+			button.onTouch(MappedTouchEvent.translateEvent(ev));
+		}
 		if (ev.getAction()==MotionEvent.ACTION_UP){
 			MappedTouchEvent event = MappedTouchEvent.translateEvent(ev);
 			if (inCardsTouchZone(event)){
@@ -421,11 +467,19 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		}
 		return super.dispatchTouchEvent(ev);
 	}
+//	
+//	@Override
+//	protected List<BitmapButton> getBitmapButtons() {
+//		List<BitmapButton> buttons = new ArrayList<BitmapButton>();
+//		return buttons;
+//	}
 	
-	@Override
-	protected List<BitmapButton> getBitmapButtons() {
-		List<BitmapButton> buttons = new ArrayList<BitmapButton>();
-		return buttons;
+	private ArrayList<BitmapButton> activeButtons = new ArrayList<BitmapButton>(); // 当前正在监听的BitmapButton。
+	
+	private void drawActiveButtons(GameGraphics graphics, Canvas canvas){
+		for (BitmapButton button: activeButtons){
+			button.onDraw(canvas);
+		}
 	}
 	
 	@Override
@@ -456,6 +510,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		}
 		drawPlayers(graphics, canvas);
 		drawHumanPlayerCards(graphics, canvas);
+		drawActiveButtons(graphics, canvas);
 	}
 	
 }

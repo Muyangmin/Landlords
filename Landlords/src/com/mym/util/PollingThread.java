@@ -1,5 +1,7 @@
 package com.mym.util;
 
+import android.util.Log;
+
 /**
  * 使用轮询方式进行工作的一种线程，启动线程后会不断执行 {@link #action()}方法。 通过
  * {@link #requestStopThread()}方法来结束线程 。
@@ -36,6 +38,7 @@ public abstract class PollingThread extends Thread {
 				}
 			} catch (Exception e) {
 				//This abstract class just ignore exception.
+				onExceptionOccured(e);
 			}
 			action();
 		}
@@ -50,7 +53,7 @@ public abstract class PollingThread extends Thread {
 	 * 当线程执行出现异常后调用该方法。
 	 */
 	protected void onExceptionOccured(Exception e){
-		
+		Log.d(getName(), "polling exception:" + e.getMessage());
 	}
 
 	/**

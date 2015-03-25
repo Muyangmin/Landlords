@@ -67,6 +67,14 @@ public final class Assets {
 	public LiveBitmap playerHuman;
 	/** AI形象右。 */
 	public LiveBitmap playerRight;
+	/** 叫地主按钮：不叫。 */
+	public LiveBitmap bitmapLandlordPass;
+	/** 叫地主按钮：1分。 */
+	public LiveBitmap bitmapLandlordP1;
+	/** 叫地主按钮：2分。 */
+	public LiveBitmap bitmapLandlordP2;
+	/** 叫地主按钮：3分。 */
+	public LiveBitmap bitmapLandlordP3;
 	/** 地主图标 */
 	public LiveBitmap iconLandlord;
 	
@@ -168,6 +176,10 @@ public final class Assets {
 		recycleBitmap(playerHuman);
 		recycleBitmap(playerLeft);
 		recycleBitmap(playerRight);
+		recycleBitmap(bitmapLandlordPass);
+		recycleBitmap(bitmapLandlordP1);
+		recycleBitmap(bitmapLandlordP2);
+		recycleBitmap(bitmapLandlordP3);
 	}
 	
 	private final void recycleBitmap(LiveBitmap[] array){
@@ -196,6 +208,7 @@ public final class Assets {
 		final int totalBitmap = 54 + 52		//54=一副牌，52=一副牌的较小版本
 							+ 1 + 1			//卡牌背面图、牌桌背景图
 							+ 1				//数字图
+							+ 4				//叫地主按钮数
 							+ 3 + 1;		//人物形象图、地主图标
 		final int totalSoundCount = 24;		//数出来的
 		int total = totalBitmap + totalSoundCount;
@@ -361,6 +374,13 @@ public final class Assets {
 		iconLandlord = LiveBitmap.loadBitmap(context, "icLandlord.png", scaleX, scaleY);
 		notifyProgressChanged(++completed, total, listener);
 		
+		//加载按钮图
+		bitmapLandlordPass = LiveBitmap.loadBitmap(context, "landlord_pass.png", scaleX, scaleY);
+		bitmapLandlordP1 = LiveBitmap.loadBitmap(context, "landlord_p1.png", scaleX, scaleY);
+		bitmapLandlordP2 = LiveBitmap.loadBitmap(context, "landlord_p2.png", scaleX, scaleY);
+		bitmapLandlordP3 = LiveBitmap.loadBitmap(context, "landlord_p3.png", scaleX, scaleY);
+		completed +=4; 
+		notifyProgressChanged(completed, total, listener);
 		return completed;
 	}
 
