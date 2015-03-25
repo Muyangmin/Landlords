@@ -1,7 +1,7 @@
 package com.mym.landlords.res;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
+//import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 
@@ -36,7 +36,7 @@ public final class GameGraphics {
 
 //	private Bitmap frameBuffer; // 底色
 //	private Canvas canvas; // 画布对象
-	private Paint paint; // 画笔对象
+//	private Paint paint; // 画笔对象
 	private float scaleX; // X缩放比
 	private float scaleY; // Y缩放比
 	private Rect srcRect = new Rect(); // 源矩阵对象

@@ -14,6 +14,7 @@ import com.mym.landlords.card.Card;
  * @create 2015-3-18
  */
 public final class Player {
+	private String playerName;			//玩家名称
 	private ArrayList<Card> handCards; // 手牌列表
 	private boolean isLandlord; // 是否是地主
 	private boolean isAiPlayer; // 是否是AI玩家
@@ -21,23 +22,45 @@ public final class Player {
 	private Player nextPlayer; // 下手玩家
 	private ArrayList<Card> lastCards; // 出的最后一手牌，用于AI判断和逻辑控制
 	private int calledScore = Integer.MIN_VALUE;// 叫的分数, Integer.MIN_VALUE表示未赋值
+	
+	private AI aiRobot;				//机器AI
 
 	/**
 	 * 创建一个新的AI玩家实例。
+	 * @deprecated 推荐使用 {@link #newAiPlayer(String)}代替。
 	 */
 	public static final Player newAiPlayer() {
-		return new Player(true);
+		return newAiPlayer("");
+	}
+	/**
+	 * 创建一个新的AI玩家实例。
+	 * @param name 玩家名称。
+	 */
+	public static final Player newAiPlayer(String name) {
+		Player player = new Player(true, name == null ? "" : name);
+		player.aiRobot = new AI();
+		return player;
 	}
 
 	/**
 	 * 创建一个非AI玩家实例。
+	 * @deprecated 推荐使用 {@link #newHumanPlayer(String)}代替。
 	 */
 	public static final Player newHumanPlayer() {
-		return new Player(false);
+		return newHumanPlayer("");
 	}
 
-	private Player(boolean isAi) {
+	/**
+	 * 创建一个非AI玩家实例。
+	 * @param name 玩家名称
+	 */
+	public static final Player newHumanPlayer(String name) {
+		return new Player(false, name);
+	}
+
+	private Player(boolean isAi, String name) {
 		isAiPlayer = isAi;
+		playerName = name;
 	}
 
 	public int getCalledScore() {
@@ -74,6 +97,21 @@ public final class Player {
 	public boolean isLandlord() {
 		return isLandlord;
 	}
+	
+	private final void checkAiPlayer(){
+		if (!isAiPlayer){
+			throw new RuntimeException("This method should not be invoked from a non-ai player.");
+		}
+	}
+	
+	/**
+	 * 执行叫地主操作。最终得出的分数要使用 {@link #getCalledScore()}方法获得。
+	 * @param minScore 地主最低分数（通常是本局前两位喊出来的）。
+	 */
+	public synchronized final void callLandlord(int minScore){
+		checkAiPlayer();
+		calledScore = aiRobot.callLandlord(handCards, minScore >= 0 ? minScore : 0);
+	}
 
 	/**
 	 * 该方法使玩家进行下一个回合。可能使用到的输入有当前的游戏状态、上一个玩家的操作等。
@@ -86,15 +124,15 @@ public final class Player {
 				|| currentGame.status == Status.Gameover) {
 			throw new IllegalArgumentException("invalid game instance.");
 		}
-		if (currentGame.status == Status.CallingLandlord) {
-			if (calledScore != Integer.MIN_VALUE) {// 已经计算过，不再计算
-				return;
-			}
-			int last = priorPlayer.getCalledScore();
-			// 如果是第一家，则只需要大于0；否则需要大于上家
-			calledScore = AI.callLandlord(handCards, last >= 0 ? last : 0);
-			return;
-		}
+//		if (currentGame.status == Status.CallingLandlord) {
+//			if (calledScore != Integer.MIN_VALUE) {// 已经计算过，不再计算
+//				return;
+//			}
+//			int last = priorPlayer.getCalledScore();
+//			// 如果是第一家，则只需要大于0；否则需要大于上家
+//			calledScore = AI.callLandlord(handCards, last >= 0 ? last : 0);
+//			return;
+//		}
 	}
 	
 
@@ -153,5 +191,8 @@ public final class Player {
 
 	public void setCalledScore(int calledScore) {
 		this.calledScore = calledScore;
+	}
+	public String getPlayerName() {
+		return playerName;
 	}
 }

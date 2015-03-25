@@ -62,6 +62,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
         private static final long LOGIC_THREAD_INTERVAL = 100;	//逻辑线程的间隔时间
     	private Player currentPlayer = null;	//记录当前已经进行的循环值
     	private Player startPlayer;				//当前循环第一次操作的玩家
+    	private Player tempLandlord = null;			//记录叫地主分数最高的玩家
 
     	public GameLogicThread() {
 			super("GameLogicThread", LOGIC_THREAD_INTERVAL);
@@ -94,21 +95,37 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
     		if (startPlayer!=null){	//循环已经开始
     			//只有AI才需要执行回合，非AI玩家的操作已经在UI线程执行。
     			if (currentPlayer.isAiPlayer()){
-    				currentPlayer.nextRound(currentGame);
+//    				currentPlayer.nextRound(currentGame);
+					currentPlayer.callLandlord(tempLandlord == null ? 0
+							: tempLandlord.getCalledScore());
     			}
     			//得到该玩家的叫牌分数
     			int calledScore = currentPlayer.getCalledScore();
+				//记录叫牌分数最高者，作为暂时的地主，如果到最后仍无人叫，则将其设置为地主。
+    			if (calledScore> Game.BASIC_SCORE_NONE){
+    				if (tempLandlord==null || calledScore>tempLandlord.getCalledScore()){
+    					tempLandlord = currentPlayer;
+    				}
+    			}
 				performCallLandlord(currentPlayer, calledScore);
+				boolean isFinalCall = currentPlayer.getNextPlayer() == startPlayer;
+				if (isFinalCall && (tempLandlord==null) ){
+					//TODO alert it and decide what to do.
+//					currentGame.status = Status.Gameover;
+					return ;
+				}
 				//如果已经叫到三分或已经是最后一个，开始游戏
-				if (calledScore == Game.BASIC_SCORE_THREE
-						|| currentPlayer.getNextPlayer() == startPlayer) {
+				if (calledScore == Game.BASIC_SCORE_THREE || isFinalCall) {
 					// TODO
+					tempLandlord.setLandlord(landlordCards);
+					Log.d(LOG_TAG, "Landlord is "+ tempLandlord.getPlayerName());
+					Log.d(LOG_TAG, "Landlord:"+tempLandlord.getHandCards().toString());
 					currentGame.status = Status.Playing;
 					return;
 				}
 				else{
-					//如果刚刚进行操作的是玩家，则让AI等待一段时间再操作（主要是避免音效重叠）。
-					if (!currentPlayer.isAiPlayer()){
+					//如果接下来进行操作的是AI，则让AI等待一段时间再操作（主要是避免音效重叠）。
+					if (currentPlayer.getNextPlayer().isAiPlayer()){
 						try {
 							Thread.sleep(2000);
 						} catch (InterruptedException e) {
@@ -128,6 +145,7 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
     			Log.d(LOG_TAG, "loopinit");
     			Random random = new Random(System.currentTimeMillis());
     			int x = random.nextInt(3);
+//    			int x = 0;
     			startPlayer = (x == 0) ? playerLeft
     					: (x == 1 ? playerHuman : playerRight);
     			Log.d(LOG_TAG, "startPlayer index = "+x);
@@ -178,22 +196,31 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 		logicThread.start();
 		currentGame.status = Status.CallingLandlord;
 		
-		handler.postDelayed(new Runnable() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-//				currentGame.status = Status.Playing;
-//				playerHuman.setLandlord(landlordCards);
-			}
-		}, 1000);
+//		handler.postDelayed(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+//				// TODO Auto-generated method stub
+////				currentGame.status = Status.Playing;
+////				playerHuman.setLandlord(landlordCards);
+//			}
+//		}, 1000);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (logicThread!=null && logicThread.isAlive()){
+			logicThread.requestStopThread();
+		}
 	}
 	
 	//初始化玩家并分配座位
 	private void initPlayerSeats(){
-		playerLeft = Player.newAiPlayer();
-		playerHuman= Player.newHumanPlayer();
-		playerRight = Player.newAiPlayer();
+		playerLeft = Player.newAiPlayer("aiLeft");
+		playerHuman= Player.newHumanPlayer("Human");
+		playerRight = Player.newAiPlayer("aiRight");
+		
 		playerLeft.setSeat(playerRight, playerHuman);
 		playerHuman.setSeat(playerLeft, playerRight);
 		playerRight.setSeat(playerHuman, playerLeft);
@@ -286,16 +313,21 @@ public class MainActivity extends AbsGameActivity implements GameScreen{
 	//绘制玩家的卡牌（即正面的卡牌）
 	private void drawHumanPlayerCards(GameGraphics g, Canvas canvas){
 		ArrayList<Card> list = playerHuman.getHandCards();
+//		Log.d(LOG_TAG, "human cards:"+list.size());
 		int len = list.size();
         int offsetX = 35;
         int offsetY = GameGraphics.BASE_SCREEN_HEIGHT - 15 - GameGraphics.CARD_HEIGHT;
-        cardOffset = (float) (GameGraphics.BASE_SCREEN_WIDTH - (offsetX + offsetX + GameGraphics.CARD_WIDTH)) / (len - 1);
+        cardOffset = (float) (GameGraphics.BASE_SCREEN_WIDTH - 
+        		(offsetX + offsetX + GameGraphics.CARD_WIDTH)) / (len - 1);
         if (cardOffset > 55)
         {
-        	offsetX = (GameGraphics.BASE_SCREEN_WIDTH - (len - 1) * 55 - GameGraphics.CARD_WIDTH) / 2;
+        	offsetX = (GameGraphics.BASE_SCREEN_WIDTH - (len - 1) * 55
+        			- GameGraphics.CARD_WIDTH) / 2;
         	cardOffset = (float) 55;
         }
-        setCardsTouchZone(offsetX, offsetY, GameGraphics.BASE_SCREEN_WIDTH - offsetX, GameGraphics.BASE_SCREEN_HEIGHT - 5);
+        setCardsTouchZone(offsetX, offsetY, 
+        		GameGraphics.BASE_SCREEN_WIDTH - offsetX, 
+        		GameGraphics.BASE_SCREEN_HEIGHT - 5);
         for(int i = 0; i < len; i++) {
         	int drawY = offsetY;
         	Card card = list.get(i);
