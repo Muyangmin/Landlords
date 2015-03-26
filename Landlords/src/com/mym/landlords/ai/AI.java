@@ -28,8 +28,7 @@ final class AI {
 	/**
 	 * 按照牌张大小和牌中炸弹数量分析叫牌的分数。
 	 * <p>基本算法如下:王炸记8分，大王4分，小王3分，每个2记2分，每个A记1分，炸弹每个记3分。
-	 * 全部加起来后看最后得分，大于等于8分即可叫3分，大于5分可叫2分，大于3分可叫1分，否则不叫。</p>
-	 * 例如玩家仅有大王和两个2，则分数为8，勉强可叫3分。如为小王和两个2， 则只能叫2分。
+	 * 全部加起来后看最后得分，大于8分即可叫3分，大于5分可叫2分，大于3分可叫1分，否则不叫。</p>
 	 * @return 返回0~3之间的某个数值。
 	 */
 	private final int callLandlord(ArrayList<Card> list){
@@ -62,13 +61,13 @@ final class AI {
 		
 		Log.d(LOG_TAG, "evaluateScore="+evaluateScore);
 		
-		if ( evaluateScore >= 8){
+		if ( evaluateScore > 8){
 			return Game.BASIC_SCORE_THREE;
 		}
 		else if (evaluateScore > 5){
 			return Game.BASIC_SCORE_TWO;
 		}
-		else if (evaluateScore >3){
+		else if (evaluateScore > 3){
 			return Game.BASIC_SCORE_ONE;
 		}
 		else{

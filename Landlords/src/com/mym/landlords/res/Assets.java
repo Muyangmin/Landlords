@@ -421,7 +421,6 @@ public final class Assets {
 		sb.append(typePrefix).append(value);
 		if (isSmaller){
 			sb.append('s');
-			Log.d(LOG_TAG, "small pic:"+sb.toString());
 		}
 		sb.append(".png");
 		return sb.toString();

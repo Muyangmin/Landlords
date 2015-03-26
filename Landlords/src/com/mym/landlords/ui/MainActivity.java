@@ -15,7 +15,6 @@ import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.res.LiveBitmap;
 import com.mym.landlords.widget.BitmapButton;
-import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameScreen;
 import com.mym.landlords.widget.GameView;
 import com.mym.landlords.widget.MappedTouchEvent;
@@ -30,9 +29,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Button;
 
-public class MainActivity extends/* AbsGame*/ Activity implements GameScreen{
+public class MainActivity extends Activity implements GameScreen{
 	
 	private static final String LOG_TAG = "MainActivity";
 	private GameGraphics graphics;
@@ -100,7 +98,6 @@ public class MainActivity extends/* AbsGame*/ Activity implements GameScreen{
     		if (startPlayer!=null){	//循环已经开始
     			//只有AI才需要执行回合，非AI玩家的操作已经在UI线程执行。
     			if (currentPlayer.isAiPlayer()){
-//    				currentPlayer.nextRound(currentGame);
 					currentPlayer.callLandlord(tempLandlord == null ? 0
 							: tempLandlord.getCalledScore());
     			}
@@ -141,8 +138,8 @@ public class MainActivity extends/* AbsGame*/ Activity implements GameScreen{
 					currentPlayer = currentPlayer.getNextPlayer();
 					if (!currentPlayer.isAiPlayer()){
 						isWaitingForUser = true;
-						setActiveCallButtons();
-//						sendEmulatedHumanActionD/elayed();
+						setActiveCallButtons(tempLandlord == null ? Game.BASIC_SCORE_NONE
+								: tempLandlord.getCalledScore());
 					}
 				}
 				
@@ -151,68 +148,65 @@ public class MainActivity extends/* AbsGame*/ Activity implements GameScreen{
     			Log.d(LOG_TAG, "loopinit");
     			Random random = new Random(System.currentTimeMillis());
     			int x = random.nextInt(3);
-//    			int x = 0;
     			startPlayer = (x == 0) ? playerLeft
     					: (x == 1 ? playerHuman : playerRight);
     			Log.d(LOG_TAG, "startPlayer index = "+x);
 				currentPlayer = startPlayer;
     			if (!currentPlayer.isAiPlayer()){
     				isWaitingForUser = true;
-    				//TODO add buttons
-    				setActiveCallButtons();
-//    				sendEmulatedHumanActionDelayed();
+    				setActiveCallButtons(Game.BASIC_SCORE_NONE);
     			}
     		}
     	}
     	
     	//init human action buttons
-    	private void setActiveCallButtons(){
+    	private void setActiveCallButtons(int minScore){
     		BitmapButton btnCallPass = new BitmapButton(graphics, 95, 240, assets.bitmapLandlordPass);
 			BitmapButton btnCallP1 = new BitmapButton(graphics, 260, 240, assets.bitmapLandlordP1);
 			BitmapButton btnCallP2 = new BitmapButton(graphics, 380, 240, assets.bitmapLandlordP2);
 			BitmapButton btnCallP3 = new BitmapButton(graphics, 500, 240, assets.bitmapLandlordP3);
 			btnCallLandlords = new ArrayList<>(4);
+			btnCallPass.setOnClickListener(new CallLandlordBtnListener(Game.BASIC_SCORE_NONE));
 			btnCallLandlords.add(btnCallPass);
-			btnCallLandlords.add(btnCallP1);
-			btnCallLandlords.add(btnCallP2);
-			btnCallLandlords.add(btnCallP3);
-			for (int i=0; i<btnCallLandlords.size(); i++){
-				final int point = i;
-				btnCallLandlords.get(i).setListener(new onClickListener() {
-					
-					@Override
-					public void onClicked(BitmapButton btn) {
-						Log.d(LOG_TAG, "btn on click");
-						currentPlayer.setCalledScore(point);
-						isWaitingForUser = false;
-						Log.d(LOG_TAG, "human player operation completed.");
-						//TODO 现有设计将导致并发修改异常。
-						synchronized (activeButtons) {
-							activeButtons.removeAll(btnCallLandlords);
-							Log.d(LOG_TAG, "btns clear.");
-						}
-//						activeButtons.clear();
-					}
-				});
+			if (minScore < Game.BASIC_SCORE_ONE){
+				btnCallP1.setOnClickListener(new CallLandlordBtnListener(Game.BASIC_SCORE_ONE));
+				btnCallLandlords.add(btnCallP1);	
 			}
+			if (minScore < Game.BASIC_SCORE_TWO){
+				btnCallP2.setOnClickListener(new CallLandlordBtnListener(Game.BASIC_SCORE_TWO));
+				btnCallLandlords.add(btnCallP2);
+			}
+			//三分一定是可选的，因为上家如果叫了三分则根本不会轮到下家
+			btnCallP3.setOnClickListener(new CallLandlordBtnListener(Game.BASIC_SCORE_THREE));
+			btnCallLandlords.add(btnCallP3);
 			activeButtons.addAll(btnCallLandlords);
 			Log.d(LOG_TAG, "activeButton added.now size is "+activeButtons.size());
     	}
     	
-    	//test method
-    	private void sendEmulatedHumanActionDelayed(){
-    		handler.postDelayed(new Runnable() {
-				
-				@Override
-				public void run() {
-					currentPlayer.setCalledScore(Game.BASIC_SCORE_TWO);
-					isWaitingForUser = false;
-					Log.d(LOG_TAG, "human player operation completed.");
+		private class CallLandlordBtnListener implements
+				BitmapButton.onClickListener {
+
+			private int score;
+
+			public CallLandlordBtnListener(int score) {
+				this.score = score;
+			}
+
+			@Override
+			public void onClicked(BitmapButton btn) {
+				Log.d(LOG_TAG, "btn on click");
+				currentPlayer.setCalledScore(score);
+				isWaitingForUser = false;
+				Log.d(LOG_TAG, "human player operation completed.");
+				// 加锁避免并发修改（主要是主线程需要迭代该列表）
+				synchronized (activeButtons) {
+					activeButtons.removeAll(btnCallLandlords);
+					Log.d(LOG_TAG, "btns clear.");
 				}
-			}, 2000);
-    	}
+			}
+		}
+        
     }
-    
 	protected static Intent getIntent(Context context){
 		Intent intent = new Intent(context, MainActivity.class);
 		return intent;
@@ -453,7 +447,9 @@ public class MainActivity extends/* AbsGame*/ Activity implements GameScreen{
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		for (BitmapButton button: activeButtons){
-			button.onTouch(MappedTouchEvent.translateEvent(ev));
+			if (button.onTouch(MappedTouchEvent.translateEvent(ev))){
+				break;
+			}
 		}
 		if (ev.getAction()==MotionEvent.ACTION_UP){
 			MappedTouchEvent event = MappedTouchEvent.translateEvent(ev);

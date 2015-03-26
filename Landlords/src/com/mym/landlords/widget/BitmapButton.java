@@ -52,7 +52,12 @@ public final class BitmapButton implements BitmapView{
 		this.bitmapPressed = bitmapPressed;
 	}
 	
-	public final void onTouch(MappedTouchEvent event){
+	/**
+	 * 处理点击事件。
+	 * @param event 映射到基准屏幕的点击事件。
+	 * @return 如果消费了本次点击事件（通常表现为Listener被调用），则返回true。
+	 */
+	public final boolean onTouch(MappedTouchEvent event){
 		if (inBounds(event)){
 			Log.d("BitmapButton", "event in bounds caught:"+event.toString());
 			if (event.getAction()==MotionEvent.ACTION_DOWN){
@@ -62,9 +67,11 @@ public final class BitmapButton implements BitmapView{
 				isPressed = false;
 				if (listener!=null){
 					listener.onClicked(this);
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 	
 	@Override
@@ -95,7 +102,7 @@ public final class BitmapButton implements BitmapView{
 		void onClicked(BitmapButton btn);
 	}
 
-	public void setListener(onClickListener listener) {
+	public void setOnClickListener(onClickListener listener) {
 		this.listener = listener;
 	}
 }
