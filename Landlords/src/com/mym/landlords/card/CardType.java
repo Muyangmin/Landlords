@@ -26,6 +26,7 @@ public abstract class CardType implements Comparable<CardType> {
 	
 	/**
 	 * 实现牌型对象之间的对比。由于斗地主游戏不允许下家的点数和上家的点数相同，因此忽略花色。
+	 * 用于比较的两个对象要么至少一个是炸弹，要么必须是相同类型，否则将会抛出异常。
 	 * @param another
 	 *            需要进行比较的另一个对象
 	 * @return 实现炸弹类型和非炸弹类型的基本比对，该方法认为炸弹始终比另一个大。
@@ -40,6 +41,14 @@ public abstract class CardType implements Comparable<CardType> {
 		} else if (this instanceof BombType && another instanceof NonBombType) {
 			return 1;
 		} else {
+			//after bomb type check:
+			Class<?> thisClz = getClass();
+			Class<?> anotherClz = another.getClass();
+			if (!thisClz.equals(anotherClz)) {
+				throw new ClassCastException(
+						"compareTo wrong type, this=" + thisClz.getSimpleName()
+								+ ", another=" + anotherClz.getSimpleName());
+			}
 			return UNDEFINED_COMPARE;
 		}
 	}
