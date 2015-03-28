@@ -25,4 +25,10 @@ final class StraightNumbers{
 		}
 		return intNumbers;
 	}
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("StraightNumbers [numbers=").append(numbers).append("]");
+		return builder.toString();
+	}
 }

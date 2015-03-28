@@ -1,7 +1,9 @@
 package com.mym.landlords.ai;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import android.util.Log;
@@ -105,35 +107,39 @@ final class AI {
 	 */
 	private ArrayList<Card> takeoutCards(int[] targetPattern, ArrayList<Card> list){
 		if (targetPattern==null || list==null){
+			Log.w(LOG_TAG, "takecards return null due to null param.");
 			return null;
 		}
 		int patternLength = targetPattern.length;
 		int cardLength = list.size();
 		if (patternLength > cardLength){
+			Log.d(LOG_TAG, "takecards return null due to no enough length.");
 			return null;
 		}
 		ArrayList<Card> targetList = new ArrayList<>();
-		for (int i=0, lastCardPos=0; i<patternLength; i++){
-			boolean cardMatches = false;
-			for (int j=lastCardPos; j<cardLength; j++){
-				Card card = list.get(j);
-				if (card.getValue() == targetPattern[i]){
-					cardMatches = true;
-					targetList.add(card);
+		//创建临时复制数组，然后从中迭代遍历，如果匹配则加入目标列表，并从临时复制数组中删除迭代的元素。
+		//最后检查结果，如果目标列表长度合适则返回，否则返回null。
+		ArrayList<Card> internalTempList = new ArrayList<>(list);
+		Iterator<Card> iterator = internalTempList.iterator();
+		int matchIndex = 0;
+		while (iterator.hasNext()){
+			Card card = iterator.next();
+			if (card.getValue()== targetPattern[matchIndex]){
+				targetList.add(card);
+				iterator.remove();
+				matchIndex++;
+				//如果已经到了要出牌的张数，则终止循环
+				if (matchIndex == targetPattern.length){
 					break;
 				}
 			}
-			if (!cardMatches){
-				targetList.clear();
-				return null;
-			}
 		}
-		//maybe useless check
-		// if (targetList.size() != patternLength){
-			// throw new RuntimeException("some target card lost.pattern="+Arrays.toString(targetPattern)+", res="+targetList.toString()); 
-		// }
-		//remove from original
-		list.removeAll(targetList);
+		internalTempList.clear();
+		Log.d(LOG_TAG, "takecards: pattern="+Arrays.toString(targetPattern)+ ", res="+targetList.toString());
+		if (targetList.size() != targetPattern.length){
+			targetList.clear();
+			return null;
+		}
 		return targetList;
 	}
 	
