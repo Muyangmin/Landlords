@@ -225,9 +225,13 @@ public class MainActivity extends Activity implements GameScreen{
 		initPlayerSeats();
 		shuffleAndDealCards();
 //		currentGame.status = Status.Playing;
-		Log.d(LOG_TAG, "player1 cards:"+playerLeft.getHandCards().toString());
-		Log.d(LOG_TAG, "player2 cards:"+playerHuman.getHandCards().toString());
-		Log.d(LOG_TAG, "player3 cards:"+playerRight.getHandCards().toString());
+		Log.d(LOG_TAG, playerLeft.getPlayerName()+" cards:"+playerLeft.getHandCards().toString());
+		//test code
+		playerLeft.makeCards();
+		Log.d(LOG_TAG, playerHuman.getPlayerName()+" cards:"+playerHuman.getHandCards().toString());
+		Log.d(LOG_TAG, playerRight.getPlayerName()+" cards:"+playerRight.getHandCards().toString());
+		//test code
+		playerRight.makeCards();
 		Log.d(LOG_TAG, "landlord cards:"+landlordCards.toString());
 		logicThread = new GameLogicThread();
 		logicThread.start();

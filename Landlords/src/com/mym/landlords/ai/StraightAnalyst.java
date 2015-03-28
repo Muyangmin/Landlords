@@ -5,20 +5,30 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import android.util.Log;
+
 import com.mym.landlords.card.Card;
 
 //package access
 final class StraightAnalyst {
+	
+	private static final String LOG_TAG = "StraightAnalyst";
+	
 	protected static List<StraightNumbers> getAllStraights(
 			ArrayList<Card> cardList) {
+		Log.d(LOG_TAG, "original list:"+cardList.toString());
 		//transfer int array
 		ArrayList<Integer> leftCardValues = new ArrayList<>();
 		for (Card card: cardList){
 			leftCardValues.add(card.getValue());
 		}
+		Log.d(LOG_TAG, "leftCardValue:" + leftCardValues.toString());
 		List<StraightNumbers> shortList = getShortestStraightList(leftCardValues);
+		Log.d(LOG_TAG, "shortest:"+shortList.toString());
 		extendStraight(shortList, leftCardValues);
+		Log.d(LOG_TAG, "after extends:"+shortList.toString());
 		concatPossibleStraights(shortList);
+		Log.d(LOG_TAG, "final concat:"+shortList.toString());
 		return shortList;
 	}
 
@@ -38,7 +48,11 @@ final class StraightAnalyst {
 		return strList;
 	}
 
-	// 选取最小的五连，参数必须非递减有序。
+	/**
+	 *  选取最小的五连，参数必须非递减有序。
+	 * @param values 剩余牌值
+	 * @return 一旦选取到5张组成的顺子则立即返回这5张牌组成的列表，否则返回null。
+	 */
 	private static StraightNumbers getSmallestShortList(ArrayList<Integer> values) {
 		ArrayList<Integer> integers = new ArrayList<>();
 		for (Integer current : values) {
@@ -67,7 +81,7 @@ final class StraightAnalyst {
 		return integers.size() >= 5 ? new StraightNumbers(integers) : null;
 	}
 
-	// 扩展所有五连，以使能拼接的都拼接上。
+	// 扩展所有五连，以使能拼接的单牌都拼接上。
 	private static void extendStraight(List<StraightNumbers> strList,
 			ArrayList<Integer> leftCards) {
 		Iterator<StraightNumbers> strIter = strList.iterator();

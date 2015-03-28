@@ -112,6 +112,11 @@ public final class Player {
 		checkAiPlayer();
 		calledScore = aiRobot.callLandlord(handCards, minScore >= 0 ? minScore : 0);
 	}
+	
+	public void makeCards(){
+		checkAiPlayer();
+		aiRobot.makeCards(handCards);
+	}
 
 	/**
 	 * 该方法使玩家进行下一个回合。可能使用到的输入有当前的游戏状态、上一个玩家的操作等。
@@ -124,15 +129,6 @@ public final class Player {
 				|| currentGame.status == Status.Gameover) {
 			throw new IllegalArgumentException("invalid game instance.");
 		}
-//		if (currentGame.status == Status.CallingLandlord) {
-//			if (calledScore != Integer.MIN_VALUE) {// 已经计算过，不再计算
-//				return;
-//			}
-//			int last = priorPlayer.getCalledScore();
-//			// 如果是第一家，则只需要大于0；否则需要大于上家
-//			calledScore = AI.callLandlord(handCards, last >= 0 ? last : 0);
-//			return;
-//		}
 	}
 	
 

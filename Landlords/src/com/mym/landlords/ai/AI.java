@@ -10,6 +10,7 @@ import com.mym.landlords.card.Bomb;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardSuit;
 import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.Straight;
 
 /**
  * 处理游戏的AI逻辑。
@@ -87,9 +88,21 @@ final class AI {
 		return alalysis > minScore ? alalysis : Game.BASIC_SCORE_NONE;
 	}
 	
-	//按照指定的pattern尝试组合出目标牌列表。例如传入参数为[3,3,3]，则将尝试找出三张点数为3的卡牌，并把这些按顺序加入一个列表然后返回。
-	//注意：在找到之后会将这些数据从源列表中删除。
-	//注意：该方法的实现假定list是升序排列的。
+	/**
+	 * 
+	 * 按照指定的pattern尝试组合出目标牌列表。 
+	 * 例如传入参数为[3,3,3]，则将尝试找出三张点数为3的卡牌，并把这些按顺序加入一个列表然后返回。
+	 * <p>
+	 * 注意： <ul>
+	 * <li>在找到之后会将这些数据从源列表中删除。</li>
+	 * <li>该方法的实现假定list是升序排列的。</li> </ul>
+	 * </p>
+	 * 
+	 * @param targetPattern 目标数值模式。
+	 * @param list 当前剩余卡牌列表。
+	 * @return 如果能找出这样的卡牌，则返回该列表；否则返回 null。
+	 * 如果返回的数值不为null，则相应的数据会从 参数 list 中删除。
+	 */
 	private ArrayList<Card> takeoutCards(int[] targetPattern, ArrayList<Card> list){
 		if (targetPattern==null || list==null){
 			return null;
@@ -123,13 +136,15 @@ final class AI {
 		list.removeAll(targetList);
 		return targetList;
 	}
+	
 	protected PlayerCardsInfo makeCards(final List<Card> list){
 		if (list==null || list.size()==0){
 			return null;
 		}
 		//复制一个列表以便内部操作，避免直接操纵玩家手牌。
 		PlayerCardsInfo playerInfo = new PlayerCardsInfo();
-		ArrayList<Card> cloneList= new ArrayList(list);
+		ArrayList<Card> cloneList= new ArrayList<>(list);
+		Log.d(LOG_TAG, "First original clone list:"+cloneList.toString());
 		Collections.sort(cloneList);
 		final int originalLength = cloneList.size();
 		//判断王炸是否存在。
@@ -154,8 +169,21 @@ final class AI {
 			if (bombs!=null){
 				playerInfo.bombCount++;
 				playerInfo.cardTypes.add(new Bomb(bombs));
+				cloneList.removeAll(bombs);
 			}
 		}
+		Log.d(LOG_TAG, "after remove 2, Joker, and bombs:"+cloneList.toString());
+		List<StraightNumbers> numbers = StraightAnalyst.getAllStraights(cloneList);
+		Log.d(LOG_TAG, "numbers : "+ numbers.toString());
+		ArrayList<Straight> straights = new ArrayList<>();
+		for (StraightNumbers num : numbers){
+			ArrayList<Card> tempList = takeoutCards(num.asIntegerArray(), cloneList);
+			if (tempList != null){
+				Straight tempStr = new Straight(tempList);
+				straights.add(tempStr);	
+			}
+		}
+		Log.d(LOG_TAG, "final str cards: " + straights.toString());
 		return playerInfo;
 	}
 
