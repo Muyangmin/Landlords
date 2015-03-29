@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.card.Card;
+import com.mym.landlords.card.CardType;
 
 /**
  * 代表玩家的实体类。
@@ -20,7 +21,7 @@ public final class Player {
 	private boolean isAiPlayer; // 是否是AI玩家
 	private Player priorPlayer; // 上手玩家
 	private Player nextPlayer; // 下手玩家
-	private ArrayList<Card> lastCards; // 出的最后一手牌，用于AI判断和逻辑控制
+	private CardType lastCards;			//出的最后一手牌，用于AI判断和逻辑控制
 	private int calledScore = Integer.MIN_VALUE;// 叫的分数, Integer.MIN_VALUE表示未赋值
 	
 	private AI aiRobot;				//机器AI
@@ -71,8 +72,19 @@ public final class Player {
 		return handCards;
 	}
 
-	public ArrayList<Card> getLastCards() {
+	public CardType getLastCards() {
 		return lastCards;
+	}
+	
+	/**
+	 * 打出卡牌。参数为null表示不出，但也将清空上一手牌的记录。
+	 * @param type 要打出的当前一手牌。
+	 */
+	public final void giveOutCards(CardType type){
+		lastCards = type;
+		if (type!=null){
+			handCards.removeAll(lastCards.getCardList());
+		}
 	}
 
 	public Player getNextPlayer() {
@@ -82,14 +94,7 @@ public final class Player {
 	public Player getPriorPlayer() {
 		return priorPlayer;
 	}
-
-	/**
-	 * 打出卡牌。
-	 */
-	protected final void giveCard(List<Card> toRemove) {
-
-	}
-
+	
 	public boolean isAiPlayer() {
 		return isAiPlayer;
 	}
@@ -168,7 +173,14 @@ public final class Player {
 			throw new RuntimeException("awardCards cannot be null.");
 		}
 		this.isLandlord = true;
-		this.handCards.addAll(awardCards);
+		//实现底牌加入手中时的选中状态
+		for (Card card : this.handCards){
+			card.setPicked(false);
+		}
+		for (Card card : awardCards){
+			card.setPicked(true);
+			this.handCards.add(card);
+		}
 		Collections.sort(this.handCards);
 	}
 
