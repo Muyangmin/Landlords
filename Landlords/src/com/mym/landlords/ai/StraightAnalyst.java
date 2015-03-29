@@ -2,6 +2,8 @@ package com.mym.landlords.ai;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -108,7 +110,8 @@ final class StraightAnalyst {
 	
 	// 连接扩展顺子，消除可以无缝连接的顺子。
 	private static void concatPossibleStraights(List<StraightNumbers> strList){
-		ArrayList<Integer> toRemove = new ArrayList<Integer>(); //待删除元素下标（即连接后被合并的数据）
+		//using HashMap instead of ArrayList to improve performance
+		HashMap<Integer, Boolean> concatedMap = new HashMap<>(strList.size());
 		
 		Iterator<StraightNumbers> strIterator = strList.iterator();//遍历迭代器
 		final int listLength = strList.size();
@@ -117,22 +120,37 @@ final class StraightAnalyst {
 			if (list.size()<=0){
 				continue;
 			}
+			//内层循环因为要随机访问所以不使用iterator迭代
 			Integer max = list.get(list.size()-1);
+			//因为顺子已经按照最小值有序排列，因此检测顺子的连接时只需要比较每一个的最小值和当前的最大值
 			for (int i=0; i<listLength; i++){
+				//如果已经是被连接过的顺子，则跳过
+				Boolean concated = concatedMap.get(i);
+				//因为是HashMap，取值出来的数据会是null而不是false
+				if (concated!=null){
+					continue;
+				}
 				StraightNumbers bigger = strList.get(i);
-				int biggerMax = bigger.numbers.get(bigger.numbers.size()-1);
+				int biggerMax = bigger.numbers.get(0);
 				if (biggerMax - max == 1) {
 					list.addAll(bigger.numbers);
-					//更新最大值
 					max = list.get(list.size()-1);
 					Collections.sort(list);
-					bigger.numbers.clear();
-					toRemove.add(i);
+					concatedMap.put(i, true);//标记已被连接，避免多个顺子重复连接
 				}
 			}//当前顺子可连接的已测试完
 		}
-		for (Integer id : toRemove){
-			toRemove.remove	(id);	// remove the object
+		//将待删除列表的数据反向排序，确保删除的时候从最大的下标开始倒序删除  ← ← ← ← 。
+		ArrayList<Integer> toRemoveList = new ArrayList<>(concatedMap.keySet());
+		Collections.sort(toRemoveList, new Comparator<Integer>() {
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return o2.compareTo(o1); //reverse compare
+			}
+		});
+		//注意：这里的遍历必须是int类型而不是 Integer类型，因为是记录的下标而不是元素自身的引用。
+		for (int key : toRemoveList){
+			strList.remove(key);
 		}
 		return ;
 	}
