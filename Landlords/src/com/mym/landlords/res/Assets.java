@@ -67,6 +67,10 @@ public final class Assets {
 	public LiveBitmap playerHuman;
 	/** AI形象右。 */
 	public LiveBitmap playerRight;
+	/** 按钮背景图。 */
+	public LiveBitmap bitmapBtnBkg;
+	/** 按钮背景图。 */
+	public LiveBitmap bitmapBtnBkgPressed;
 	/** 叫地主按钮：不叫。 */
 	public LiveBitmap bitmapLandlordPass;
 	/** 叫地主按钮：1分。 */
@@ -206,7 +210,7 @@ public final class Assets {
 	 */
 	private final void load(Context context, LoadingProgressListener listener){
 		final int totalBitmap = 54 + 52		//54=一副牌，52=一副牌的较小版本
-							+ 1 + 1			//卡牌背面图、牌桌背景图
+							+ 1 + 1	+ 2		//卡牌背面图、牌桌背景图、按钮背景图
 							+ 1				//数字图
 							+ 4				//叫地主按钮数
 							+ 3 + 1;		//人物形象图、地主图标
@@ -375,6 +379,10 @@ public final class Assets {
 		notifyProgressChanged(++completed, total, listener);
 		
 		//加载按钮图
+		bitmapBtnBkg = LiveBitmap.loadBitmap(context, "bkg_btn_normal.png", scaleX, scaleY);
+		notifyProgressChanged(++completed, total, listener);
+		bitmapBtnBkgPressed = LiveBitmap.loadBitmap(context, "bkg_btn_pressed.png", scaleX, scaleY);
+		notifyProgressChanged(++completed, total, listener);
 		bitmapLandlordPass = LiveBitmap.loadBitmap(context, "landlord_pass.png", scaleX, scaleY);
 		bitmapLandlordP1 = LiveBitmap.loadBitmap(context, "landlord_p1.png", scaleX, scaleY);
 		bitmapLandlordP2 = LiveBitmap.loadBitmap(context, "landlord_p2.png", scaleX, scaleY);

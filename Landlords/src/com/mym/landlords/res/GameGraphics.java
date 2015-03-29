@@ -101,7 +101,7 @@ public final class GameGraphics {
 //	}
 //	
 	/**
-	 * 绘制指定的Bitmap。
+	 * 绘制指定的Bitmap，自动处理缩放比例。
 	 * @param canvas 目标画布
 	 * @param bitmap 要绘制的图片
 	 * @param x 左边缘位置
@@ -128,11 +128,11 @@ public final class GameGraphics {
 		canvas.drawBitmap(bitmap.getBitmap(), null, dstRect, null);
 	}
 
-//	public void drawBitmapInParentCenter(LiveBitmap bitmap, Point center) {
-//		int x = center.x - (int) (bitmap.getRawWidth() / 2 + 0.5f);
-//		int y = center.y - (int) (bitmap.getRawHeight() / 2 + 0.5f);
-//		drawBitmap(bitmap, x, y);
-//	}
+	public void drawBitmapInParentCenter(Canvas canvas, LiveBitmap bitmap, Point center) {
+		int x = center.x - (int) (bitmap.getRawWidth() / 2 + 0.5f);
+		int y = center.y - (int) (bitmap.getRawHeight() / 2 + 0.5f);
+		drawBitmap(canvas, bitmap, x, y);
+	}
 	/**
 	 * 绘制数字形式的文本。
 	 * @param msg 要绘制的消息，只能包含数字或空格，否则将抛出异常。
@@ -160,6 +160,14 @@ public final class GameGraphics {
             x += srcWidth;
         }
     }
+    
+	public Point getCenter(LiveBitmap pixmap, float x, float y)
+	{
+		int centerX = (int) (x + pixmap.getRawWidth() / 2 + 0.5f);
+		int centerY = (int) (y + pixmap.getRawHeight() / 2 + 0.5f);
+		return new Point(centerX, centerY);
+	}
+	
 	public float getScaleX() {
 		return scaleX;
 	}

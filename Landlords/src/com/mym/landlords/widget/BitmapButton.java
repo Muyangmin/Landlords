@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.LiveBitmap;
 
@@ -18,9 +19,11 @@ public final class BitmapButton implements BitmapView{
 	private final GameGraphics graphics;
 	private final int x;						//x坐标起点
 	private final int y;						//y坐标起点
-	private final LiveBitmap bitmapNormal;	//按钮图片
-	private final LiveBitmap bitmapPressed;	//按钮按下的图片
-	private boolean isPressed;			//是否已经被按下
+	private final LiveBitmap bkgNormal; 		//背景图片
+	private final LiveBitmap bkgPressed; 		//按下背景图
+	private final LiveBitmap bitmapNormal;		//按钮图片
+	private final LiveBitmap bitmapPressed;		//按钮按下的图片
+	private boolean isPressed;					//是否已经被按下
 	
 	/**
 	 * 构造一个图片按钮，按钮不具备按下效果。
@@ -50,6 +53,8 @@ public final class BitmapButton implements BitmapView{
 		this.y = y;
 		this.bitmapNormal = bitmapNormal;
 		this.bitmapPressed = bitmapPressed;
+		this.bkgNormal = Assets.getInstance().bitmapBtnBkg;
+		this.bkgPressed = Assets.getInstance().bitmapBtnBkgPressed;
 	}
 	
 	/**
@@ -75,16 +80,25 @@ public final class BitmapButton implements BitmapView{
 	}
 	
 	@Override
-	public void onDraw(Canvas canvas) {
-		graphics.drawBitmap(canvas, isPressed ? bitmapPressed : bitmapNormal, x, y);
+	public void onPaint(Canvas canvas) {
+//		bkgNormal
+//		LiveBitmap btnBkg = Assets.getInstance().bitmapBtnBkg;
+		LiveBitmap btnBkg = isPressed?bkgNormal:bkgPressed;
+		graphics.drawBitmap(canvas, btnBkg, x, y);
+//		graphics.drawBitmap(canvas, isPressed ? bitmapPressed : bitmapNormal, x, y);
+		graphics.drawBitmapInParentCenter(canvas, isPressed ? bitmapPressed
+				: bitmapNormal, graphics.getCenter(btnBkg, x, y));
 	}
 	
 	/**
 	 * 判断指定的事件是否在自己的区域中。
 	 */
 	private boolean inBounds(MappedTouchEvent event){
-		int width = bitmapNormal.getRawWidth();
-		int height = bitmapNormal.getRawHeight();
+//		int width, height;
+//		int width = bitmapNormal.getRawWidth();
+//		int height = bitmapNormal.getRawHeight();
+		int width = bkgNormal.getRawWidth();
+		int height = bkgNormal.getRawHeight();
         if(event.x > x && event.x < x + width - 1 && 
            event.y > y && event.y < y + height - 1){
         	return true;

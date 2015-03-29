@@ -478,7 +478,7 @@ public class MainActivity extends Activity implements GameScreen{
 	
 	private void drawActiveButtons(GameGraphics graphics, Canvas canvas){
 		for (BitmapButton button: activeButtons){
-			button.onDraw(canvas);
+			button.onPaint(canvas);
 		}
 	}
 	

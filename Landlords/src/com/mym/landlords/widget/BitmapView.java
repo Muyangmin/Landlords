@@ -8,5 +8,5 @@ import android.graphics.Canvas;
  */
 public interface BitmapView {
 	/** 绘制组件。  */
-	void onDraw(Canvas canvas);
+	void onPaint(Canvas canvas);
 }
