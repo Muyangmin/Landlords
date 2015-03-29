@@ -134,6 +134,7 @@ final class AI {
 				}
 			}
 		}
+		//手动清除列表内容，方便GC
 		internalTempList.clear();
 		Log.d(LOG_TAG, "takecards: pattern="+Arrays.toString(targetPattern)+ ", res="+targetList.toString());
 		if (targetList.size() != targetPattern.length){

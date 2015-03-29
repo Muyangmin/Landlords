@@ -2,7 +2,7 @@ package com.mym.landlords.card;
 
 import java.util.ArrayList;
 
-public class Bomb extends CardType implements BombType{
+public final class Bomb extends CardType implements BombType{
 	
 	public Bomb(ArrayList<Card> list){
 		if (list==null || list.size()!=4 || (!list.get(0).isSameValueAs(list.get(1)))

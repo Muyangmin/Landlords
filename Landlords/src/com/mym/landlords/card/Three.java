@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * @author Muyangmin
  * @create 2015-3-24
  */
-public class Three extends CardType implements NonBombType{
+public final class Three extends CardType implements NonBombType{
 	
 	public Three(ArrayList<Card> list) {
 		if (list == null || list.size() != 3

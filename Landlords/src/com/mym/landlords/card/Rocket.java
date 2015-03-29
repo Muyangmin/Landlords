@@ -2,7 +2,7 @@ package com.mym.landlords.card;
 
 import java.util.ArrayList;
 
-public class Rocket extends CardType implements BombType{
+public final class Rocket extends CardType implements BombType{
 	public Rocket(ArrayList<Card> list){
 		if (list==null || list.size()!=2 || list.get(0).getSuit()!= CardSuit.Joker 
 			|| list.get(1).getSuit()!= CardSuit.Joker){
