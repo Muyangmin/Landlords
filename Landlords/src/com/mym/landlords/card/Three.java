@@ -35,4 +35,12 @@ public final class Three extends CardType implements NonBombType{
 		}
 		return cardList.get(0).compareTo(((Three)another).cardList.get(1));
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Three ").append(cardList);
+		return builder.toString();
+	}
+	
 }

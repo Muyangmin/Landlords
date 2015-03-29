@@ -31,4 +31,11 @@ public final class Single extends CardType implements NonBombType {
 		return cardList.get(0).compareIgnoreSuit(
 				((Single) another).cardList.get(0));
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Single ").append(cardList);
+		return builder.toString();
+	}
 }

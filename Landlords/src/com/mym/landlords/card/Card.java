@@ -131,7 +131,7 @@ public final class Card implements Serializable, Comparable<Card>, Pickable{
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		//仅输出类似 "SPADE A"之类文本。
-		builder.append("Card [").append(suit).append(" ").append(valueStr).append("]");
+		builder./*append("Card [").*/append(suit).append(" ").append(valueStr)/*.append("]")*/;
 		return builder.toString();
 	}
 

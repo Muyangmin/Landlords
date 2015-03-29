@@ -16,19 +16,27 @@ final class StraightAnalyst {
 	
 	private static final String LOG_TAG = "StraightAnalyst";
 	
+	/**
+	 * 找出所有能组成顺子的数值组合。
+	 * @param cardList 卡牌列表。
+	 * @return 顺子数值列表
+	 */
 	protected static List<StraightNumbers> getAllStraights(
 			ArrayList<Card> cardList) {
-		Log.d(LOG_TAG, "original list:"+cardList.toString());
+//		Log.d(LOG_TAG, "original list:"+cardList.toString());
 		//transfer int array
 		ArrayList<Integer> leftCardValues = new ArrayList<>();
 		for (Card card: cardList){
-			leftCardValues.add(card.getValue());
+			//过滤2和王
+			if (card.getValue() < Card.CARD_VALUE_2){
+				leftCardValues.add(card.getValue());	
+			}
 		}
-		Log.d(LOG_TAG, "leftCardValue:" + leftCardValues.toString());
+//		Log.d(LOG_TAG, "leftCardValue:" + leftCardValues.toString());
 		List<StraightNumbers> shortList = getShortestStraightList(leftCardValues);
-		Log.d(LOG_TAG, "shortest:"+shortList.toString());
+//		Log.d(LOG_TAG, "shortest:"+shortList.toString());
 		extendStraight(shortList, leftCardValues);
-		Log.d(LOG_TAG, "after extends:"+shortList.toString());
+//		Log.d(LOG_TAG, "after extends:"+shortList.toString());
 		concatPossibleStraights(shortList);
 		Log.d(LOG_TAG, "final concat:"+shortList.toString());
 		return shortList;

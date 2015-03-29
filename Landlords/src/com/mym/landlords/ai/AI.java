@@ -10,9 +10,12 @@ import android.util.Log;
 
 import com.mym.landlords.card.Bomb;
 import com.mym.landlords.card.Card;
-import com.mym.landlords.card.CardSuit;
 import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.Pair;
+import com.mym.landlords.card.Rocket;
+import com.mym.landlords.card.Single;
 import com.mym.landlords.card.Straight;
+import com.mym.landlords.card.Three;
 
 /**
  * 处理游戏的AI逻辑。
@@ -96,14 +99,12 @@ final class AI {
 	 * 例如传入参数为[3,3,3]，则将尝试找出三张点数为3的卡牌，并把这些按顺序加入一个列表然后返回。
 	 * <p>
 	 * 注意： <ul>
-	 * <li>在找到之后会将这些数据从源列表中删除。</li>
 	 * <li>该方法的实现假定list是升序排列的。</li> </ul>
 	 * </p>
 	 * 
 	 * @param targetPattern 目标数值模式。
 	 * @param list 当前剩余卡牌列表。
 	 * @return 如果能找出这样的卡牌，则返回该列表；否则返回 null。
-	 * 如果返回的数值不为null，则相应的数据会从 参数 list 中删除。
 	 */
 	private ArrayList<Card> takeoutCards(int[] targetPattern, ArrayList<Card> list){
 		if (targetPattern==null || list==null){
@@ -136,11 +137,12 @@ final class AI {
 		}
 		//手动清除列表内容，方便GC
 		internalTempList.clear();
-		Log.d(LOG_TAG, "takecards: pattern="+Arrays.toString(targetPattern)+ ", res="+targetList.toString());
 		if (targetList.size() != targetPattern.length){
 			targetList.clear();
+			Log.v(LOG_TAG, "takecards: pattern="+Arrays.toString(targetPattern)+ ", not found");
 			return null;
 		}
+		Log.d(LOG_TAG, "takecards: pattern="+Arrays.toString(targetPattern)+ ", res="+targetList.toString());
 		return targetList;
 	}
 	
@@ -151,50 +153,114 @@ final class AI {
 		//复制一个列表以便内部操作，避免直接操纵玩家手牌。
 		PlayerCardsInfo playerInfo = new PlayerCardsInfo();
 		ArrayList<Card> cloneList= new ArrayList<>(list);
-		Log.d(LOG_TAG, "First original clone list:"+cloneList.toString());
 		Collections.sort(cloneList);
-		final int originalLength = cloneList.size();
 		//判断王炸是否存在。
-		if (cloneList.get(originalLength-1).getValue()==Card.CARD_VALUE_JOKER_B 
-			&& cloneList.get(originalLength-1).getValue()==Card.CARD_VALUE_JOKER_B ){
-			playerInfo.hasRocket = true;
-		}
-		
-		//因为2和王是不能被连起来的，所以，先把这些排开再连接。
-		for (int i=cloneList.size()-1; i>0; i--){//利用排序特性进行优化
-			Card card = cloneList.get(i);
-			if (card.getValue()==Card.CARD_VALUE_2 || card.getSuit()==CardSuit.Joker){
-				playerInfo.twoAndJokerCount++;
-				cloneList.remove(card);
-			}
+		ArrayList<Card> rocket = takeoutCards(new int[] {
+				Card.CARD_VALUE_JOKER_S, Card.CARD_VALUE_JOKER_B }, cloneList);
+		if (rocket!=null){
+			playerInfo.cardTypes.add(new Rocket(rocket));
+			cloneList.removeAll(rocket);
 		}
 		//找出所有的炸弹。通常情况下，炸弹也是不会进行拆分处理的。
-		for (int i=0; i<cloneList.size(); i++){
+		//注意：这里使用lastNotFoundValue跳过相同点数的数值，避免无谓的循环。
+		for (int i = 0, lastNotFoundValue=0; i < cloneList.size(); i++) {
 			int cardValue = cloneList.get(i).getValue();
-			int[] bombPattern = new int[]{cardValue, cardValue, cardValue, cardValue};
+			if (lastNotFoundValue==cardValue){
+				continue ;
+			}
+			int[] bombPattern = new int[] { cardValue, cardValue, cardValue,
+					cardValue };
 			ArrayList<Card> bombs = takeoutCards(bombPattern, cloneList);
-			if (bombs!=null){
-				playerInfo.bombCount++;
+			if (bombs != null) {
 				playerInfo.cardTypes.add(new Bomb(bombs));
 				cloneList.removeAll(bombs);
 			}
+			else{
+				lastNotFoundValue = cardValue;
+			}
 		}
-		Log.d(LOG_TAG, "after remove 2, Joker, and bombs:"+cloneList.toString());
+		//找出所有的顺子
 		List<StraightNumbers> numbers = StraightAnalyst.getAllStraights(cloneList);
-		Log.d(LOG_TAG, "numbers : "+ numbers.toString());
 		ArrayList<Straight> straights = new ArrayList<>();
 		for (StraightNumbers num : numbers){
 			ArrayList<Card> tempList = takeoutCards(num.asIntegerArray(), cloneList);
 			if (tempList != null){
 				Straight tempStr = new Straight(tempList);
-				straights.add(tempStr);	
+				straights.add(tempStr);
+				cloneList.removeAll(tempList);
 			}
 		}
-		Log.d(LOG_TAG, "final str cards: " + straights.toString());
+		playerInfo.cardTypes.addAll(straights);
+		
+		//找出所有的三条
+		for (int i = 0, lastNotFoundValue=0; i < cloneList.size(); i++) {
+			int cardValue = cloneList.get(i).getValue();
+			if (lastNotFoundValue==cardValue){
+				continue ;
+			}
+			int[] threePattern = new int[] { cardValue, cardValue, cardValue};
+			ArrayList<Card> threes = takeoutCards(threePattern, cloneList);
+			if (threes != null) {
+				playerInfo.cardTypes.add(new Three(threes));
+				cloneList.removeAll(threes);
+			}
+			else{
+				lastNotFoundValue = cardValue;
+			}
+		}
+		//找出所有的对子
+		//对子无需使用lastNotFound来优化
+		for (int i = 0; i < cloneList.size(); i++) {
+			int cardValue = cloneList.get(i).getValue();
+			int[] threePattern = new int[] { cardValue, cardValue};
+			ArrayList<Card> pairs = takeoutCards(threePattern, cloneList);
+			if (pairs != null) {
+				playerInfo.cardTypes.add(new Pair(pairs));
+				cloneList.removeAll(pairs);
+			}
+		}
+		//剩下的都是单牌
+		Iterator<Card> singleIterator = cloneList.iterator();
+		while (singleIterator.hasNext()){
+			playerInfo.cardTypes.add(new Single(singleIterator.next()));
+			singleIterator.remove();
+		}
+		statPlayerCardsInfo(playerInfo);
+		Log.d(LOG_TAG, "Final playerInfo:"+playerInfo);
 		return playerInfo;
 	}
-
-	private List<ArrayList<CardType>> getAllPatterns(ArrayList<Card> list){
-		return null;
+	
+	private void statPlayerCardsInfo(PlayerCardsInfo info){
+		//force init
+		info.hasRocket = false;
+		info.bombCount = 0;
+		info.pairCount = 0;
+		info.singleCount = 0;
+		info.threeCount = 0;
+		info.straightCount=0;
+		
+		info.expectedRound = info.cardTypes.size();
+		
+		for (CardType type: info.cardTypes){
+			if (type instanceof Rocket){
+				info.hasRocket = true;
+			}
+			else if (type instanceof Bomb){
+				info.bombCount++;
+			}
+			else if (type instanceof Straight){
+				info.straightCount++;
+			}
+			else if (type instanceof Three){
+				info.threeCount++;
+			}
+			else if (type instanceof Single){
+				info.singleCount++;
+			}
+			else if (type instanceof Pair){
+				info.pairCount++;
+			}
+		}
 	}
+	
 }

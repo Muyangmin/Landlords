@@ -32,4 +32,11 @@ public final class Pair extends CardType implements NonBombType {
 		}
 		return cardList.get(0).compareIgnoreSuit(((Pair) another).cardList.get(1));
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Pair ").append(cardList);
+		return builder.toString();
+	}
 }

@@ -18,4 +18,11 @@ public final class Rocket extends CardType implements BombType{
 	public int compareTo(CardType another){
 		return 1;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Rocket");
+		return builder.toString();
+	}
 }

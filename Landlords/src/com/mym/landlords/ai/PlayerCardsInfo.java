@@ -55,4 +55,20 @@ public final class PlayerCardsInfo {
 	public ArrayList<CardType> getCardTypes() {
 		return cardTypes;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("PlayerCardsInfo [singleCount=").append(singleCount)
+				.append(", pairCount=").append(pairCount)
+				.append(", threeCount=").append(threeCount)
+				.append(", straightCount=").append(straightCount)
+				.append(", bombCount=").append(bombCount)
+				.append(", twoAndJokerCount=").append(twoAndJokerCount)
+				.append(", hasRocket=").append(hasRocket)
+				.append(", expectedRound=").append(expectedRound)
+				.append(", cardTypes=").append(cardTypes).append("]");
+		return builder.toString();
+	}
+	
 }
