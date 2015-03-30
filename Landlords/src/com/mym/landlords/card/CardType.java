@@ -113,6 +113,21 @@ public abstract class CardType implements Comparable<CardType> {
 		}
 		return cardList;
 	}
+	
+	/**
+	 * 判断当前牌能否打前一手牌。
+	 * @param before 前一手牌
+	 * @return 如果能打出则返回true，否则返回false。
+	 */
+	public final boolean canAgainstType(CardType before){
+		if (this instanceof Rocket){
+			return true;
+		}
+		if (this instanceof BombType && before instanceof NonBombType){
+			return true;
+		}
+		return getClass().equals(before.getClass());
+	}
 }
 /**包级标记接口， 表示炸弹类型。 */
 interface NonBombType {

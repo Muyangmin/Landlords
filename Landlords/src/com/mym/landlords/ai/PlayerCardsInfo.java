@@ -71,4 +71,8 @@ public final class PlayerCardsInfo {
 		return builder.toString();
 	}
 	
+	protected final void recycle(){
+		cardTypes.clear();
+		cardTypes = null;
+	}
 }

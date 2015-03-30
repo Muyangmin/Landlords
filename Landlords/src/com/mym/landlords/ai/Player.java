@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.util.Log;
+
 import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardType;
@@ -16,15 +18,16 @@ import com.mym.landlords.card.CardType;
  */
 public final class Player {
 	private String playerName;			//玩家名称
-	private ArrayList<Card> handCards; // 手牌列表
-	private boolean isLandlord; // 是否是地主
-	private boolean isAiPlayer; // 是否是AI玩家
-	private Player priorPlayer; // 上手玩家
-	private Player nextPlayer; // 下手玩家
+	private ArrayList<Card> handCards; 	// 手牌列表
+	private boolean isLandlord;			// 是否是地主
+	private boolean isAiPlayer; 		// 是否是AI玩家
+	private Player priorPlayer; 		// 上手玩家
+	private Player nextPlayer; 			// 下手玩家
 	private CardType lastCards;			//出的最后一手牌，用于AI判断和逻辑控制
 	private int calledScore = Integer.MIN_VALUE;// 叫的分数, Integer.MIN_VALUE表示未赋值
 	
-	private AI aiRobot;				//机器AI
+	private AI aiRobot;					//机器AI
+	private PlayerCardsInfo cardsInfo;	//卡牌分析结果
 
 	/**
 	 * 创建一个新的AI玩家实例。
@@ -83,6 +86,7 @@ public final class Player {
 	public final void giveOutCards(CardType type){
 		lastCards = type;
 		if (type!=null){
+			Log.d(playerName, "giveoutcard:"+type);
 			handCards.removeAll(lastCards.getCardList());
 		}
 	}
@@ -118,9 +122,9 @@ public final class Player {
 		calledScore = aiRobot.callLandlord(handCards, minScore >= 0 ? minScore : 0);
 	}
 	
-	public void makeCards(){
+	protected final PlayerCardsInfo makeCards(){
 		checkAiPlayer();
-		aiRobot.makeCards(handCards);
+		return aiRobot.makeCards(handCards);
 	}
 
 	/**
@@ -136,6 +140,22 @@ public final class Player {
 		}
 	}
 	
+	public void nextRound(CardType lastType){
+		checkAiPlayer();
+		if (lastType==null){
+			//出第一手牌，从最小的打起
+			giveOutCards(cardsInfo.cardTypes.get(0));
+		}
+		else{
+			for (CardType type : cardsInfo.cardTypes){
+				if (type.canAgainstType(lastType) && type.compareTo(lastType)>0){
+					giveOutCards(type);
+					break;
+				}
+			}
+		}
+	}
+	
 
 	/**
 	 * 设置手牌并自动排序。
@@ -148,18 +168,9 @@ public final class Player {
 		this.handCards = new ArrayList<>(handCards.size());
 		this.handCards.addAll(handCards);
 		Collections.sort(this.handCards);
-	}
-
-	/**
-	 * 设置手牌并自动排序。
-	 * @param cards 卡牌列表，不能为null。
-	 */
-	public void setHandCards(ArrayList<Card> cards) {
-		if (cards == null) {
-			throw new RuntimeException("handCards cannot be null.");
+		if (isAiPlayer){
+			this.cardsInfo = makeCards();
 		}
-		handCards = cards;
-		Collections.sort(handCards);
 	}
 
 	/**
@@ -182,6 +193,10 @@ public final class Player {
 			this.handCards.add(card);
 		}
 		Collections.sort(this.handCards);
+		if (isAiPlayer){
+			this.cardsInfo.recycle();
+			this.cardsInfo = makeCards();
+		}
 	}
 
 	/**

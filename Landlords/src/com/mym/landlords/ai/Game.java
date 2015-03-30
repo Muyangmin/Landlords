@@ -35,6 +35,8 @@ public final class Game {
 	public int basicScore;
 	/** 当前状态 */
 	public Status status;
+	/** 地主玩家 */
+	public Player landlordPlayer;
 	
 	public ArrayList<Card> playerLeftCards = new ArrayList<>();		//记牌器功能
 	public ArrayList<Card> playerHumanCards = new ArrayList<>();	//记牌器功能
