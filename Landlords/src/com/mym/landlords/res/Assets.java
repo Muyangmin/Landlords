@@ -79,6 +79,14 @@ public final class Assets {
 	public LiveBitmap bitmapLandlordP2;
 	/** 叫地主按钮：3分。 */
 	public LiveBitmap bitmapLandlordP3;
+	/** 出牌按钮。 */
+	public LiveBitmap bitmapGiveCard;
+	/** 不出按钮。 */
+	public LiveBitmap bitmapDoNotGiveCard;
+	/** 重选按钮。 */
+	public LiveBitmap bitmapRechoose;
+	/** 提示按钮。 */
+	public LiveBitmap bitmapTips;
 	/** 地主图标 */
 	public LiveBitmap iconLandlord;
 	
@@ -212,7 +220,7 @@ public final class Assets {
 		final int totalBitmap = 54 + 52		//54=一副牌，52=一副牌的较小版本
 							+ 1 + 1	+ 2		//卡牌背面图、牌桌背景图、按钮背景图
 							+ 1				//数字图
-							+ 4				//叫地主按钮数
+							+ 4	+ 4			//叫地主按钮、出牌系列按钮
 							+ 3 + 1;		//人物形象图、地主图标
 		final int totalSoundCount = 24;		//数出来的
 		int total = totalBitmap + totalSoundCount;
@@ -387,6 +395,13 @@ public final class Assets {
 		bitmapLandlordP1 = LiveBitmap.loadBitmap(context, "landlord_p1.png", scaleX, scaleY);
 		bitmapLandlordP2 = LiveBitmap.loadBitmap(context, "landlord_p2.png", scaleX, scaleY);
 		bitmapLandlordP3 = LiveBitmap.loadBitmap(context, "landlord_p3.png", scaleX, scaleY);
+		completed +=4; 
+		notifyProgressChanged(completed, total, listener);
+		
+		bitmapGiveCard = LiveBitmap.loadBitmap(context, "play_ahand.png", scaleX, scaleY);
+		bitmapDoNotGiveCard = LiveBitmap.loadBitmap(context, "play_pass.png", scaleX, scaleY);
+		bitmapRechoose = LiveBitmap.loadBitmap(context, "play_rechoose.png", scaleX, scaleY);
+		bitmapTips = LiveBitmap.loadBitmap(context, "play_tip.png", scaleX, scaleY);
 		completed +=4; 
 		notifyProgressChanged(completed, total, listener);
 		return completed;

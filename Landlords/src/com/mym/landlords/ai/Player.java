@@ -140,20 +140,27 @@ public final class Player {
 		}
 	}
 	
-	public void nextRound(CardType lastType){
+	/**
+	 * 执行跟牌策略。
+	 * @param lastType 场上最后打出的卡牌牌型对象。
+	 * @return 返回一个合适的对象，该对象一定是逻辑合法（即大于参数牌型）的；或者为null。
+	 */
+	public CardType followCards(CardType lastType){
 		checkAiPlayer();
+		CardType decideType = null;
 		if (lastType==null){
 			//出第一手牌，从最小的打起
-			giveOutCards(cardsInfo.cardTypes.get(0));
+			decideType = (cardsInfo.cardTypes.get(0));
 		}
 		else{
 			for (CardType type : cardsInfo.cardTypes){
-				if (type.canAgainstType(lastType) && type.compareTo(lastType)>0){
-					giveOutCards(type);
+				if (type.canAgainstType(lastType)){
+					decideType =  type;
 					break;
 				}
 			}
 		}
+		return decideType;
 	}
 	
 

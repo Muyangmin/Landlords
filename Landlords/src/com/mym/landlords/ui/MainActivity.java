@@ -1,5 +1,6 @@
 package com.mym.landlords.ui;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,11 +11,14 @@ import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.ai.Player;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardFactory;
+import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.Single;
 import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.res.LiveBitmap;
 import com.mym.landlords.widget.BitmapButton;
+import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameScreen;
 import com.mym.landlords.widget.GameView;
 import com.mym.landlords.widget.MappedTouchEvent;
@@ -29,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Button;
 
 public class MainActivity extends Activity implements GameScreen{
 	
@@ -52,9 +57,12 @@ public class MainActivity extends Activity implements GameScreen{
     private GameLogicThread logicThread;
     private boolean isWaitingForUser;			//当前逻辑线程是否被玩家阻塞
     
-    Handler handler = new Handler();		//temporary
+    private ArrayList<Player> winners = new ArrayList<>();;			//获胜的玩家
     
-    private ArrayList<BitmapButton> btnCallLandlords;//叫地主系列按钮
+//    Handler handler = new Handler();		//temporary
+
+    private ArrayList<BitmapButton> btnCallLandlords;	//叫地主系列按钮
+    private ArrayList<BitmapButton> btnGiveCards;		//出牌系列按钮
     
     /**
      * 逻辑控制线程。
@@ -66,6 +74,7 @@ public class MainActivity extends Activity implements GameScreen{
     	private Player currentPlayer = null;	//记录当前已经进行的循环值
     	private Player startPlayer;				//当前循环第一次操作的玩家
     	private Player tempLandlord = null;			//记录叫地主分数最高的玩家
+    	private CardType currentType;			//当前正在打的牌型
 
     	public GameLogicThread() {
 			super("GameLogicThread", LOGIC_THREAD_INTERVAL);
@@ -80,6 +89,7 @@ public class MainActivity extends Activity implements GameScreen{
 				callLandlord();
 				break;
 			case Playing:
+				playing();
 				break;
 			case ShowingAICards:
 				break;
@@ -89,6 +99,197 @@ public class MainActivity extends Activity implements GameScreen{
 				break;
 			}
     	}
+    	
+    	private void playing(){
+    		if (isWaitingForUser){
+    			Log.v(LOG_TAG, "waiting for user...");
+    			return ;
+    		}
+    		//检查游戏是否应该结束
+    		Player zeroCardPlayer = getWinnerPlayer();
+    		if (zeroCardPlayer!=null){
+    			winners.clear(); 
+				winners.add(zeroCardPlayer);
+    			if (!zeroCardPlayer.isLandlord()){
+					winners.add(zeroCardPlayer.getNextPlayer().isLandlord() 
+							? zeroCardPlayer.getNextPlayer() 
+									: zeroCardPlayer.getPriorPlayer());
+    			}
+    			currentGame.status = Status.Gameover;
+    			Log.i(LOG_TAG, "winner:"+winners);
+    			return ;
+    		}
+    		
+    		//如果已经在出牌中
+    		if (startPlayer!=null){
+    			CardType tempCardType;
+    			//如果当前的玩家是AI，则执行跟牌策略
+    			if (currentPlayer.isAiPlayer()){
+    				//TODO auto give card
+    				tempCardType = currentPlayer.followCards(currentType);
+    				currentPlayer.giveOutCards(tempCardType);
+    			}
+    			//否则根据人类玩家的手牌进行试组合
+    			else{
+    				ArrayList<Card> pickedList = getPickedCards(currentPlayer);
+    				//因为手牌为0的情况已经在出牌按钮中进行区分，所以这里再取不到就视为不出
+    				if (pickedList.size()==0){
+    					tempCardType = null;
+    					//TODO hint 没有选择任何卡牌
+    				}
+    				tempCardType = CardType.createObjectFromCards(pickedList);
+    				if (tempCardType!=null && (!tempCardType.canAgainstType(currentType)) ){
+    					Log.d(LOG_TAG, "cardtype not match the rule.");
+//    					synchronized (currentPlayer) {
+//							for (Card card:currentPlayer.getHandCards()){
+//								
+//							}
+//						}
+    					isWaitingForUser = true;
+    					return ;
+    					//TODO hint 不符合规则
+    				}
+    				else{
+    					currentPlayer.giveOutCards(tempCardType);
+    					currentType = tempCardType;
+    					synchronized (activeButtons) {
+    						activeButtons.removeAll(btnGiveCards);
+    					}
+    				}
+    			}//end of current Player
+    			switchToNextPlayer();
+    			if (currentPlayer.getPriorPlayer().getLastCards()==null
+    					&& currentPlayer.getNextPlayer().getLastCards()==null){
+    				//重置当前的卡牌。
+    				currentType = null;
+    			}
+    			if (!currentPlayer.isAiPlayer()){
+					isWaitingForUser = true;
+					setActiveGiveCardButtons();
+				}
+    			//TODO 增加startPlayer的重置 
+//    				else 
+//    				if (currentPlayer.isLandlord()){
+//    					currentPlayer.giveOutCards(new Single(currentPlayer.getHandCards().get(0)));
+//    				}
+//    				else{
+//    					currentPlayer.giveOutCards(null);
+//    				}
+//    			if (tempCardType !=null && tempCardType.canAgainstType(currentType)){
+//    				
+//    			}
+//    			currentType = currentPlayer.getLastCards();
+    		}
+    		else{
+    			startPlayer = currentGame.landlordPlayer;
+    			currentPlayer = startPlayer;
+    			if (!currentPlayer.isAiPlayer()){
+    				isWaitingForUser = true;
+					setActiveGiveCardButtons();
+    			}
+    		}
+    	}
+    	
+    	private void setActiveGiveCardButtons(){
+    		if (btnGiveCards == null){
+    			btnGiveCards = new ArrayList<>(4);
+        		BitmapButton btnPass = new BitmapButton(graphics, 95, 240, assets.bitmapDoNotGiveCard);
+    			BitmapButton btnGiveCard = new BitmapButton(graphics, 260, 240, assets.bitmapGiveCard);
+    			BitmapButton btnRechoose = new BitmapButton(graphics, 380, 240, assets.bitmapRechoose);
+    			BitmapButton btnTips = new BitmapButton(graphics, 500, 240, assets.bitmapTips);
+    			btnPass.setOnClickListener(new onClickListener() {
+					
+					@Override
+					public void onClicked(BitmapButton btn) {
+						//TODO whether should clear pick status?
+						isWaitingForUser = false;
+					}
+				});
+    			btnGiveCard.setOnClickListener(new onClickListener() {
+					
+					@Override
+					public void onClicked(BitmapButton btn) {
+						ArrayList<Card> pickedList = getPickedCards(currentPlayer);
+	    				if (pickedList.size()==0){
+	    					Log.d(LOG_TAG, "no card selected.");
+	    					return;
+	    					//TODO hint 没有选择任何卡牌
+	    				}
+	    				else{
+	    					isWaitingForUser = false;
+	    				}
+					}
+				});
+    			btnRechoose.setOnClickListener(new onClickListener() {
+					
+					@Override
+					public void onClicked(BitmapButton btn) {
+						synchronized (currentPlayer) {
+							for (Card card : currentPlayer.getHandCards()){
+								card.setPicked(false);
+							}
+						}
+					}
+				});
+    			btnTips.setOnClickListener(new onClickListener() {
+					
+					@Override
+					public void onClicked(BitmapButton btn) {
+						Log.v(LOG_TAG, "button clicked ");
+					}
+				});
+    			btnGiveCards.add(btnTips);
+    			btnGiveCards.add(btnRechoose);
+    			btnGiveCards.add(btnGiveCard);
+    			btnGiveCards.add(btnPass);
+    		}
+    		activeButtons.clear();
+    		synchronized (activeButtons) {
+        		activeButtons.addAll(btnGiveCards);
+			}
+    		Log.d(LOG_TAG, "give card buttons added.");
+    	}
+    	
+    	//获取玩家选中的手牌列表
+    	private ArrayList<Card> getPickedCards(Player player){
+    		ArrayList<Card> pickedList = new ArrayList<>();
+    		for (Card card: player.getHandCards()){
+    			if (card.isPicked()){
+    				pickedList.add(card);
+    			}
+    		}
+    		return pickedList;
+    	}
+    	
+    	//检查手牌为0的玩家
+    	private Player getWinnerPlayer(){
+    		if (playerLeft.getHandCards().size()==0){
+    			return playerLeft;
+    		}
+    		else if (playerRight.getHandCards().size()==0){
+    			return playerRight;
+    		}
+    		else if (playerHuman.getHandCards().size()==0){
+    			return playerHuman;
+    		}
+    		return null;
+    	}
+    	
+    	//负责标记当前玩家的引用及切换之间的暂停。
+    	private final void switchToNextPlayer(){
+    		//如果接下来进行操作的是AI，则让AI等待一段时间再操作（主要是避免音效重叠）。
+			currentPlayer = currentPlayer.getNextPlayer();
+			if (currentPlayer.isAiPlayer()){
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+//			//由下一个人叫地主
+//			currentPlayer = currentPlayer.getNextPlayer();
+    	}
+    	
 		//模拟叫牌
     	private void callLandlord(){
 			if (isWaitingForUser){	//如果已经在等候玩家操作，则不做处理
@@ -118,15 +319,17 @@ public class MainActivity extends Activity implements GameScreen{
 				}
 				//如果已经叫到三分或已经是最后一个，开始游戏
 				if (calledScore == Game.BASIC_SCORE_THREE || isFinalCall) {
-					// TODO
 					tempLandlord.setLandlord(landlordCards);
+					currentGame.landlordPlayer = tempLandlord;
 					Log.d(LOG_TAG, "Landlord is "+ tempLandlord.getPlayerName());
 					Log.d(LOG_TAG, "Landlord:"+tempLandlord.getHandCards().toString());
 					currentGame.status = Status.Playing;
+					startPlayer = null;
+					currentPlayer = null;
 					return;
 				}
 				else{
-					//如果接下来进行操作的是AI，则让AI等待一段时间再操作（主要是避免音效重叠）。
+					/*//如果接下来进行操作的是AI，则让AI等待一段时间再操作（主要是避免音效重叠）。
 					if (currentPlayer.getNextPlayer().isAiPlayer()){
 						try {
 							Thread.sleep(2000);
@@ -135,7 +338,8 @@ public class MainActivity extends Activity implements GameScreen{
 						}
 					}
 					//由下一个人叫地主
-					currentPlayer = currentPlayer.getNextPlayer();
+					currentPlayer = currentPlayer.getNextPlayer();*/
+					switchToNextPlayer();
 					if (!currentPlayer.isAiPlayer()){
 						isWaitingForUser = true;
 						setActiveCallButtons(tempLandlord == null ? Game.BASIC_SCORE_NONE
@@ -227,11 +431,11 @@ public class MainActivity extends Activity implements GameScreen{
 //		currentGame.status = Status.Playing;
 		Log.d(LOG_TAG, playerLeft.getPlayerName()+" cards:"+playerLeft.getHandCards().toString());
 		//test code
-		playerLeft.makeCards();
+//		playerLeft.makeCards();
 		Log.d(LOG_TAG, playerHuman.getPlayerName()+" cards:"+playerHuman.getHandCards().toString());
 		Log.d(LOG_TAG, playerRight.getPlayerName()+" cards:"+playerRight.getHandCards().toString());
 		//test code
-		playerRight.makeCards();
+//		playerRight.makeCards();
 		Log.d(LOG_TAG, "landlord cards:"+landlordCards.toString());
 		logicThread = new GameLogicThread();
 		logicThread.start();
@@ -271,6 +475,9 @@ public class MainActivity extends Activity implements GameScreen{
 	private void shuffleAndDealCards(){
 		if (cardPack==null){
 			cardPack = CardFactory.newCardPack();
+		}
+		for (Card card: cardPack){
+			card.setPicked(false);
 		}
 		//洗牌五次
 		for (int i=0; i<5; i++){

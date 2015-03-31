@@ -64,7 +64,7 @@ public final class BitmapButton implements BitmapView{
 	 */
 	public final boolean onTouch(MappedTouchEvent event){
 		if (inBounds(event)){
-			Log.d("BitmapButton", "event in bounds caught:"+event.toString());
+//			Log.d("BitmapButton", "event in bounds caught:"+event.toString());
 			if (event.getAction()==MotionEvent.ACTION_DOWN){
 				isPressed = true;
 			}

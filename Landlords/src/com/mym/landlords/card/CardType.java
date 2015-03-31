@@ -1,5 +1,6 @@
 package com.mym.landlords.card;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -9,6 +10,11 @@ import java.util.Comparator;
  * <h1>获取卡牌列表</h1>
  * 为程序统一起见，将所有的牌型都视为一个卡牌的列表，这个列表存储在 {@link #cardList} 字段中，客户端代码通过
  * {@link #getCardList()}方式获得。这其中只有单牌是例外，因此只需将单牌处理为仅有一个元素的列表即可。
+ * </p>
+ * <p>
+ * <h1>从卡牌列表创建牌型</h1>
+ * 在与用户交互的过程中，程序可能需要把用户的卡牌列表组合成牌型对象。{@link #createObjectFromCards(ArrayList)}方法
+ * 可以完成这项工作。但是，<b>子类必须有一个构造器仅带有ArrayList&lt;Card&gt;参数</b>。
  * </p>
  * <p>
  * <h1>牌型的排序</h1>
@@ -119,14 +125,72 @@ public abstract class CardType implements Comparable<CardType> {
 	 * @param before 前一手牌
 	 * @return 如果能打出则返回true，否则返回false。
 	 */
-	public final boolean canAgainstType(CardType before){
-		if (this instanceof Rocket){
+	public final boolean canAgainstType(CardType before) {
+		if (before==null){
 			return true;
 		}
-		if (this instanceof BombType && before instanceof NonBombType){
+		if (this instanceof Rocket) {
 			return true;
 		}
-		return getClass().equals(before.getClass());
+		if (this instanceof BombType && before instanceof NonBombType) {
+			return true;
+		}
+		//否则需要类型相同且大于参数值。
+		return getClass().equals(before.getClass())
+				&& (this.compareTo(before) > 0);
+	}
+	
+	/**
+	 * 简单的工厂方法，用于把特定的卡牌列表转换为一个合适的类型。
+	 * @param cards 卡牌列表
+	 * @return 如果能把指定的卡牌转换为一个特定的类型，则返回这个类型的对象，否则返回null。
+	 */
+	public static final CardType createObjectFromCards(ArrayList<Card> cards){
+		CardType instance = null;
+		int cardCount;
+		if (cards==null || ((cardCount=cards.size())==0) ){
+			return null;
+		}
+		if (cardCount==1){
+			//仅有一种情况，因此直接尝试创建对象并返回。为符合单一出口原则，并不在这里直接return
+			instance=createObject(cards, Single.class);
+		}
+		else if (cardCount==2){
+			//只有对子和王炸两种情况
+			if ((instance=createObject(cards, Pair.class))==null){
+				instance = createObject(cards, Rocket.class);
+			}
+		}
+		else if (cardCount==3) {
+			instance = createObject(cards, Three.class);
+		}
+		else if (cardCount==4) {
+			instance = createObject(cards, Bomb.class);
+		}
+		else if (cardCount>=5){
+			instance = createObject(cards, Straight.class);
+		}
+		return instance;
+	}
+	
+	//创建子类对象。该方法假定子类均有一个仅带有一个ArrayList参数的构造器。
+	private static final CardType createObject(ArrayList<Card> cards,
+			Class<? extends CardType> clz) {
+		try {
+			CardType instance = clz.getConstructor(ArrayList.class).newInstance(cards);
+			return instance;
+		}catch (InvocationTargetException e) {
+			//ignore
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
 /**包级标记接口， 表示炸弹类型。 */

@@ -13,6 +13,13 @@ public final class Single extends CardType implements NonBombType {
 		cardList = new ArrayList<>(1);
 		cardList.add(card);
 	}
+	public Single(ArrayList<Card> cards) {
+		super();
+		if (cards==null || cards.size()>1){
+			throw new IllegalArgumentException("a single type cannot contain more than 1 card.");
+		}
+		cardList = cards;
+	}
 
 	/**
 	 * 实现单张牌牌型大小比对。
