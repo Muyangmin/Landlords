@@ -98,40 +98,41 @@ public final class Assets {
 	public int soundLandloadP2;
 	/** 叫地主音效：3分。 */
 	public int soundLandloadP3;
+
+	/** 单牌音效：小王。 */
+	public int soundCardJokerS;
+	/** 单牌音效：大王。 */
+	public int soundCardJokerB;
 	
 	/** 牌型音效：单。 */
-	public int soundCardSingle;
+	public int soundTypeSingle;
 	/** 牌型音效：对。 */
-	public int soundCardTwo;
-	/** 牌型音效：小王。 */
-	public int soundCardJokerS;
-	/** 牌型音效：大王。 */
-	public int soundCardJokerB;
+	public int soundTypePair;
 	/** 牌型音效：三不带。 */
-	public int soundCardThree;
+	public int soundTypeThree;
 	/** 牌型音效：三带一。 */
-	public int soundCardThree1;
+	public int soundTypeThree1;
 	/** 牌型音效：三带对。 */
-	public int soundCardThree2;
+	public int soundTypeThree2;
 	/** 牌型音效：飞机。 */
-	public int soundCardPlane;
+	public int soundTypePlane;
 	/** 牌型音效：顺子。 */
-	public int soundCardShun1;
+	public int soundTypeShun1;
 	/** 牌型音效：双顺（连对）。 */
-	public int soundCardShun2;
+	public int soundTypeShun2;
 	/** 牌型音效：炸弹。 */
-	public int soundCardBoom;
+	public int soundTypeBomb;
 	/** 牌型音效： 王炸（有些地方称为火箭）。 */
-	public int soundCardRocket;
+	public int soundTypeRocket;
 	
 	/** 牌局音效：过。 */
 	public int soundPlayPass;
 	/** 牌局音效：跟牌压牌。 */
 	public int[] soundPlayBigger;
 	/** 牌局音效：炸弹爆炸。 */
-	public int soundPlayBoom;
+	public int soundEffectBoom;
 	/** 牌局音效：飞机。 */
-	public int soundPlayPlane;
+	public int soundEffectPlane;
 	/** 牌局音效：胜。 */
 	public int soundPlayWin;
 	/** 牌局音效：负。 */
@@ -251,29 +252,29 @@ public final class Assets {
 		notifyProgressChanged(++completed, total, listener);
 		soundLandloadPass = sp.loadSound(context, "landlord_pass.mp3");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardPlane = sp.loadSound(context, "feiji.wav");
+		soundTypePlane = sp.loadSound(context, "feiji.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardBoom = sp.loadSound(context, "zhadan.wav");
+		soundTypeBomb = sp.loadSound(context, "zhadan.wav");
 		notifyProgressChanged(++completed, total, listener);
 		soundCardJokerS = sp.loadSound(context, "xiaowang.wav");
 		notifyProgressChanged(++completed, total, listener);
 		soundCardJokerB = sp.loadSound(context, "dawang.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardRocket = sp.loadSound(context, "wangzha.wav");
+		soundTypeRocket = sp.loadSound(context, "wangzha.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardShun1 = sp.loadSound(context, "shunzi.wav");
+		soundTypeShun1 = sp.loadSound(context, "shunzi.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardShun2 = sp.loadSound(context, "liandui.wav");
+		soundTypeShun2 = sp.loadSound(context, "liandui.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardSingle = sp.loadSound(context, "givecard.wav");
+		soundTypeSingle = sp.loadSound(context, "givecard.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardThree = sp.loadSound(context, "givecard.wav");
+		soundTypeThree = sp.loadSound(context, "givecard.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardThree1 = sp.loadSound(context, "sandaiyi.wav");
+		soundTypeThree1 = sp.loadSound(context, "sandaiyi.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardThree2 = sp.loadSound(context, "sandaiyidui.wav");
+		soundTypeThree2 = sp.loadSound(context, "sandaiyidui.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundCardTwo = sp.loadSound(context, "givecard.wav");
+		soundTypePair = sp.loadSound(context, "givecard.wav");
 		notifyProgressChanged(++completed, total, listener);
 		
 		soundPlayBigger = new int[3];
@@ -285,9 +286,9 @@ public final class Assets {
 		notifyProgressChanged(++completed, total, listener);
 		soundPlayPass = sp.loadSound(context, "buyao.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundPlayBoom = sp.loadSound(context, "boom.wav");
+		soundEffectBoom = sp.loadSound(context, "boom.wav");
 		notifyProgressChanged(++completed, total, listener);
-		soundPlayPlane = sp.loadSound(context, "plane.wav");
+		soundEffectPlane = sp.loadSound(context, "plane.wav");
 		notifyProgressChanged(++completed, total, listener);
 		soundPlayLose = sp.loadSound(context, "lose.mp3");
 		notifyProgressChanged(++completed, total, listener);

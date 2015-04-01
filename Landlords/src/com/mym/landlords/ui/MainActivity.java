@@ -1,6 +1,5 @@
 package com.mym.landlords.ui;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,10 +8,14 @@ import java.util.Random;
 import com.mym.landlords.ai.Game;
 import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.ai.Player;
+import com.mym.landlords.card.Bomb;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardFactory;
 import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.Pair;
+import com.mym.landlords.card.Rocket;
 import com.mym.landlords.card.Single;
+import com.mym.landlords.card.Straight;
 import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
@@ -30,10 +33,8 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Button;
 
 public class MainActivity extends Activity implements GameScreen{
 	
@@ -102,7 +103,7 @@ public class MainActivity extends Activity implements GameScreen{
     	
     	private void playing(){
     		if (isWaitingForUser){
-    			Log.v(LOG_TAG, "waiting for user...");
+//    			Log.v(LOG_TAG, "waiting for user...");
     			return ;
     		}
     		//检查游戏是否应该结束
@@ -126,71 +127,44 @@ public class MainActivity extends Activity implements GameScreen{
     			//如果当前的玩家是AI，则执行跟牌策略
     			if (currentPlayer.isAiPlayer()){
     				//TODO auto give card
+    				boolean isFirst = currentType==null;
     				tempCardType = currentPlayer.followCards(currentType);
     				currentPlayer.giveOutCards(tempCardType);
+    				performGiveCard(tempCardType, isFirst);
     			}
-    			//否则根据人类玩家的手牌进行试组合
+    			//否则直接取出人类玩家的卡牌类型。
     			else{
-    				ArrayList<Card> pickedList = getPickedCards(currentPlayer);
-    				//因为手牌为0的情况已经在出牌按钮中进行区分，所以这里再取不到就视为不出
-    				if (pickedList.size()==0){
-    					tempCardType = null;
-    					//TODO hint 没有选择任何卡牌
-    				}
-    				tempCardType = CardType.createObjectFromCards(pickedList);
-    				if (tempCardType!=null && (!tempCardType.canAgainstType(currentType)) ){
-    					Log.d(LOG_TAG, "cardtype not match the rule.");
-//    					synchronized (currentPlayer) {
-//							for (Card card:currentPlayer.getHandCards()){
-//								
-//							}
-//						}
-    					isWaitingForUser = true;
-    					return ;
-    					//TODO hint 不符合规则
-    				}
-    				else{
-    					currentPlayer.giveOutCards(tempCardType);
-    					currentType = tempCardType;
-    					synchronized (activeButtons) {
-    						activeButtons.removeAll(btnGiveCards);
-    					}
-    				}
+					tempCardType = currentPlayer.getLastCards();
+					synchronized (activeButtons) {
+						activeButtons.removeAll(btnGiveCards);
+					}
     			}//end of current Player
     			switchToNextPlayer();
+				if (tempCardType!=null){
+					currentType = tempCardType;
+				}
     			if (currentPlayer.getPriorPlayer().getLastCards()==null
     					&& currentPlayer.getNextPlayer().getLastCards()==null){
+    				Log.d(LOG_TAG, "no bigger cards, exec next round.");
     				//重置当前的卡牌。
     				currentType = null;
     			}
     			if (!currentPlayer.isAiPlayer()){
 					isWaitingForUser = true;
-					setActiveGiveCardButtons();
+					setActiveGiveCardButtons(currentType==null);
 				}
-    			//TODO 增加startPlayer的重置 
-//    				else 
-//    				if (currentPlayer.isLandlord()){
-//    					currentPlayer.giveOutCards(new Single(currentPlayer.getHandCards().get(0)));
-//    				}
-//    				else{
-//    					currentPlayer.giveOutCards(null);
-//    				}
-//    			if (tempCardType !=null && tempCardType.canAgainstType(currentType)){
-//    				
-//    			}
-//    			currentType = currentPlayer.getLastCards();
     		}
     		else{
     			startPlayer = currentGame.landlordPlayer;
     			currentPlayer = startPlayer;
     			if (!currentPlayer.isAiPlayer()){
     				isWaitingForUser = true;
-					setActiveGiveCardButtons();
+					setActiveGiveCardButtons(currentType==null);
     			}
     		}
     	}
     	
-    	private void setActiveGiveCardButtons(){
+    	private void setActiveGiveCardButtons(final boolean isFirstOfCurrentRound){
     		if (btnGiveCards == null){
     			btnGiveCards = new ArrayList<>(4);
         		BitmapButton btnPass = new BitmapButton(graphics, 95, 240, assets.bitmapDoNotGiveCard);
@@ -215,7 +189,15 @@ public class MainActivity extends Activity implements GameScreen{
 	    					return;
 	    					//TODO hint 没有选择任何卡牌
 	    				}
+	    				CardType tempCardType = CardType.createObjectFromCards(pickedList);
+	    				if (tempCardType!=null && (!tempCardType.canAgainstType(currentType)) ){
+	    					Log.d(LOG_TAG, "cardtype not match the rule, currentType="+currentType);
+	    					return ;
+	    					//TODO hint 不符合规则
+	    				}
 	    				else{
+	    					currentPlayer.giveOutCards(tempCardType);
+	        				performGiveCard(tempCardType, currentType==null);
 	    					isWaitingForUser = false;
 	    				}
 					}
@@ -238,14 +220,19 @@ public class MainActivity extends Activity implements GameScreen{
 						Log.v(LOG_TAG, "button clicked ");
 					}
 				});
+
+    			btnGiveCards.add(btnPass);
     			btnGiveCards.add(btnTips);
     			btnGiveCards.add(btnRechoose);
     			btnGiveCards.add(btnGiveCard);
-    			btnGiveCards.add(btnPass);
     		}
     		activeButtons.clear();
     		synchronized (activeButtons) {
         		activeButtons.addAll(btnGiveCards);
+    			//第一个出牌的时候不允许不出。
+    			if (isFirstOfCurrentRound){
+    				btnGiveCards.remove(btnGiveCards.get(0));
+    			}
 			}
     		Log.d(LOG_TAG, "give card buttons added.");
     	}
@@ -286,14 +273,12 @@ public class MainActivity extends Activity implements GameScreen{
 					e.printStackTrace();
 				}
 			}
-//			//由下一个人叫地主
-//			currentPlayer = currentPlayer.getNextPlayer();
     	}
     	
 		//模拟叫牌
     	private void callLandlord(){
 			if (isWaitingForUser){	//如果已经在等候玩家操作，则不做处理
-    			Log.v(LOG_TAG, "waiting for user...");
+//    			Log.v(LOG_TAG, "waiting for user...");
    				return ;
     		}
     		if (startPlayer!=null){	//循环已经开始
@@ -488,6 +473,45 @@ public class MainActivity extends Activity implements GameScreen{
 		playerRight.setHandCards(cardPack.subList(34, 51));
 		landlordCards = cardPack.subList(51, 54);
 	}
+	private Random randomSoundGenerator = new Random();
+	private void performGiveCard(CardType type, boolean isFirst) {
+		if (type==null){
+			soundPool.playSound(assets.soundPlayPass);
+			return ;
+		}
+		if (!isFirst){
+			int i = randomSoundGenerator.nextInt(assets.soundPlayBigger.length);
+			soundPool.playSound(assets.soundPlayBigger[i]);
+			return ;
+		}
+		if (type instanceof Pair){
+			soundPool.playSound(assets.soundTypePair);
+		}
+		else if (type instanceof Single){
+			switch (type.getCardList().get(0).getValue()){
+			case Card.CARD_VALUE_JOKER_S:
+				soundPool.playSound(assets.soundCardJokerS);
+				break;
+			case Card.CARD_VALUE_JOKER_B:
+				soundPool.playSound(assets.soundCardJokerS);
+				break;
+			default:
+				soundPool.playSound(assets.soundTypeSingle);
+				break;
+			}
+		}//end of Single
+		else if (type instanceof Straight){
+			soundPool.playSound(assets.soundTypeShun1);
+		}
+		else if (type instanceof Bomb){
+			soundPool.playSound(assets.soundTypeBomb);
+			soundPool.playSound(assets.soundEffectBoom);
+		}
+		else if (type instanceof Rocket){
+			soundPool.playSound(assets.soundTypeRocket);
+			soundPool.playSound(assets.soundEffectBoom);
+		}
+	}
 	
 	/**
 	 * 执行叫地主的操作。
@@ -674,12 +698,6 @@ public class MainActivity extends Activity implements GameScreen{
 		}
 		return super.dispatchTouchEvent(ev);
 	}
-//	
-//	@Override
-//	protected List<BitmapButton> getBitmapButtons() {
-//		List<BitmapButton> buttons = new ArrayList<BitmapButton>();
-//		return buttons;
-//	}
 	
 	private ArrayList<BitmapButton> activeButtons = new ArrayList<BitmapButton>(); // 当前正在监听的BitmapButton。
 	

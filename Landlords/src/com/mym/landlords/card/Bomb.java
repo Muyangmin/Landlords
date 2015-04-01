@@ -27,4 +27,11 @@ public final class Bomb extends CardType implements BombType{
 		}
 		return cardList.get(0).compareTo(((Bomb)another).cardList.get(1));
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Bomb ").append(cardList);
+		return builder.toString();
+	}
 }
