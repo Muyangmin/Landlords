@@ -229,4 +229,12 @@ public final class Player {
 	public String getPlayerName() {
 		return playerName;
 	}
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Player [").append(playerName)
+				.append(isAiPlayer ? ", isAiPlayer." : "").append("]");
+		return builder.toString();
+	}
+	
 }

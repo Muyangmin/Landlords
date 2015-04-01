@@ -126,11 +126,14 @@ public class MainActivity extends Activity implements GameScreen{
     			CardType tempCardType;
     			//如果当前的玩家是AI，则执行跟牌策略
     			if (currentPlayer.isAiPlayer()){
-    				//TODO auto give card
     				boolean isFirst = currentType==null;
     				tempCardType = currentPlayer.followCards(currentType);
     				currentPlayer.giveOutCards(tempCardType);
     				performGiveCard(tempCardType, isFirst);
+    				//检查游戏的结束
+    				if (currentPlayer.getHandCards().size()==0){
+    					return ;
+    				}
     			}
     			//否则直接取出人类玩家的卡牌类型。
     			else{
@@ -523,6 +526,10 @@ public class MainActivity extends Activity implements GameScreen{
 			soundPool.playSound(assets.soundTypeRocket);
 			soundPool.playSound(assets.soundEffectBoom);
 		}
+		else {
+			//默认出牌音效
+			soundPool.playSound(assets.soundTypeSingle);
+		}
 	}
 	
 	/**
@@ -691,6 +698,80 @@ public class MainActivity extends Activity implements GameScreen{
 		}
 	}
 	
+	private void drawPlayerOutCards(GameGraphics graphics, Canvas canvas) {
+		int offsetX = 0;
+		int offsetY = 0;
+
+		//等待玩家操作时无需绘制玩家的手牌，否则会叠在按钮下面很不好看
+		if (playerHuman.getLastCards() != null && (!isWaitingForUser)) {
+			ArrayList<Card> cards = playerHuman.getLastCards().getCardList();
+			int len = cards.size();
+			offsetX = (int) ((GameGraphics.BASE_SCREEN_WIDTH - len * 35) / 2);
+			offsetY = 250;
+			for (int i = 0; i < len; i++) {
+				Card card = cards.get(i);
+
+				LiveBitmap cardBitmap = assets.getCorrespondBitmap(card);
+				graphics.drawBitmap(canvas, cardBitmap, offsetX + i * 35,
+						offsetY, 63, 86);
+			}
+		}
+		if (playerLeft.getLastCards() != null) {
+			ArrayList<Card> cards = playerLeft.getLastCards().getCardList();
+			int len = cards.size();
+			offsetX = 120;
+			offsetY = 100;
+			for (int i = 0; i < len; i++) {
+				Card card = cards.get(i);
+
+				LiveBitmap cardBitmap = assets.getCorrespondBitmap(card);
+				if (i < 6) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + i * 35,
+							offsetY, 63, 86);
+				} else if (i < 12) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + (i - 6)
+							* 35, offsetY + 25, 63, 86);
+				} else if (i < 18) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + (i - 12)
+							* 35, offsetY + 50, 63, 86);
+				} else {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + (i - 18)
+							* 35, offsetY + 75, 63, 86);
+				}
+			}
+		}
+		if (playerRight.getLastCards() != null) {
+			ArrayList<Card> cards = playerRight.getLastCards().getCardList();
+			int len = cards.size();
+			offsetX = GameGraphics.BASE_SCREEN_WIDTH - 120 - 63;
+			offsetY = 100;
+			for (int i = 0; i < len; i++) {
+				Card card = cards.get(i);
+
+				LiveBitmap cardBitmap = assets.getCorrespondBitmap(card);
+				;
+				if (i < 6) {
+					if (len < 6) {
+						graphics.drawBitmap(canvas, cardBitmap, offsetX
+								- (len - 1 - i) * 35, offsetY, 63, 86);
+					} else {
+						graphics.drawBitmap(canvas, cardBitmap, offsetX
+								- (6 - 1 - i) * 35, offsetY, 63, 86);
+					}
+				} else if (i < 12) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX - 5 * 35
+							+ (i - 6) * 35, offsetY + 25, 63, 86);
+				} else if (i < 18) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX - 5 * 35
+							+ (i - 12) * 35, offsetY + 50, 63, 86);
+				} else {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX - 5 * 35
+							+ (i - 18) * 35, offsetY + 75, 63, 86);
+				}
+			}
+		}
+	}
+	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		for (BitmapButton button: activeButtons){
@@ -747,6 +828,7 @@ public class MainActivity extends Activity implements GameScreen{
 		}
 		drawPlayers(graphics, canvas);
 		drawHumanPlayerCards(graphics, canvas);
+		drawPlayerOutCards(graphics, canvas);
 		drawActiveButtons(graphics, canvas);
 	}
 	
