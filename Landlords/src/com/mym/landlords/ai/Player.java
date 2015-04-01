@@ -88,6 +88,10 @@ public final class Player {
 		if (type!=null){
 			Log.d(playerName, "giveoutcard:"+type);
 			handCards.removeAll(lastCards.getCardList());
+			//移除相关牌型
+			if (isAiPlayer){
+				cardsInfo.cardTypes.remove(type);
+			}
 		}
 	}
 

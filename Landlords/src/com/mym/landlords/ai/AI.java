@@ -226,6 +226,7 @@ final class AI {
 			singleIterator.remove();
 		}
 		statPlayerCardsInfo(playerInfo);
+		Collections.sort(playerInfo.cardTypes, CardType.SORT_COMPARATOR);
 		Log.d(LOG_TAG, "Final playerInfo:"+playerInfo);
 		return playerInfo;
 	}
