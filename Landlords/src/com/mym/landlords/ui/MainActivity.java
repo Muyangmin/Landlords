@@ -176,6 +176,9 @@ public class MainActivity extends Activity implements GameScreen{
 					@Override
 					public void onClicked(BitmapButton btn) {
 						//TODO whether should clear pick status?
+						//显式指定出牌为null
+						currentPlayer.giveOutCards(null);
+						performGiveCard(null, false);
 						isWaitingForUser = false;
 					}
 				});
@@ -231,10 +234,10 @@ public class MainActivity extends Activity implements GameScreen{
         		activeButtons.addAll(btnGiveCards);
     			//第一个出牌的时候不允许不出。
     			if (isFirstOfCurrentRound){
-    				btnGiveCards.remove(btnGiveCards.get(0));
+    				activeButtons.remove(btnGiveCards.get(0));
     			}
 			}
-    		Log.d(LOG_TAG, "give card buttons added.");
+//    		Log.d(LOG_TAG, "give card buttons added.");
     	}
     	
     	//获取玩家选中的手牌列表
@@ -480,8 +483,17 @@ public class MainActivity extends Activity implements GameScreen{
 			return ;
 		}
 		if (!isFirst){
-			int i = randomSoundGenerator.nextInt(assets.soundPlayBigger.length);
-			soundPool.playSound(assets.soundPlayBigger[i]);
+			if (type instanceof Bomb) {
+				soundPool.playSound(assets.soundTypeBomb);
+				soundPool.playSound(assets.soundEffectBoom);
+			} else if (type instanceof Rocket) {
+				soundPool.playSound(assets.soundTypeRocket);
+				soundPool.playSound(assets.soundEffectBoom);
+			}
+			else{
+				int i = randomSoundGenerator.nextInt(assets.soundPlayBigger.length);
+				soundPool.playSound(assets.soundPlayBigger[i]);
+			}
 			return ;
 		}
 		if (type instanceof Pair){
@@ -583,7 +595,7 @@ public class MainActivity extends Activity implements GameScreen{
 		}
     }
 	//绘制玩家的卡牌（即正面的卡牌）
-	private void drawHumanPlayerCards(GameGraphics g, Canvas canvas){
+	private synchronized void drawHumanPlayerCards(GameGraphics g, Canvas canvas){
 		ArrayList<Card> list = playerHuman.getHandCards();
 //		Log.d(LOG_TAG, "human cards:"+list.size());
 		int len = list.size();

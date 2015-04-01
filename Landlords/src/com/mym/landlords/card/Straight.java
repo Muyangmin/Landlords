@@ -23,6 +23,7 @@ public class Straight extends CardType implements NonBombType{
 		this.startValue = list.get(0).getValue();
 		this.length = list.size();
 	}
+	
 	private final boolean canMakeupStraight(ArrayList<Card> list){
 		int listSize = list.size();
 		if (listSize < 5){
@@ -42,6 +43,7 @@ public class Straight extends CardType implements NonBombType{
 		}
 		return res;
 	}
+	
 	@Override
 	public int compareTo(CardType another){
 		int superCompare = super.compareTo(another);
@@ -51,6 +53,15 @@ public class Straight extends CardType implements NonBombType{
 		return Integer.valueOf(startValue).compareTo(
 				((Straight) another).startValue);
 	}
+	
+	@Override
+	protected boolean isSameConcreteSubclass(CardType another) {
+		if (another instanceof Straight){
+			return length == ((Straight)another).length;
+		}
+		return false;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
