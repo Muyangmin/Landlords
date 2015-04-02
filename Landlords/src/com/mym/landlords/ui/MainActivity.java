@@ -57,6 +57,8 @@ public class MainActivity extends Activity implements GameScreen{
     private float cardOffset;					//用于判断玩家点选的是哪张卡牌
     private GameLogicThread logicThread;
     private boolean isWaitingForUser;			//当前逻辑线程是否被玩家阻塞
+    private boolean pickedTypeNotMatch;			//标记当前人类玩家选择的卡牌不符合规则
+    private boolean humanNoBiggerCards;			//标记当前人类玩家没有大于上家的卡牌
     
     private ArrayList<Player> winners = new ArrayList<>();;			//获胜的玩家
     
@@ -182,8 +184,7 @@ public class MainActivity extends Activity implements GameScreen{
 					
 					@Override
 					public void onClicked(BitmapButton btn) {
-						//TODO whether should clear pick status?
-						//显式指定出牌为null
+						//XXX whether should clear pick status?
 						currentPlayer.giveOutCards(null);
 						performGiveCard(null, false);
 						isWaitingForUser = false;
@@ -196,17 +197,20 @@ public class MainActivity extends Activity implements GameScreen{
 						ArrayList<Card> pickedList = getPickedCards(currentPlayer);
 	    				if (pickedList.size()==0){
 	    					Log.d(LOG_TAG, "no card selected.");
+	    					graphics.setAlpha(255);
+	    					pickedTypeNotMatch = true;
 	    					return;
-	    					//TODO hint 没有选择任何卡牌
 	    				}
 	    				CardType tempCardType = CardType.createObjectFromCards(pickedList);
 	    				if (tempCardType!=null && (!tempCardType.canAgainstType(currentType)) ){
 	    					Log.d(LOG_TAG, "cardtype not match the rule, currentType="+currentType);
+	    					graphics.setAlpha(255);
+	    					pickedTypeNotMatch = true;
 	    					return ;
-	    					//TODO hint 不符合规则
 	    				}
 	    				else{
 	    					currentPlayer.giveOutCards(tempCardType);
+	    					pickedTypeNotMatch = false;
 	    					//打出最后一手牌时无需播放卡牌音效
 	    					if (currentPlayer.getHandCards().size()>0){
 	    						performGiveCard(tempCardType, currentType==null);
@@ -428,28 +432,13 @@ public class MainActivity extends Activity implements GameScreen{
 		currentGame.status = Status.Preparing;
 		initPlayerSeats();
 		shuffleAndDealCards();
-//		currentGame.status = Status.Playing;
 		Log.d(LOG_TAG, playerLeft.getPlayerName()+" cards:"+playerLeft.getHandCards().toString());
-		//test code
-//		playerLeft.makeCards();
 		Log.d(LOG_TAG, playerHuman.getPlayerName()+" cards:"+playerHuman.getHandCards().toString());
 		Log.d(LOG_TAG, playerRight.getPlayerName()+" cards:"+playerRight.getHandCards().toString());
-		//test code
-//		playerRight.makeCards();
 		Log.d(LOG_TAG, "landlord cards:"+landlordCards.toString());
 		logicThread = new GameLogicThread();
 		logicThread.start();
 		currentGame.status = Status.CallingLandlord;
-		
-//		handler.postDelayed(new Runnable() {
-//			
-//			@Override
-//			public void run() {
-//				// TODO Auto-generated method stub
-////				currentGame.status = Status.Playing;
-////				playerHuman.setLandlord(landlordCards);
-//			}
-//		}, 1000);
 	}
 	
 	@Override
@@ -781,6 +770,29 @@ public class MainActivity extends Activity implements GameScreen{
 		}
 	}
 	
+	//绘制出牌信息（无大牌或牌型错误）
+    private void drawOutCardsMessage(GameGraphics graphics, Canvas canvas)
+    {
+    	if (graphics.getCurrentAlpha() > 0)
+    	{
+    		if (pickedTypeNotMatch)
+            {
+    			LiveBitmap bitmap = assets.bitmapCardsNotMatch;
+            	int x = (GameGraphics.BASE_SCREEN_WIDTH - bitmap.getRawWidth()) / 2;
+            	int y = GameGraphics.BASE_SCREEN_HEIGHT - 15 - GameGraphics.CARD_HEIGHT - bitmap.getRawHeight();
+            	graphics.drawBitmapUsingAlpha(canvas, bitmap, x, y);
+            }
+        	if (humanNoBiggerCards)
+        	{
+    			LiveBitmap bitmap = assets.bitmapNoBigger;
+        		int x = (GameGraphics.BASE_SCREEN_WIDTH - bitmap.getRawWidth()) / 2;
+            	int y = GameGraphics.BASE_SCREEN_HEIGHT - 15 - GameGraphics.CARD_HEIGHT - bitmap.getRawHeight(); 
+            	graphics.drawBitmapUsingAlpha(canvas, bitmap, x, y);
+        	}
+    	}
+    }
+    
+	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		for (BitmapButton button: activeButtons){
@@ -838,6 +850,7 @@ public class MainActivity extends Activity implements GameScreen{
 		drawPlayers(graphics, canvas);
 		drawHumanPlayerCards(graphics, canvas);
 		drawPlayerOutCards(graphics, canvas);
+		drawOutCardsMessage(graphics, canvas);
 		drawActiveButtons(graphics, canvas);
 	}
 	

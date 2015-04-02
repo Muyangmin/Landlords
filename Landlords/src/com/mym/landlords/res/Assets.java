@@ -85,6 +85,10 @@ public final class Assets {
 	public LiveBitmap bitmapDoNotGiveCard;
 	/** 重选按钮。 */
 	public LiveBitmap bitmapRechoose;
+	/** 没有牌能大过上家。 */
+	public LiveBitmap bitmapNoBigger;
+	/** 选择的牌不符合规则 */
+	public LiveBitmap bitmapCardsNotMatch;
 	/** 提示按钮。 */
 	public LiveBitmap bitmapTips;
 	/** 地主图标 */
@@ -221,7 +225,7 @@ public final class Assets {
 		final int totalBitmap = 54 + 52		//54=一副牌，52=一副牌的较小版本
 							+ 1 + 1	+ 2		//卡牌背面图、牌桌背景图、按钮背景图
 							+ 1				//数字图
-							+ 4	+ 4			//叫地主按钮、出牌系列按钮
+							+ 4	+ 6			//叫地主按钮、出牌系列按钮
 							+ 3 + 1;		//人物形象图、地主图标
 		final int totalSoundCount = 24;		//数出来的
 		int total = totalBitmap + totalSoundCount;
@@ -404,6 +408,11 @@ public final class Assets {
 		bitmapRechoose = LiveBitmap.loadBitmap(context, "play_rechoose.png", scaleX, scaleY);
 		bitmapTips = LiveBitmap.loadBitmap(context, "play_tip.png", scaleX, scaleY);
 		completed +=4; 
+		notifyProgressChanged(completed, total, listener);
+		
+		bitmapNoBigger = LiveBitmap.loadBitmap(context, "noBiggerCards.png", scaleX, scaleY);
+		bitmapCardsNotMatch = LiveBitmap.loadBitmap(context, "wrongCards.png", scaleX, scaleY);
+		completed +=2; 
 		notifyProgressChanged(completed, total, listener);
 		return completed;
 	}

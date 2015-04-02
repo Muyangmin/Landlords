@@ -1,9 +1,10 @@
 package com.mym.landlords.res;
 
 import android.graphics.Canvas;
-//import android.graphics.Paint;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.CountDownTimer;
 
 /**
  * 负责图像的绘制和自动缩放控制。
@@ -36,11 +37,20 @@ public final class GameGraphics {
 
 //	private Bitmap frameBuffer; // 底色
 //	private Canvas canvas; // 画布对象
-//	private Paint paint; // 画笔对象
+	private Paint paint; // 画笔对象
 	private float scaleX; // X缩放比
 	private float scaleY; // Y缩放比
 	private Rect srcRect = new Rect(); // 源矩阵对象
 	private Rect dstRect = new Rect(); // 目标矩阵对象
+	
+	/**
+	 * @see #setAlpha(int)
+	 */
+	private int currentAlpha=0;			//当前画笔的Alpha值，0=透明，255=不透明
+	/**
+	 * @see #setAlpha(int)
+	 */
+	private CountDownTimer alphaDecendTimer;	//用于消减Alpha
 	
 	private static GameGraphics instance;
 	
@@ -61,7 +71,7 @@ public final class GameGraphics {
 	private GameGraphics(Point outSize){
 		scaleX = outSize.x / (float) BASE_SCREEN_WIDTH;
 		scaleY = outSize.y / (float) BASE_SCREEN_HEIGHT;
-//		this.paint = new Paint();
+		this.paint = new Paint();
 	}
 
 	/**
@@ -89,17 +99,58 @@ public final class GameGraphics {
 
 		canvas.drawBitmap(bitmap.getBitmap(), srcRect, dstRect, null);
 	}
-//
-//
-//	/**
-//	 * 使用指定的Alpha值绘制Bitmap。
-//	 * @param alpha 要使用的Alpha值 [0..255]。
-//	 */
-//	public void drawBitmap(LiveBitmap bitmap, int x, int y, int alpha) {
-//		paint.setAlpha(alpha);
-//		canvas.drawBitmap(bitmap.getBitmap(), x * scaleX, y * scaleY, paint);
-//	}
-//	
+
+	/**
+	 * 设置画笔的Alpha值。该值仅对调用  {@link #drawBitmapUsingAlpha(Canvas, LiveBitmap, int, int)}有效。
+	 * @param alpha 目标 alpha值，必须在0-255之间。
+	 */
+	public final void setAlpha(int alpha){
+		if (alpha<0 || alpha > 255){
+			throw new IllegalArgumentException("wrong alpha value " + alpha);
+		}
+		currentAlpha = alpha;
+		if (alphaDecendTimer!=null){
+			alphaDecendTimer.cancel();
+		}
+		alphaDecendTimer = new CountDownTimer(16*64,16) {
+			
+			@Override
+			public void onTick(long millisUntilFinished) {
+				//从255衰减到0需要64次，大约1s
+				currentAlpha -= 4;
+				if (currentAlpha<=0){
+					currentAlpha=0;
+				}
+				cancel();
+				alphaDecendTimer = null;
+			}
+			
+			@Override
+			public void onFinish() {
+				if (alphaDecendTimer != null){
+					currentAlpha = 0;
+					alphaDecendTimer.cancel();
+					alphaDecendTimer = null;
+				}
+				
+			}
+		};
+		alphaDecendTimer.start();
+	}
+	
+	public final int getCurrentAlpha(){
+		return currentAlpha;
+	}
+
+	/**
+	 * 使用 {@link #currentAlpha}作为Alpha值绘制Bitmap。
+	 * 可以通过调用 {@link #setAlpha(int)}来设置Alpha值。Alpha值会在设置之后自动递减，直至为0。
+	 */
+	public void drawBitmapUsingAlpha(Canvas canvas, LiveBitmap bitmap, int x, int y) {
+		paint.setAlpha(currentAlpha);
+		canvas.drawBitmap(bitmap.getBitmap(), x * scaleX, y * scaleY, paint);
+	}
+	
 	/**
 	 * 绘制指定的Bitmap，自动处理缩放比例。
 	 * @param canvas 目标画布
