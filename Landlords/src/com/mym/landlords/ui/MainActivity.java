@@ -202,7 +202,13 @@ public class MainActivity extends Activity implements GameScreen{
 	    					return;
 	    				}
 	    				CardType tempCardType = CardType.createObjectFromCards(pickedList);
-	    				if (tempCardType!=null && (!tempCardType.canAgainstType(currentType)) ){
+	    				//既然是点击出牌，则不允许打不出合适的牌型
+	    				if (tempCardType==null){
+	    					graphics.setAlpha(255);
+	    					pickedTypeNotMatch = true;
+	    				}
+	    				//也不能比当前的牌小
+	    				else if (!tempCardType.canAgainstType(currentType)) {
 	    					Log.d(LOG_TAG, "cardtype not match the rule, currentType="+currentType);
 	    					graphics.setAlpha(255);
 	    					pickedTypeNotMatch = true;
@@ -214,6 +220,12 @@ public class MainActivity extends Activity implements GameScreen{
 	    					//打出最后一手牌时无需播放卡牌音效
 	    					if (currentPlayer.getHandCards().size()>0){
 	    						performGiveCard(tempCardType, currentType==null);
+	    					}
+	    					//用于消除玩家打出最后一手牌后按钮的残留。
+	    					else{
+	    						synchronized (activeButtons) {
+		    						activeButtons.removeAll(btnGiveCards);
+		    					}
 	    					}
 	    					isWaitingForUser = false;
 	    				}
@@ -285,7 +297,7 @@ public class MainActivity extends Activity implements GameScreen{
 			currentPlayer = currentPlayer.getNextPlayer();
 			if (currentPlayer.isAiPlayer()){
 				try {
-					Thread.sleep(2000);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -331,16 +343,7 @@ public class MainActivity extends Activity implements GameScreen{
 					return;
 				}
 				else{
-					/*//如果接下来进行操作的是AI，则让AI等待一段时间再操作（主要是避免音效重叠）。
-					if (currentPlayer.getNextPlayer().isAiPlayer()){
-						try {
-							Thread.sleep(2000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
 					//由下一个人叫地主
-					currentPlayer = currentPlayer.getNextPlayer();*/
 					switchToNextPlayer();
 					if (!currentPlayer.isAiPlayer()){
 						isWaitingForUser = true;
@@ -477,7 +480,9 @@ public class MainActivity extends Activity implements GameScreen{
 		playerRight.setHandCards(cardPack.subList(34, 51));
 		landlordCards = cardPack.subList(51, 54);
 	}
+	
 	private Random randomSoundGenerator = new Random();
+	
 	private void performGiveCard(CardType type, boolean isFirst) {
 		if (type==null){
 			soundPool.playSound(assets.soundPlayPass);

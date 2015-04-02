@@ -35,7 +35,8 @@ public class Straight extends CardType implements NonBombType{
 		int lastValue = iterator.next().getValue(); 
 		while (iterator.hasNext()){
 			int currentValue = iterator.next().getValue();
-			if (currentValue != lastValue+1){
+			if ((currentValue != lastValue + 1)			//检查每张牌的连续性
+					|| (currentValue >= Card.CARD_VALUE_2)) { //2和王不能被连
 				res = false;
 				break;
 			}
