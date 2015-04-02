@@ -111,12 +111,16 @@ public class MainActivity extends Activity implements GameScreen{
     		if (zeroCardPlayer!=null){
     			winners.clear(); 
 				winners.add(zeroCardPlayer);
+				//如果率先达到0手牌的玩家不是地主，则另一个农民同时获胜
     			if (!zeroCardPlayer.isLandlord()){
 					winners.add(zeroCardPlayer.getNextPlayer().isLandlord() 
-							? zeroCardPlayer.getNextPlayer() 
-									: zeroCardPlayer.getPriorPlayer());
+							? zeroCardPlayer.getPriorPlayer() 
+									: zeroCardPlayer.getNextPlayer());
     			}
     			currentGame.status = Status.Gameover;
+    			//播放结束音效
+				soundPool.playSound(winners.contains(playerHuman) ? assets.soundPlayWin
+								: assets.soundPlayLose);
     			Log.i(LOG_TAG, "winner:"+winners);
     			return ;
     		}
@@ -203,7 +207,10 @@ public class MainActivity extends Activity implements GameScreen{
 	    				}
 	    				else{
 	    					currentPlayer.giveOutCards(tempCardType);
-	        				performGiveCard(tempCardType, currentType==null);
+	    					//打出最后一手牌时无需播放卡牌音效
+	    					if (currentPlayer.getHandCards().size()>0){
+	    						performGiveCard(tempCardType, currentType==null);
+	    					}
 	    					isWaitingForUser = false;
 	    				}
 					}
@@ -232,8 +239,8 @@ public class MainActivity extends Activity implements GameScreen{
     			btnGiveCards.add(btnRechoose);
     			btnGiveCards.add(btnGiveCard);
     		}
-    		activeButtons.clear();
     		synchronized (activeButtons) {
+        		activeButtons.clear();
         		activeButtons.addAll(btnGiveCards);
     			//第一个出牌的时候不允许不出。
     			if (isFirstOfCurrentRound){
@@ -374,7 +381,9 @@ public class MainActivity extends Activity implements GameScreen{
 			//三分一定是可选的，因为上家如果叫了三分则根本不会轮到下家
 			btnCallP3.setOnClickListener(new CallLandlordBtnListener(Game.BASIC_SCORE_THREE));
 			btnCallLandlords.add(btnCallP3);
-			activeButtons.addAll(btnCallLandlords);
+			synchronized(activeButtons){
+				activeButtons.addAll(btnCallLandlords);
+			}
 			Log.d(LOG_TAG, "activeButton added.now size is "+activeButtons.size());
     	}
     	
@@ -508,7 +517,7 @@ public class MainActivity extends Activity implements GameScreen{
 				soundPool.playSound(assets.soundCardJokerS);
 				break;
 			case Card.CARD_VALUE_JOKER_B:
-				soundPool.playSound(assets.soundCardJokerS);
+				soundPool.playSound(assets.soundCardJokerB);
 				break;
 			default:
 				soundPool.playSound(assets.soundTypeSingle);
