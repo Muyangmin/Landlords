@@ -173,6 +173,7 @@ public class MainActivity extends Activity implements GameScreen{
     				currentType = null;
     			}
     			if (!currentPlayer.isAiPlayer()){
+					isWaitingForUser = true;
 					currentTips = TipRobot.getTips(currentType, currentPlayer.getHandCards());
 					if (currentTips==null || currentTips.isEmpty()){
 						Log.d(LOG_TAG, "human has no bigger cards.");
@@ -185,18 +186,19 @@ public class MainActivity extends Activity implements GameScreen{
 								humanNoBiggerCards = true;
 								currentPlayer.giveOutCards(null);
 								performGiveCard(null, false);
-								
+								isWaitingForUser = false;
 							}
 						});
 					}
 					else{
-						isWaitingForUser = true;
+						//继续等待用户指令
 						humanNoBiggerCards = false;
 						tipBtnListener.resetCurrentTips();
 						setActiveGiveCardButtons(currentType==null);
 					}
 				}
     		}
+    		//如果所有人都还未出过牌
     		else{
     			startPlayer = currentGame.landlordPlayer;
     			currentPlayer = startPlayer;
