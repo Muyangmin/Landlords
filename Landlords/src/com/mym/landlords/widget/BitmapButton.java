@@ -1,7 +1,6 @@
 package com.mym.landlords.widget;
 
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.mym.landlords.res.Assets;

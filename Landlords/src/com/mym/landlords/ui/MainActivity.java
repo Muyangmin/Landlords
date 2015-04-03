@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.mym.landlords.ai.Game;
+import com.mym.landlords.ai.TipRobot;
 import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.ai.Player;
 import com.mym.landlords.card.Bomb;
@@ -33,6 +34,7 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -61,11 +63,11 @@ public class MainActivity extends Activity implements GameScreen{
     private boolean humanNoBiggerCards;			//标记当前人类玩家没有大于上家的卡牌
     
     private ArrayList<Player> winners = new ArrayList<>();;			//获胜的玩家
-    
-//    Handler handler = new Handler();		//temporary
 
     private ArrayList<BitmapButton> btnCallLandlords;	//叫地主系列按钮
     private ArrayList<BitmapButton> btnGiveCards;		//出牌系列按钮
+    
+    private Handler handler = new Handler();
     
     /**
      * 逻辑控制线程。
@@ -78,6 +80,8 @@ public class MainActivity extends Activity implements GameScreen{
     	private Player startPlayer;				//当前循环第一次操作的玩家
     	private Player tempLandlord = null;			//记录叫地主分数最高的玩家
     	private CardType currentType;			//当前正在打的牌型
+        private ArrayList<CardType> currentTips;	//当前提示的出牌列表
+    	private TipBtnListener tipBtnListener = new TipBtnListener();
 
     	public GameLogicThread() {
 			super("GameLogicThread", LOGIC_THREAD_INTERVAL);
@@ -159,8 +163,27 @@ public class MainActivity extends Activity implements GameScreen{
     				currentType = null;
     			}
     			if (!currentPlayer.isAiPlayer()){
-					isWaitingForUser = true;
-					setActiveGiveCardButtons(currentType==null);
+					currentTips = TipRobot.getTips(currentType, currentPlayer.getHandCards());
+					if (currentTips==null || currentTips.isEmpty()){
+						Log.d(LOG_TAG, "human has no bigger cards.");
+						//使用post方式在主线程进行状态的修改。
+						handler.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								graphics.setAlpha(255);
+								humanNoBiggerCards = true;
+								currentPlayer.giveOutCards(null);
+								performGiveCard(null, false);
+								
+							}
+						});
+					}
+					else{
+						isWaitingForUser = true;
+						tipBtnListener.resetCurrentTips();
+						setActiveGiveCardButtons(currentType==null);
+					}
 				}
     		}
     		else{
@@ -218,11 +241,9 @@ public class MainActivity extends Activity implements GameScreen{
 	    					currentPlayer.giveOutCards(tempCardType);
 	    					pickedTypeNotMatch = false;
 	    					//打出最后一手牌时无需播放卡牌音效
-	    					if (currentPlayer.getHandCards().size()>0){
-	    						performGiveCard(tempCardType, currentType==null);
-	    					}
+	    					performGiveCard(tempCardType, currentType==null);
 	    					//用于消除玩家打出最后一手牌后按钮的残留。
-	    					else{
+	    					if (currentPlayer.getHandCards().isEmpty()){
 	    						synchronized (activeButtons) {
 		    						activeButtons.removeAll(btnGiveCards);
 		    					}
@@ -242,13 +263,7 @@ public class MainActivity extends Activity implements GameScreen{
 						}
 					}
 				});
-    			btnTips.setOnClickListener(new onClickListener() {
-					
-					@Override
-					public void onClicked(BitmapButton btn) {
-						Log.v(LOG_TAG, "button clicked ");
-					}
-				});
+    			btnTips.setOnClickListener(tipBtnListener);
 
     			btnGiveCards.add(btnPass);
     			btnGiveCards.add(btnTips);
@@ -263,7 +278,6 @@ public class MainActivity extends Activity implements GameScreen{
     				activeButtons.remove(btnGiveCards.get(0));
     			}
 			}
-//    		Log.d(LOG_TAG, "give card buttons added.");
     	}
     	
     	//获取玩家选中的手牌列表
@@ -393,8 +407,36 @@ public class MainActivity extends Activity implements GameScreen{
 			}
 			Log.d(LOG_TAG, "activeButton added.now size is "+activeButtons.size());
     	}
-    	
-		private class CallLandlordBtnListener implements
+    	//提示按钮
+    	private class TipBtnListener implements BitmapButton.onClickListener{
+    		
+    		private int tipIndex = 0;
+    		/**
+    		 * 重置当前提示。每次 {@link MainActivity#currentTips}更新时都应该调用该方法。
+    		 */
+    		protected final void resetCurrentTips(){
+    			tipIndex = 0;
+    		}
+    		
+			@Override
+			public void onClicked(BitmapButton btn) {
+				for (Card card: currentPlayer.getHandCards()){
+					card.setPicked(false);
+				}
+				for (Card card: currentTips.get(tipIndex).getCardList()){
+					card.setPicked(true);
+				}
+//				tipIndex = (tipIndex+1)%currentTips.size();
+				tipIndex++;
+				if (tipIndex>=currentTips.size()){
+					tipIndex=0;
+				}
+			}
+    		
+    	} 
+		
+    	//叫地主系列按钮
+    	private class CallLandlordBtnListener implements
 				BitmapButton.onClickListener {
 
 			private int score;

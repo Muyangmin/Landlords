@@ -79,7 +79,6 @@ final class AI {
 		else{
 			return Game.BASIC_SCORE_NONE;
 		}
-//		return Game.BASIC_BASIC_SCORE_THREE;
 	}
 	
 	/**
@@ -106,7 +105,7 @@ final class AI {
 	 * @param list 当前剩余卡牌列表。
 	 * @return 如果能找出这样的卡牌，则返回该列表；否则返回 null。
 	 */
-	private ArrayList<Card> takeoutCards(int[] targetPattern, ArrayList<Card> list){
+	protected ArrayList<Card> takeoutCards(int[] targetPattern, ArrayList<Card> list){
 		if (targetPattern==null || list==null){
 			Log.w(LOG_TAG, "takecards return null due to null param.");
 			return null;
@@ -146,6 +145,11 @@ final class AI {
 		return targetList;
 	}
 	
+	/**
+	 * 将手牌按照一般原则进行组合。
+	 * @param list 手牌列表
+	 * @return 返回封装后的 PlayerCardsInfo 对象，其中的 cardTypes字段保证不为null且已进行过排序。
+	 */
 	protected PlayerCardsInfo makeCards(final List<Card> list){
 		if (list==null || list.size()==0){
 			return null;
@@ -227,7 +231,6 @@ final class AI {
 		}
 		statPlayerCardsInfo(playerInfo);
 		Collections.sort(playerInfo.cardTypes, CardType.SORT_COMPARATOR);
-		Log.d(LOG_TAG, "Final playerInfo:"+playerInfo);
 		return playerInfo;
 	}
 	

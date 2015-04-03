@@ -126,9 +126,11 @@ public final class Player {
 		calledScore = aiRobot.callLandlord(handCards, minScore >= 0 ? minScore : 0);
 	}
 	
-	protected final PlayerCardsInfo makeCards(){
+	private final PlayerCardsInfo makeCards(){
 		checkAiPlayer();
-		return aiRobot.makeCards(handCards);
+		PlayerCardsInfo playerInfo =  aiRobot.makeCards(handCards);
+		Log.d(playerName, "Final playerInfo:"+playerInfo);
+		return playerInfo;
 	}
 
 	/**

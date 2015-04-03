@@ -102,6 +102,7 @@ public final class GameGraphics {
 
 	/**
 	 * 设置画笔的Alpha值。该值仅对调用  {@link #drawBitmapUsingAlpha(Canvas, LiveBitmap, int, int)}有效。
+	 * <p><b>注意：强烈建议在主线程中调用该方法。</b></p>
 	 * @param alpha 目标 alpha值，必须在0-255之间。
 	 */
 	public final void setAlpha(int alpha){

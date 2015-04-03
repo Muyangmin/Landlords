@@ -10,6 +10,7 @@ import java.util.List;
 import android.util.Log;
 
 import com.mym.landlords.card.Card;
+import com.mym.landlords.card.Straight;
 
 //package access
 final class StraightAnalyst {
@@ -40,6 +41,56 @@ final class StraightAnalyst {
 		concatPossibleStraights(shortList);
 		Log.d(LOG_TAG, "final concat:"+shortList.toString());
 		return shortList;
+	}
+	
+	/**
+	 * 强行凑出对子。
+	 * @param follow 要跟牌的对子
+	 * @param cards 如果无牌可出，则返回null;否则返回一个所有可能点数情况的列表，这些对子的点数彼此可能有所重叠。
+	 * @return
+	 */
+	protected static ArrayList<Straight> forceGetStraights(Straight follow, ArrayList<Card> cards){
+		if (follow==null || cards.size()< follow.length){
+			return null;
+		}
+		ArrayList<Straight> forceStraights = new ArrayList<>();
+		Card lastCard = null;
+		int size = cards.size();
+		ArrayList<Card> tempCards = new ArrayList<>(); 
+		for (int i=0; i<size-follow.length; i++){
+			lastCard=null;
+			tempCards.clear();
+			//一定比
+			for (int j=0; i+j < size ; j++){
+				Card thisCard = cards.get(i+j);
+				if (thisCard.getValue()>=Card.CARD_VALUE_2){
+					break;
+				}
+				if (lastCard==null){
+					tempCards.add(thisCard);
+					continue;
+				}
+				int increment = thisCard.getValue()-lastCard.getValue();
+				if (increment==0){
+					continue;
+				}
+				else if (increment==1){
+					tempCards.add(thisCard);
+					lastCard = thisCard;
+					if (tempCards.size()==follow.length){
+						break;
+					}
+				}
+				//大于1不会构成顺子。
+				else {
+					break;
+				}
+			}
+			if (tempCards.size()==follow.length){
+				forceStraights.add(new Straight(tempCards));
+			}
+		}
+		return forceStraights;
 	}
 
 	/**
