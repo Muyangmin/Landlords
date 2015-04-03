@@ -191,6 +191,8 @@ public class MainActivity extends Activity implements GameScreen{
     			currentPlayer = startPlayer;
     			if (!currentPlayer.isAiPlayer()){
     				isWaitingForUser = true;
+    				//初始化一开局的提示，避免玩家一开始就点提示导致崩溃
+    				currentTips = TipRobot.getTips(null, currentPlayer.getHandCards());
 					setActiveGiveCardButtons(currentType==null);
     			}
     		}
