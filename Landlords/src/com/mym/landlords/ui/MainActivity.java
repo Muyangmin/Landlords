@@ -136,10 +136,20 @@ public class MainActivity extends Activity implements GameScreen{
     			CardType tempCardType;
     			//如果当前的玩家是AI，则执行跟牌策略
     			if (currentPlayer.isAiPlayer()){
-    				boolean isFirst = currentType==null;
+    				boolean isFirst = (currentType==null) ;
     				tempCardType = currentPlayer.followCards(currentType);
     				currentPlayer.giveOutCards(tempCardType);
     				performGiveCard(tempCardType, isFirst);
+    				//初始化AI信息的画笔Alpha
+    				if (currentPlayer.getLastCards()==null){
+    					handler.post(new Runnable() {
+							
+							@Override
+							public void run() {
+		    					graphics.setAlpha(currentPlayer, 255);
+							}
+						});
+    				}
     				//检查游戏的结束
     				if (currentPlayer.getHandCards().size()==0){
     					return ;
@@ -152,10 +162,10 @@ public class MainActivity extends Activity implements GameScreen{
 						activeButtons.removeAll(btnGiveCards);
 					}
     			}//end of current Player
-    			switchToNextPlayer();
 				if (tempCardType!=null){
 					currentType = tempCardType;
 				}
+    			switchToNextPlayer();
     			if (currentPlayer.getPriorPlayer().getLastCards()==null
     					&& currentPlayer.getNextPlayer().getLastCards()==null){
     				Log.d(LOG_TAG, "no bigger cards, exec next round.");
@@ -171,7 +181,7 @@ public class MainActivity extends Activity implements GameScreen{
 							
 							@Override
 							public void run() {
-								graphics.setAlpha(255);
+								graphics.setAlpha(currentPlayer, 255);
 								humanNoBiggerCards = true;
 								currentPlayer.giveOutCards(null);
 								performGiveCard(null, false);
@@ -181,6 +191,7 @@ public class MainActivity extends Activity implements GameScreen{
 					}
 					else{
 						isWaitingForUser = true;
+						humanNoBiggerCards = false;
 						tipBtnListener.resetCurrentTips();
 						setActiveGiveCardButtons(currentType==null);
 					}
@@ -189,6 +200,15 @@ public class MainActivity extends Activity implements GameScreen{
     		else{
     			startPlayer = currentGame.landlordPlayer;
     			currentPlayer = startPlayer;
+    			handler.post(new Runnable() {
+					
+					@Override
+					public void run() {
+						graphics.setAlpha(playerHuman, 0);
+						graphics.setAlpha(playerLeft, 0);
+						graphics.setAlpha(playerRight, 0);
+					}
+				});
     			if (!currentPlayer.isAiPlayer()){
     				isWaitingForUser = true;
     				//初始化一开局的提示，避免玩家一开始就点提示导致崩溃
@@ -222,20 +242,20 @@ public class MainActivity extends Activity implements GameScreen{
 						ArrayList<Card> pickedList = getPickedCards(currentPlayer);
 	    				if (pickedList.size()==0){
 	    					Log.d(LOG_TAG, "no card selected.");
-	    					graphics.setAlpha(255);
+	    					graphics.setAlpha(currentPlayer, 255);
 	    					pickedTypeNotMatch = true;
 	    					return;
 	    				}
 	    				CardType tempCardType = CardType.createObjectFromCards(pickedList);
 	    				//既然是点击出牌，则不允许打不出合适的牌型
 	    				if (tempCardType==null){
-	    					graphics.setAlpha(255);
+	    					graphics.setAlpha(currentPlayer, 255);
 	    					pickedTypeNotMatch = true;
 	    				}
 	    				//也不能比当前的牌小
 	    				else if (!tempCardType.canAgainstType(currentType)) {
 	    					Log.d(LOG_TAG, "cardtype not match the rule, currentType="+currentType);
-	    					graphics.setAlpha(255);
+	    					graphics.setAlpha(currentPlayer, 255);
 	    					pickedTypeNotMatch = true;
 	    					return ;
 	    				}
@@ -749,8 +769,14 @@ public class MainActivity extends Activity implements GameScreen{
 		int offsetX = 0;
 		int offsetY = 0;
 
+		if (playerHuman.getLastCards()==null){
+			offsetX = (int) (GameGraphics.BASE_SCREEN_WIDTH + 40 / 2);
+			offsetY = 250;
+			graphics.drawTextUsingAlpha(canvas, playerHuman, "不出", offsetX, offsetY);
+		}
+		else if /*
 		//等待玩家操作时无需绘制玩家的手牌，否则会叠在按钮下面很不好看
-		if (playerHuman.getLastCards() != null && (!isWaitingForUser)) {
+		if (playerHuman.getLastCards() != null && */(!isWaitingForUser) {
 			ArrayList<Card> cards = playerHuman.getLastCards().getCardList();
 			int len = cards.size();
 			offsetX = (int) ((GameGraphics.BASE_SCREEN_WIDTH - len * 35) / 2);
@@ -763,7 +789,12 @@ public class MainActivity extends Activity implements GameScreen{
 						offsetY, 63, 86);
 			}
 		}
-		if (playerLeft.getLastCards() != null) {
+		if (playerLeft.getLastCards() == null){
+			offsetX = 120;
+			offsetY = 120;
+			graphics.drawTextUsingAlpha(canvas, playerLeft, "不出", offsetX, offsetY);
+		}
+		else {
 			ArrayList<Card> cards = playerLeft.getLastCards().getCardList();
 			int len = cards.size();
 			offsetX = 120;
@@ -787,7 +818,12 @@ public class MainActivity extends Activity implements GameScreen{
 				}
 			}
 		}
-		if (playerRight.getLastCards() != null) {
+		if (playerRight.getLastCards() == null){
+			offsetX = GameGraphics.BASE_SCREEN_WIDTH - 120 - 63;
+			offsetY = 120;
+			graphics.drawTextUsingAlpha(canvas, playerRight, "不出", offsetX, offsetY);
+		}
+		else{
 			ArrayList<Card> cards = playerRight.getLastCards().getCardList();
 			int len = cards.size();
 			offsetX = GameGraphics.BASE_SCREEN_WIDTH - 120 - 63;
@@ -822,21 +858,21 @@ public class MainActivity extends Activity implements GameScreen{
 	//绘制出牌信息（无大牌或牌型错误）
     private void drawOutCardsMessage(GameGraphics graphics, Canvas canvas)
     {
-    	if (graphics.getCurrentAlpha() > 0)
+    	if (graphics.getCurrentAlpha(playerHuman) > 0)
     	{
     		if (pickedTypeNotMatch)
             {
     			LiveBitmap bitmap = assets.bitmapCardsNotMatch;
             	int x = (GameGraphics.BASE_SCREEN_WIDTH - bitmap.getRawWidth()) / 2;
             	int y = GameGraphics.BASE_SCREEN_HEIGHT - 15 - GameGraphics.CARD_HEIGHT - bitmap.getRawHeight();
-            	graphics.drawBitmapUsingAlpha(canvas, bitmap, x, y);
+            	graphics.drawBitmapUsingAlpha(canvas, playerHuman, bitmap, x, y);
             }
         	if (humanNoBiggerCards)
         	{
     			LiveBitmap bitmap = assets.bitmapNoBigger;
         		int x = (GameGraphics.BASE_SCREEN_WIDTH - bitmap.getRawWidth()) / 2;
             	int y = GameGraphics.BASE_SCREEN_HEIGHT - 15 - GameGraphics.CARD_HEIGHT - bitmap.getRawHeight(); 
-            	graphics.drawBitmapUsingAlpha(canvas, bitmap, x, y);
+            	graphics.drawBitmapUsingAlpha(canvas, playerHuman, bitmap, x, y);
         	}
     	}
     }
@@ -887,19 +923,21 @@ public class MainActivity extends Activity implements GameScreen{
 							- GameGraphics.SCREEN_PADDING_HORIZONTAL + 10
 							- assets.playerRight.getRawWidth(),
 					130, playerRight.getHandCards().size());
-			graphics.drawText(canvas, assets.bitmapNumbers,
+			graphics.drawNumericText(canvas, assets.bitmapNumbers,
 					String.valueOf(playerLeft.getHandCards().size()),
 					GameGraphics.AIPLAYER_LEFT_CARDNUM_X,
 					GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
-			graphics.drawText(canvas, assets.bitmapNumbers,
+			graphics.drawNumericText(canvas, assets.bitmapNumbers,
 					String.valueOf(playerRight.getHandCards().size()),
 					GameGraphics.AIPLAYER_RIGHT_CARDNUM_X,
 					GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
 		}
 		drawPlayers(graphics, canvas);
 		drawHumanPlayerCards(graphics, canvas);
-		drawPlayerOutCards(graphics, canvas);
-		drawOutCardsMessage(graphics, canvas);
+		if (currentGame.status == Status.Playing){
+			drawPlayerOutCards(graphics, canvas);
+			drawOutCardsMessage(graphics, canvas);	
+		}
 		drawActiveButtons(graphics, canvas);
 	}
 	

@@ -36,19 +36,24 @@ public final class TipRobot {
 		}
 		//否则只能强制找出所有能组合出的适合当前牌型的牌
 		ArrayList<CardType> types = new ArrayList<>();
-		final int originalSize = handCards.size();
 		ArrayList<Card> cloneList = new ArrayList<>(handCards);
 
 		Card[] tempBombCards = new Card[4];
 		//先找出炸弹
-		for (int i=0,lastValue=0; i<originalSize-4;i++){
+		for (int i=0,lastValue=0; i<cloneList.size();i++){
 			int thisValue = cloneList.get(i).getValue();
 			if (thisValue==lastValue){
 				continue;
 			}
 			lastValue = thisValue;
-			for (int j=0; j<4; j++){
+			int realLength=0;
+			for (int j=0; j<4 && i+j<cloneList.size(); j++){
 				tempBombCards[j] = cloneList.get(i+j);
+				realLength++;
+			}
+			//没有四张牌
+			if (realLength<4){
+				break;
 			}
 			if (tempBombCards[0].compareIgnoreSuit(tempBombCards[1])==0
 					&& tempBombCards[1].compareIgnoreSuit(tempBombCards[2])==0 
@@ -79,7 +84,7 @@ public final class TipRobot {
 		if (followType instanceof Pair){
 			//跳过比原牌小的
 			Card before = followType.getCardList().get(0);
-			for (int i=0, lastValue = 0; i+1<originalSize; i++){
+			for (int i=0, lastValue = 0; i+1<cloneList.size(); i++){
 				Card thisCard = handCards.get(i);	
 				if (thisCard.compareIgnoreSuit(before)<=0){
 					continue;
@@ -97,7 +102,7 @@ public final class TipRobot {
 		}
 		else if (followType instanceof Three){
 			Card before = followType.getCardList().get(0);
-			for (int i=0, lastValue = 0; i<originalSize-2; i++){
+			for (int i=0, lastValue = 0; i<cloneList.size()-2; i++){
 				Card thisCard = handCards.get(i);
 				//跳过比原牌小的
 				if (thisCard.compareIgnoreSuit(before)<=0){

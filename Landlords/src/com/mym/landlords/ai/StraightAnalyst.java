@@ -68,6 +68,7 @@ final class StraightAnalyst {
 				}
 				if (lastCard==null){
 					tempCards.add(thisCard);
+					lastCard = thisCard;
 					continue;
 				}
 				int increment = thisCard.getValue()-lastCard.getValue();

@@ -83,7 +83,7 @@ public final class Player {
 	 * 打出卡牌。参数为null表示不出，但也将清空上一手牌的记录。
 	 * @param type 要打出的当前一手牌。
 	 */
-	public final void giveOutCards(CardType type){
+	public final synchronized void giveOutCards(CardType type){
 		lastCards = type;
 		if (type!=null){
 			Log.d(playerName, "giveoutcard:"+type);
@@ -147,8 +147,8 @@ public final class Player {
 	}
 	
 	/**
-	 * 执行跟牌策略。
-	 * @param lastType 场上最后打出的卡牌牌型对象。
+	 * 执行出牌或跟牌策略。
+	 * @param lastType 场上最后打出的卡牌牌型对象。当参数为null时表示自由出牌。
 	 * @return 返回一个合适的对象，该对象一定是逻辑合法（即大于参数牌型）的；或者为null。
 	 */
 	public CardType followCards(CardType lastType){
