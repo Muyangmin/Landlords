@@ -175,13 +175,24 @@ public abstract class CardType implements Comparable<CardType> {
 		}
 		else if (cardCount==4) {
 			instance = createObject(cards, Bomb.class);
+			//三带一
+			if (instance==null){
+				instance = createObject(cards, Three.class);
+			}
+		}
+		else if (cardCount==5){
+			instance = createObject(cards, Straight.class);
+			//三带对
+			if (instance==null){
+				instance = createObject(cards, Three.class);
+			}
 		}
 		else if (cardCount>=5){
 			instance = createObject(cards, Straight.class);
 		}
 		return instance;
 	}
-	
+
 	//创建子类对象。该方法假定子类均有一个仅带有一个ArrayList参数的构造器。
 	private static final CardType createObject(ArrayList<Card> cards,
 			Class<? extends CardType> clz) {

@@ -17,6 +17,7 @@ import com.mym.landlords.card.Pair;
 import com.mym.landlords.card.Rocket;
 import com.mym.landlords.card.Single;
 import com.mym.landlords.card.Straight;
+import com.mym.landlords.card.Three;
 import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
@@ -520,9 +521,9 @@ public class MainActivity extends Activity implements GameScreen{
 	
 	//初始化玩家并分配座位
 	private void initPlayerSeats(){
-		playerLeft = Player.newAiPlayer("aiLeft");
+		playerLeft = Player.newAiPlayer("aiLeft", playerLeft);
 		playerHuman= Player.newHumanPlayer("Human");
-		playerRight = Player.newAiPlayer("aiRight");
+		playerRight = Player.newAiPlayer("aiRight", playerRight);
 		
 		playerLeft.setSeat(playerRight, playerHuman);
 		playerHuman.setSeat(playerLeft, playerRight);
@@ -594,6 +595,18 @@ public class MainActivity extends Activity implements GameScreen{
 		else if (type instanceof Rocket){
 			soundPool.playSound(assets.soundTypeRocket);
 			soundPool.playSound(assets.soundEffectBoom);
+		}
+		else if (type instanceof Three){
+			CardType attachment = ((Three)type).getAttachType();
+			if (attachment instanceof Single){
+				soundPool.playSound(assets.soundTypeThree1);
+			}
+			else if (attachment instanceof Pair){
+				soundPool.playSound(assets.soundTypeThree2);
+			}
+			else {
+				soundPool.playSound(assets.soundTypeThree);
+			}
 		}
 		else {
 			//默认出牌音效

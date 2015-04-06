@@ -27,9 +27,15 @@ import com.mym.landlords.card.Three;
 final class AI {
 	
 	private static final String LOG_TAG = "AI";
+	/**
+	 * 保存关联的AI Player对象。
+	 */
+	private final Player bindPlayer;
 	
 	//package access
-	AI(){}
+	AI(Player player){
+		bindPlayer = player;
+	}
 	
 	/**
 	 * 按照牌张大小和牌中炸弹数量分析叫牌的分数。
@@ -90,6 +96,45 @@ final class AI {
 	protected final int callLandlord(ArrayList<Card> cards, int minScore) {
 		int alalysis = callLandlord(cards);
 		return alalysis > minScore ? alalysis : Game.BASIC_SCORE_NONE;
+	}
+	
+	protected CardType followCards(CardType lastType){
+		CardType decideType = null;
+		ArrayList<CardType> cardTypes = bindPlayer.cardsInfo.cardTypes;
+		if (lastType==null){
+			//出第一手牌，从最小的打起
+			decideType = (cardTypes.get(0));
+			//如果是三条，则考虑是否带牌
+			if (decideType instanceof Three){
+				optimizeThreeAttachments((Three) decideType, cardTypes);
+			}
+		}
+		else{
+			for (CardType type : cardTypes){
+				if (type.canAgainstType(lastType)){
+					decideType =  type;
+					break;
+				}
+			}
+		}
+		return decideType;
+	}
+	
+	private void optimizeThreeAttachments(Three three,
+			ArrayList<CardType> cardTypes) {
+		for (CardType tp : cardTypes) {
+			// XXX to be optimized: 2以上不带
+			if (tp instanceof Single
+					&& tp.getCardList().get(0).getValue() < Card.CARD_VALUE_2) {
+				three.setAttachType(tp);
+				break;
+			} else if (tp instanceof Pair
+					&& tp.getCardList().get(0).getValue() < Card.CARD_VALUE_2) {
+				three.setAttachType(tp);
+				break;
+			}
+			// 否则不带
+		}
 	}
 	
 	/**

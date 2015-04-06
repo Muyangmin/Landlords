@@ -20,7 +20,7 @@ import com.mym.landlords.card.Three;
  * @create 2015-4-2
  */
 public final class TipRobot {
-	private static AI robot = new AI();
+	private static AI robot = new AI(null);
 	
 	/**
 	 * 获取出牌提示。

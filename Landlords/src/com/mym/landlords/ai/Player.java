@@ -26,32 +26,18 @@ public final class Player {
 	private CardType lastCards;			//出的最后一手牌，用于AI判断和逻辑控制
 	private int calledScore = Integer.MIN_VALUE;// 叫的分数, Integer.MIN_VALUE表示未赋值
 	
+	/* 以下部分为 AI需要用到的属性 */
 	private AI aiRobot;					//机器AI
-	private PlayerCardsInfo cardsInfo;	//卡牌分析结果
+	protected PlayerCardsInfo cardsInfo;	//卡牌分析结果
 
-	/**
-	 * 创建一个新的AI玩家实例。
-	 * @deprecated 推荐使用 {@link #newAiPlayer(String)}代替。
-	 */
-	public static final Player newAiPlayer() {
-		return newAiPlayer("");
-	}
 	/**
 	 * 创建一个新的AI玩家实例。
 	 * @param name 玩家名称。
 	 */
-	public static final Player newAiPlayer(String name) {
+	public static final Player newAiPlayer(String name, Player bindPlayer) {
 		Player player = new Player(true, name == null ? "" : name);
-		player.aiRobot = new AI();
+		player.aiRobot = new AI(bindPlayer);
 		return player;
-	}
-
-	/**
-	 * 创建一个非AI玩家实例。
-	 * @deprecated 推荐使用 {@link #newHumanPlayer(String)}代替。
-	 */
-	public static final Player newHumanPlayer() {
-		return newHumanPlayer("");
 	}
 
 	/**
