@@ -37,11 +37,19 @@ public final class TipRobot {
 		//否则只能强制找出所有能组合出的适合当前牌型的牌
 		ArrayList<CardType> types = new ArrayList<>();
 		ArrayList<Card> cloneList = new ArrayList<>(handCards);
-
+		if (followType instanceof Rocket){
+			return types;
+		}
 		Card[] tempBombCards = new Card[4];
+		final boolean followBomb = followType instanceof Bomb;
+		final int bombValue = followType.getCardList().get(0).getValue();
 		//先找出炸弹
 		for (int i=0,lastValue=0; i<cloneList.size();i++){
 			int thisValue = cloneList.get(i).getValue();
+			//排除比前一个炸弹小的炸弹。
+			if (followBomb && thisValue <= bombValue) {
+				continue;
+			}
 			if (thisValue==lastValue){
 				continue;
 			}
@@ -73,7 +81,7 @@ public final class TipRobot {
 				types.add(new Single(card));
 			}
 		}
-		//王炸可以拆开打单牌，但是对于其他情形就只能用炸弹了
+		//王炸可以拆开打单牌，但是对于其他情形就只能用作炸弹了
 		int[] rocketPattern = new int[]{Card.CARD_VALUE_JOKER_S, Card.CARD_VALUE_JOKER_B};
 		ArrayList<Card> rocketCards = robot.takeoutCards(rocketPattern, cloneList);
 		if (rocketCards!=null){

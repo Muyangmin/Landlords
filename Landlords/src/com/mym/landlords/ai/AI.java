@@ -98,7 +98,6 @@ final class AI {
 		return alalysis > minScore ? alalysis : Game.BASIC_SCORE_NONE;
 	}
 	
-	//TODO 在提示机器人中增加跟牌类型为炸弹时，对前一个炸弹大小的判断。
 	protected CardType followCards(CardType lastType){
 		CardType decideType = null;
 		ArrayList<CardType> cardTypes = bindPlayer.cardsInfo.cardTypes;
