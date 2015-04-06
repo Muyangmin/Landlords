@@ -1,6 +1,7 @@
 package com.mym.landlords.card;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * 因为斗地主中三条可以带一个或一对，因此需要稍加判断。但为了程序的统一性，三条和其带的牌被统一放在
@@ -103,8 +104,17 @@ public final class Three extends CardType implements NonBombType{
 		return attachType;
 	}
 
+	//设置这个三条所带的牌。
 	public void setAttachType(CardType attachType) {
+		CardType beforeType = this.attachType;
+		if (attachType!=null && beforeType!=null){
+			cardList.removeAll(beforeType.getCardList());
+		}
 		this.attachType = attachType;
+		if (attachType!=null){
+			cardList.addAll(attachType.getCardList());
+			Collections.sort(cardList);
+		}
 	}
 	
 }

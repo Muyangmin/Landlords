@@ -98,6 +98,7 @@ final class AI {
 		return alalysis > minScore ? alalysis : Game.BASIC_SCORE_NONE;
 	}
 	
+	//TODO 在提示机器人中增加跟牌类型为炸弹时，对前一个炸弹大小的判断。
 	protected CardType followCards(CardType lastType){
 		CardType decideType = null;
 		ArrayList<CardType> cardTypes = bindPlayer.cardsInfo.cardTypes;
@@ -110,9 +111,17 @@ final class AI {
 			}
 		}
 		else{
-			for (CardType type : cardTypes){
-				if (type.canAgainstType(lastType)){
-					decideType =  type;
+			for (CardType type : cardTypes) {
+				if (type.canAgainstType(lastType)) {
+					decideType = type;
+					// 如果是三条， 则检查出牌要带的类型，强制只能带一样的类型。
+					if (decideType instanceof Three) {
+						if (!forceAttachCards(((Three) lastType),
+								((Three) decideType), cardTypes)) {
+							// 无牌可带
+							decideType = null;
+						}
+					}
 					break;
 				}
 			}
@@ -120,6 +129,7 @@ final class AI {
 		return decideType;
 	}
 	
+	//出牌前检查三条是否能带上单或对
 	private void optimizeThreeAttachments(Three three,
 			ArrayList<CardType> cardTypes) {
 		for (CardType tp : cardTypes) {
@@ -135,6 +145,29 @@ final class AI {
 			}
 			// 否则不带
 		}
+	}
+	
+	//强制带牌，用于跟牌时使用。
+	private boolean forceAttachCards(Three before, Three current, 
+			ArrayList<CardType> cardTypes){
+		if (current.getAttachType()!=null){
+			Log.w(LOG_TAG, "this object has already attach cards before.");
+			return false;
+		}
+		CardType followType = before.getAttachType();
+		if (followType==null){
+			return true;
+		}
+		Class<? extends CardType> clz = followType.getClass();
+		for (CardType tp : cardTypes) {
+			if (tp.getClass().equals(clz)
+					&& tp.getCardList().get(0).getValue() < Card.CARD_VALUE_2) {
+				current.setAttachType(tp);
+				return true;
+			}
+			// 否则不带
+		}
+		return false;
 	}
 	
 	/**

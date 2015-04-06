@@ -34,9 +34,9 @@ public final class Player {
 	 * 创建一个新的AI玩家实例。
 	 * @param name 玩家名称。
 	 */
-	public static final Player newAiPlayer(String name, Player bindPlayer) {
+	public static final Player newAiPlayer(String name) {
 		Player player = new Player(true, name == null ? "" : name);
-		player.aiRobot = new AI(bindPlayer);
+		player.aiRobot = new AI(player);
 		return player;
 	}
 
@@ -139,20 +139,7 @@ public final class Player {
 	 */
 	public CardType followCards(CardType lastType){
 		checkAiPlayer();
-		CardType decideType = null;
-		if (lastType==null){
-			//出第一手牌，从最小的打起
-			decideType = (cardsInfo.cardTypes.get(0));
-		}
-		else{
-			for (CardType type : cardsInfo.cardTypes){
-				if (type.canAgainstType(lastType)){
-					decideType =  type;
-					break;
-				}
-			}
-		}
-		return decideType;
+		return aiRobot.followCards(lastType);
 	}
 	
 

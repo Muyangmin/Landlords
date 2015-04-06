@@ -124,7 +124,9 @@ public final class TipRobot {
 		else if (followType instanceof Straight){
 			ArrayList<Straight> straights = StraightAnalyst.forceGetStraights(
 					(Straight) followType, cloneList);
-			types.addAll(straights);
+			if (straights!=null){
+				types.addAll(straights);	
+			}
 		}
 		Collections.sort(types, CardType.SORT_COMPARATOR);
 		return types;

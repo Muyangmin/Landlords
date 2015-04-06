@@ -521,9 +521,9 @@ public class MainActivity extends Activity implements GameScreen{
 	
 	//初始化玩家并分配座位
 	private void initPlayerSeats(){
-		playerLeft = Player.newAiPlayer("aiLeft", playerLeft);
+		playerLeft = Player.newAiPlayer("aiLeft");
 		playerHuman= Player.newHumanPlayer("Human");
-		playerRight = Player.newAiPlayer("aiRight", playerRight);
+		playerRight = Player.newAiPlayer("aiRight");
 		
 		playerLeft.setSeat(playerRight, playerHuman);
 		playerHuman.setSeat(playerLeft, playerRight);
