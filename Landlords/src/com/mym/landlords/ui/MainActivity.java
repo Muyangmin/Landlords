@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -496,6 +497,7 @@ public class MainActivity extends Activity implements GameScreen{
 		graphics = GameGraphics.newInstance();
 		gameView = new GameView(this, graphics, this);
 		setContentView(gameView);
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		soundPool = GlobalSoundPool.getInstance(this);
 		assets = Assets.getInstance();
 		currentGame = Game.newGame();
@@ -785,7 +787,7 @@ public class MainActivity extends Activity implements GameScreen{
 		int offsetY = 0;
 
 		if (playerHuman.getLastCards()==null){
-			offsetX = (int) (GameGraphics.BASE_SCREEN_WIDTH + 40 / 2);
+			offsetX = (int) (GameGraphics.BASE_SCREEN_WIDTH/ 2);
 			offsetY = 250;
 			graphics.drawTextUsingAlpha(canvas, playerHuman, "不出", offsetX, offsetY);
 		}
