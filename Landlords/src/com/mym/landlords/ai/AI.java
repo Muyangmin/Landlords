@@ -110,20 +110,26 @@ final class AI {
 			}
 		}
 		else{
-			for (CardType type : cardTypes) {
-				if (type.canAgainstType(lastType)) {
-					decideType = type;
-					// 如果是三条， 则检查出牌要带的类型，强制只能带一样的类型。
-					if (decideType instanceof Three) {
-						if (!forceAttachCards(((Three) lastType),
-								((Three) decideType), cardTypes)) {
-							// 无牌可带
-							decideType = null;
-						}
-					}
-					break;
-				}
+			//先判断是否需要跟牌
+			if (!needToFollow(lastType)){
+				decideType = null;
 			}
+			else{
+				for (CardType type : cardTypes) {
+					if (type.canAgainstType(lastType)) {
+						decideType = type;
+						// 如果是三条， 则检查出牌要带的类型，强制只能带一样的类型。
+						if (decideType instanceof Three) {
+							if (!forceAttachCards(((Three) lastType),
+									((Three) decideType), cardTypes)) {
+								// 无牌可带
+								decideType = null;
+							}
+						}
+						break;
+					}
+				}
+			}//else block
 		}
 		return decideType;
 	}
@@ -309,6 +315,61 @@ final class AI {
 		statPlayerCardsInfo(playerInfo);
 		Collections.sort(playerInfo.cardTypes, CardType.SORT_COMPARATOR);
 		return playerInfo;
+	}
+	
+	//判断是否需要跟牌
+	private boolean needToFollow(CardType cardsToFollow){
+		//如果自己是地主，则无需考虑，有牌必打
+		if (bindPlayer.isLandlord()){
+			return true;
+		}
+		//如果自己是地主的上家, 默认出牌
+		if (bindPlayer.isPriorOfLandlord){
+			CardType partnerCards = bindPlayer.getPriorPlayer().getLastCards();
+			//搭档没有打,则跟牌
+			if (partnerCards==null){
+				return true;
+			}
+			//如果搭档跟了牌且牌比较大，则不跟牌
+			if ((cardsToFollow instanceof Single 
+					&& partnerCards.getCardList().get(0).getValue() >= Card.CARD_VALUE_A)
+					|| (cardsToFollow instanceof Pair 
+					&& partnerCards.getCardList().get(0).getValue() >= Card.CARD_VALUE_K)) {
+				return false;
+			}
+			//如果跟的牌是炸弹或顺子，不跟牌
+			if (partnerCards instanceof Bomb
+					|| partnerCards instanceof Straight
+					|| partnerCards instanceof Rocket) {
+				return false;
+			}
+			return true;
+		}
+		//如果自己是地主的下家
+		if (bindPlayer.isNextOfLandlord){
+			CardType landCards = bindPlayer.getPriorPlayer().getLastCards();
+			//如果地主没有出牌，则不出
+			if (landCards==null){
+				return false;
+			}
+			//如果是炸弹或顺子，有牌必跟（不需要判断王炸）
+			if (landCards instanceof Bomb || landCards instanceof Straight){
+				return true;
+			}
+			//搭档上次没有跟牌，则打出
+			if (bindPlayer.getNextPlayer().getLastCards()==null){
+				return true;
+			}
+			//如果有独立的无需拆牌就能打的，则打出
+			ArrayList<CardType> cardTypes = bindPlayer.cardsInfo.cardTypes;
+			for (CardType type: cardTypes){
+				if (type.getClass().equals(cardsToFollow)){
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
 	}
 	
 	private void statPlayerCardsInfo(PlayerCardsInfo info){

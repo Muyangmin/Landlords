@@ -29,6 +29,10 @@ public final class Player {
 	/* 以下部分为 AI需要用到的属性 */
 	private AI aiRobot;					//机器AI
 	protected PlayerCardsInfo cardsInfo;	//卡牌分析结果
+	/** 是否为地主的上家。 */
+	protected boolean isPriorOfLandlord = false;
+	/** 是否为地主的下家。 */
+	protected boolean isNextOfLandlord = false;
 
 	/**
 	 * 创建一个新的AI玩家实例。
@@ -170,6 +174,9 @@ public final class Player {
 			throw new RuntimeException("awardCards cannot be null.");
 		}
 		this.isLandlord = true;
+		getPriorPlayer().isPriorOfLandlord = true;
+		getNextPlayer().isNextOfLandlord = true;
+		
 		//实现底牌加入手中时的选中状态
 		for (Card card : this.handCards){
 			card.setPicked(false);
@@ -179,10 +186,13 @@ public final class Player {
 			this.handCards.add(card);
 		}
 		Collections.sort(this.handCards);
+		
+		//对于 AI，重新组合手牌
 		if (isAiPlayer){
 			this.cardsInfo.recycle();
 			this.cardsInfo = makeCards();
 		}
+
 	}
 
 	/**
