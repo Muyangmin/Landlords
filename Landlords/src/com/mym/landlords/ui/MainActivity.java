@@ -30,7 +30,11 @@ import com.mym.landlords.widget.MappedTouchEvent;
 import com.mym.util.PollingThread;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -80,7 +84,7 @@ public class MainActivity extends Activity implements GameScreen{
         private static final long LOGIC_THREAD_INTERVAL = 100;	//逻辑线程的间隔时间
     	private Player currentPlayer = null;	//记录当前已经进行的循环值
     	private Player startPlayer;				//当前循环第一次操作的玩家
-    	private Player tempLandlord = null;			//记录叫地主分数最高的玩家
+    	private Player tempLandlord = null;		//记录叫地主分数最高的玩家
     	private CardType currentType;			//当前正在打的牌型
         private ArrayList<CardType> currentTips;	//当前提示的出牌列表
     	private TipBtnListener tipBtnListener = new TipBtnListener();
@@ -92,7 +96,13 @@ public class MainActivity extends Activity implements GameScreen{
     	@Override
     	protected void action() {
     		switch (currentGame.status) {
-			case Preparing://该阶段无逻辑需要控制
+			case Preparing:
+				shuffleAndDealCards();
+				Log.d(LOG_TAG, playerLeft.getPlayerName()+" cards:"+playerLeft.getHandCards().toString());
+				Log.d(LOG_TAG, playerHuman.getPlayerName()+" cards:"+playerHuman.getHandCards().toString());
+				Log.d(LOG_TAG, playerRight.getPlayerName()+" cards:"+playerRight.getHandCards().toString());
+				Log.d(LOG_TAG, "landlord cards:"+landlordCards.toString());
+				currentGame.status = Status.CallingLandlord;
 				break;
 			case CallingLandlord:
 				callLandlord();
@@ -126,9 +136,22 @@ public class MainActivity extends Activity implements GameScreen{
 									: zeroCardPlayer.getNextPlayer());
     			}
     			currentGame.status = Status.Gameover;
+    			final boolean humanWonGame = winners.contains(playerHuman);
     			//播放结束音效
-				soundPool.playSound(winners.contains(playerHuman) ? assets.soundPlayWin
-								: assets.soundPlayLose);
+				soundPool.playSound(humanWonGame ? assets.soundPlayWin
+						: assets.soundPlayLose);
+				//重置各种变量
+				currentPlayer = null;
+				startPlayer = null;
+				tempLandlord = null;
+				currentType = null;
+    			handler.post(new Runnable() {
+					
+					@Override
+					public void run() {
+		    			showGameOverDialog(humanWonGame);
+					}
+				});
     			Log.i(LOG_TAG, "winner:"+winners);
     			return ;
     		}
@@ -503,14 +526,8 @@ public class MainActivity extends Activity implements GameScreen{
 		currentGame = Game.newGame();
 		currentGame.status = Status.Preparing;
 		initPlayerSeats();
-		shuffleAndDealCards();
-		Log.d(LOG_TAG, playerLeft.getPlayerName()+" cards:"+playerLeft.getHandCards().toString());
-		Log.d(LOG_TAG, playerHuman.getPlayerName()+" cards:"+playerHuman.getHandCards().toString());
-		Log.d(LOG_TAG, playerRight.getPlayerName()+" cards:"+playerRight.getHandCards().toString());
-		Log.d(LOG_TAG, "landlord cards:"+landlordCards.toString());
 		logicThread = new GameLogicThread();
 		logicThread.start();
-		currentGame.status = Status.CallingLandlord;
 	}
 	
 	@Override
@@ -894,6 +911,20 @@ public class MainActivity extends Activity implements GameScreen{
     	}
     }
     
+    private void showGameOverDialog(boolean humanWin) {
+    	AlertDialog.Builder builder = new Builder(this);
+		builder.setTitle("游戏结束").setMessage( (humanWin?"您赢了！":"你挂了，") + "是否重来？")
+				.setPositiveButton(android.R.string.ok, new OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						currentGame = Game.newGame();
+						Log.d(LOG_TAG, "game has reseted.");
+					}
+				}).setNegativeButton(android.R.string.no, null)
+				.create().show();
+	}
 	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
