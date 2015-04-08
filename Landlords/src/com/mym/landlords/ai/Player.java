@@ -51,6 +51,13 @@ public final class Player {
 	public static final Player newHumanPlayer(String name) {
 		return new Player(false, name);
 	}
+	
+	public synchronized final void reset(){
+		isLandlord = false;
+		handCards.clear();
+		lastCards = null;
+		calledScore = Integer.MIN_VALUE;
+	}
 
 	private Player(boolean isAi, String name) {
 		isAiPlayer = isAi;
@@ -214,9 +221,11 @@ public final class Player {
 	public void setCalledScore(int calledScore) {
 		this.calledScore = calledScore;
 	}
+	
 	public String getPlayerName() {
 		return playerName;
 	}
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

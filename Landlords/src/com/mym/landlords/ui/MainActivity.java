@@ -544,6 +544,9 @@ public class MainActivity extends Activity implements GameScreen{
 		pickedTypeNotMatch = humanNoBiggerCards = isWaitingForUser = false;
 		logicThread.startPlayer = logicThread.currentPlayer = logicThread.tempLandlord = null;
 		logicThread.currentType = null;
+		playerHuman.reset();
+		playerLeft.reset();
+		playerRight.reset();
 	}
 	
 	//初始化玩家并分配座位

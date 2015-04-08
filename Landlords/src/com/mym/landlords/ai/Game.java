@@ -56,6 +56,7 @@ public final class Game {
 		instance.basicScore = 0;
 		instance.boomCount =0;
 		instance.status = Status.Preparing;
+		instance.landlordPlayer = null;
 		instance.playerHumanCards.clear();
 		instance.playerLeftCards.clear();
 		instance.playerRightCards.clear();
