@@ -75,16 +75,15 @@ public final class Player {
 	 */
 	public final synchronized void giveOutCards(CardType type){
 		lastCards = type;
-		if (type!=null){
+		if (lastCards!=null){
 			Log.d(playerName, "giveoutcard:"+type);
 			handCards.removeAll(lastCards.getCardList());
-			//移除相关牌型
 			if (isAiPlayer){
-				cardsInfo.cardTypes.remove(type);
+				refreshCardsInfo();
 			}
 		}
 	}
-
+	
 	public Player getNextPlayer() {
 		return nextPlayer;
 	}
@@ -116,11 +115,16 @@ public final class Player {
 		calledScore = aiRobot.callLandlord(handCards, minScore >= 0 ? minScore : 0);
 	}
 	
-	private final PlayerCardsInfo makeCards(){
+	/**
+	 * 重新分析卡牌信息。
+	 */
+	private final void refreshCardsInfo(){
 		checkAiPlayer();
-		PlayerCardsInfo playerInfo =  aiRobot.makeCards(handCards);
-		Log.d(playerName, "Final playerInfo:"+playerInfo);
-		return playerInfo;
+		if (cardsInfo!=null){
+			cardsInfo.recycle();
+		}
+		cardsInfo = aiRobot.makeCards(handCards);
+		Log.v(playerName, "Final playerInfo:"+cardsInfo);
 	}
 
 	/**
@@ -159,7 +163,7 @@ public final class Player {
 		this.handCards.addAll(handCards);
 		Collections.sort(this.handCards);
 		if (isAiPlayer){
-			this.cardsInfo = makeCards();
+			refreshCardsInfo();
 		}
 	}
 
@@ -189,8 +193,7 @@ public final class Player {
 		
 		//对于 AI，重新组合手牌
 		if (isAiPlayer){
-			this.cardsInfo.recycle();
-			this.cardsInfo = makeCards();
+			refreshCardsInfo();
 		}
 
 	}

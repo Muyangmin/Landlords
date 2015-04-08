@@ -538,6 +538,14 @@ public class MainActivity extends Activity implements GameScreen{
 		}
 	}
 	
+	//重置游戏结束后的各项属性。
+	private void resetGame() {
+		currentGame = Game.newGame();
+		pickedTypeNotMatch = humanNoBiggerCards = isWaitingForUser = false;
+		logicThread.startPlayer = logicThread.currentPlayer = logicThread.tempLandlord = null;
+		logicThread.currentType = null;
+	}
+	
 	//初始化玩家并分配座位
 	private void initPlayerSeats(){
 		playerLeft = Player.newAiPlayer("aiLeft");
@@ -919,7 +927,7 @@ public class MainActivity extends Activity implements GameScreen{
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
-						currentGame = Game.newGame();
+						resetGame();
 						Log.d(LOG_TAG, "game has reseted.");
 					}
 				}).setNegativeButton(android.R.string.no, null)
