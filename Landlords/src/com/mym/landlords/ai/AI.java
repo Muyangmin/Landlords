@@ -276,29 +276,35 @@ final class AI {
 		ArrayList<CardType> cardTypes = info.cardTypes;
 		// 先确定要带的牌，避免在循环中处理
 		CardType attachType = null;
-		boolean hasRightAttachment = true;
+		boolean hasRightAttachment = false;
 		if (followType.getAttachType() instanceof Single) {
 			// This is a hack. we just create a "least" card and follow it.
 			attachType = followSingle(new Single(new Card(CardSuit.Spade,
 					Card.CARD_VALUE_3)), needToForce);
-			if ( (attachType==null) || (!(attachType instanceof Single))) {
-				hasRightAttachment = false;
+			if ( (attachType!=null) && (attachType instanceof Single)) {
+				hasRightAttachment = true;
 			}
 		} else if (followType.getAttachType() instanceof Pair) {
 			attachType = followPair(
 					new Pair(LangUtils.createList(new Card(CardSuit.Spade,
 							Card.CARD_VALUE_3), new Card(CardSuit.Spade,
 							Card.CARD_VALUE_3))), needToForce);
-			if ( (attachType==null) || (!(attachType instanceof Pair))) {
-				hasRightAttachment = false;
+			if ( (attachType!=null) && (attachType instanceof Pair)) {
+				hasRightAttachment = true;
 			}
 		}
 		Log.v(LOG_TAG, "follow:"+followType+", hasAttach:"+hasRightAttachment+","+attachType);
 		if (hasRightAttachment) {
 			for (CardType type : cardTypes) {
 				if (type instanceof Three && type.compareTo(followType)>0) {
-					((Three) type).setAttachType(attachType);
-					return type;
+					Three three = ((Three) type);
+					//避免出现自己带自己的Bug
+					if ( attachType!=null && three.getBodyList().get(0)
+							.isSameValueAs(attachType.getCardList().get(0))){
+						continue;
+					}
+					three.setAttachType(attachType);
+					return three;
 				}
 			}
 		}
