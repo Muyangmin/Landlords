@@ -32,7 +32,14 @@ public final class TipRobot {
 		//如果是第一个出牌
 		if (followType==null){
 			PlayerCardsInfo info = robot.makeCards(handCards);
-			return info.cardTypes;
+			ArrayList<CardType> cardTypes = info.cardTypes;
+			//优化带牌
+			for (CardType type: cardTypes){
+				if (type instanceof Three){
+					robot.optimizeThreeAttachments((Three)type, info.cardTypes);
+				}
+			}
+			return cardTypes;
 		}
 		//否则只能强制找出所有能组合出的适合当前牌型的牌
 		ArrayList<CardType> types = new ArrayList<>();

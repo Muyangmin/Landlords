@@ -15,6 +15,7 @@ import java.util.Collections;
 public final class Three extends CardType implements NonBombType{
 	
 	private CardType attachType = null;
+	private ArrayList<Card> bodyList;
 	
 	public Three(ArrayList<Card> list) {
 		try {
@@ -55,9 +56,10 @@ public final class Three extends CardType implements NonBombType{
 		int tmpListSize = tempCardList.size();
 		int tmpAttachSize = tempAttachList.size();
 		if ( (tmpListSize==3 && (tmpAttachSize<3)) ){
-			//do nothing
+			bodyList = tempCardList;
 		}
 		else if (tmpAttachSize==3 && (tmpListSize<3)){
+			bodyList = tempAttachList;
 			tempAttachList = tempCardList;
 			tmpAttachSize = tmpListSize;
 		}
@@ -87,7 +89,7 @@ public final class Three extends CardType implements NonBombType{
 			throw new ClassCastException("compare to wrong type:"
 					+ another.getClass().getSimpleName());
 		}
-		return cardList.get(0).compareTo(((Three)another).cardList.get(1));
+		return bodyList.get(0).compareTo(((Three)another).bodyList.get(0));
 	}
 
 	@Override
@@ -102,6 +104,12 @@ public final class Three extends CardType implements NonBombType{
 	 */
 	public CardType getAttachType() {
 		return attachType;
+	}
+	/**
+	 * 获得组成三条的卡牌列表。
+	 */
+	public ArrayList<Card> getBodyList(){
+		return bodyList;
 	}
 
 	//设置这个三条所带的牌。

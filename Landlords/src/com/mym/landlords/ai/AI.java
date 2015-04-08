@@ -10,12 +10,14 @@ import android.util.Log;
 
 import com.mym.landlords.card.Bomb;
 import com.mym.landlords.card.Card;
+import com.mym.landlords.card.CardSuit;
 import com.mym.landlords.card.CardType;
 import com.mym.landlords.card.Pair;
 import com.mym.landlords.card.Rocket;
 import com.mym.landlords.card.Single;
 import com.mym.landlords.card.Straight;
 import com.mym.landlords.card.Three;
+import com.mym.util.LangUtils;
 
 /**
  * 处理游戏的AI逻辑。
@@ -111,31 +113,209 @@ final class AI {
 		}
 		else{
 			//先判断是否需要跟牌
-			if (!needToFollow(lastType)){
-				decideType = null;
+			boolean needToForce = needToFollow(lastType);
+			if (lastType instanceof Single){
+				decideType = followSingle((Single) lastType, needToForce);
 			}
-			else{
+			else if (lastType instanceof Pair){
+				decideType = followPair((Pair) lastType, needToForce);
+			}
+			else if (lastType instanceof Three){
+				decideType = followThree((Three) lastType, needToForce);
+			}
+			else {
 				for (CardType type : cardTypes) {
 					if (type.canAgainstType(lastType)) {
 						decideType = type;
-						// 如果是三条， 则检查出牌要带的类型，强制只能带一样的类型。
-						if (decideType instanceof Three) {
-							if (!forceAttachCards(((Three) lastType),
-									((Three) decideType), cardTypes)) {
-								// 无牌可带
-								decideType = null;
-							}
-						}
 						break;
 					}
 				}
-			}//else block
+			}
 		}
 		return decideType;
 	}
+
+	/**
+	 * 处理单牌的跟牌方案。
+	 * 
+	 * @param followType
+	 *            需要被跟的牌
+	 * @param needToForce
+	 *            是否需要拆牌（强制跟牌）
+	 * @return 如果有牌可出，则返回这个牌型对象，否则返回null。注意：返回的不一定是Single对象，还可能是炸弹。
+	 */
+	protected CardType followSingle(Single followType, boolean needToForce) {
+		Card followCard = followType.getCardList().get(0); // 取出要跟的牌，便于比较
+		PlayerCardsInfo info = bindPlayer.cardsInfo;
+		ArrayList<CardType> cardTypes = info.cardTypes;
+		if (cardTypes == null) {
+			return null;
+		}
+		// 如果有现成的单牌且比原来的大，则返回
+		for (CardType type : cardTypes) {
+			if (type instanceof Single && type.compareTo(followType) > 0) {
+				return type;
+			}
+		}
+		// 没有，则拆2.注意：如果有王炸则不拆，而如果没有王炸，其必定是单牌，已在前面出过。
+		if (info.twoAndJokerCount > 0) {
+			for (Card card : bindPlayer.getHandCards()) {
+				if (card.getValue() == Card.CARD_VALUE_2
+						&& card.compareTo(followCard) > 0) {
+					return new Single(card);
+				}
+			}
+		}
+		// 没有，则找炸弹
+		if (info.bombCount > 0) {
+			for (CardType type : cardTypes) {
+				if (type instanceof Bomb || type instanceof Rocket) {
+					return type;
+				}
+			}
+		}
+		// 如果不是强制跟牌，则到此为止
+		if (!needToForce) {
+			return null;
+		}
+		// 否则拆顺子的顶牌, 5张以下顺子不拆
+		for (CardType type : cardTypes) {
+			if (type instanceof Straight) {
+				int length = ((Straight) type).length;
+				if (length <= 5) {
+					continue;
+				}
+				Card lastCard = type.getCardList().get(length - 1);
+				if (lastCard.compareTo(followCard) > 0) {
+					return new Single(lastCard);
+				}
+			}
+		}
+		// 否则拆三条
+		for (CardType type : cardTypes) {
+			if (type instanceof Three) {
+				// important:只能拆BodyList，而不能拆其带的牌
+				Card card = ((Three) type).getBodyList().get(0);
+				if (card.compareTo(followCard) > 0) {
+					return new Single(card);
+				}
+			}
+		}
+		// 无牌可出
+		return null;
+	}
+
+	/**
+	 * 处理对子的跟牌方案。
+	 * 
+	 * @param followType
+	 *            需要被跟的牌
+	 * @param needToForce
+	 *            是否需要拆牌（强制跟牌）
+	 * @return 如果有牌可出，则返回这个牌型对象，否则返回null。注意：返回的不一定是Pair对象，还可能是炸弹。
+	 */
+	protected CardType followPair(Pair followType, boolean needToForce) {
+		Card followCard = followType.getCardList().get(0); // 取出要跟的牌，便于比较
+		PlayerCardsInfo info = bindPlayer.cardsInfo;
+		ArrayList<CardType> cardTypes = info.cardTypes;
+		if (cardTypes == null) {
+			return null;
+		}
+		// 如果有现成的对子且比原来的大，则返回
+		for (CardType type : cardTypes) {
+			if (type instanceof Pair && type.compareTo(followType) > 0) {
+				return type;
+			}
+		}
+		// 没有，则拆2.注意：王炸不拆
+		if (info.twoAndJokerCount > 1) {
+			ArrayList<Card> cards = takeoutCards(new int[] { Card.CARD_VALUE_2,
+					Card.CARD_VALUE_2 }, bindPlayer.getHandCards());
+			if (cards != null) {
+				return new Pair(cards);
+			}
+		}
+		// 没有，则找炸弹
+		if (info.bombCount > 0) {
+			for (CardType type : cardTypes) {
+				if (type instanceof Bomb || type instanceof Rocket) {
+					return type;
+				}
+			}
+		}
+		// 如果不是强制跟牌，则到此为止
+		if (!needToForce) {
+			return null;
+		}
+		// 否则拆连对，暂略
+		// 否则拆三条
+		for (CardType type : cardTypes) {
+			if (type instanceof Three) {
+				Card card = ((Three) type).getBodyList().get(0);
+				if (card.compareTo(followCard) > 0) {
+					return new Pair(new ArrayList<Card>(((Three) type)
+							.getBodyList().subList(0, 2)));
+				}
+			}
+		}
+		// 还是没有牌，不出
+		return null;
+	}
+
+	/**
+	 * 处理三条的跟牌方案。
+	 * 
+	 * @param followType
+	 *            需要被跟的牌
+	 * @param needToForce
+	 *            是否需要拆牌（强制跟牌）
+	 * @return 如果有牌可出，则返回这个牌型对象，否则返回null。注意：返回的不一定是Three对象，还可能是炸弹。
+	 */
+	protected CardType followThree(Three followType, boolean needToForce) {
+		PlayerCardsInfo info = bindPlayer.cardsInfo;
+		ArrayList<CardType> cardTypes = info.cardTypes;
+		// 先确定要带的牌，避免在循环中处理
+		CardType attachType = null;
+		boolean hasRightAttachment = true;
+		if (followType.getAttachType() instanceof Single) {
+			// This is a hack. we just create a "least" card and follow it.
+			attachType = followSingle(new Single(new Card(CardSuit.Spade,
+					Card.CARD_VALUE_3)), needToForce);
+			if ( (attachType==null) || (!(attachType instanceof Single))) {
+				hasRightAttachment = false;
+			}
+		} else if (followType.getAttachType() instanceof Pair) {
+			attachType = followPair(
+					new Pair(LangUtils.createList(new Card(CardSuit.Spade,
+							Card.CARD_VALUE_3), new Card(CardSuit.Spade,
+							Card.CARD_VALUE_3))), needToForce);
+			if ( (attachType==null) || (!(attachType instanceof Pair))) {
+				hasRightAttachment = false;
+			}
+		}
+		Log.v(LOG_TAG, "follow:"+followType+", hasAttach:"+hasRightAttachment+","+attachType);
+		if (hasRightAttachment) {
+			for (CardType type : cardTypes) {
+				if (type instanceof Three && type.compareTo(followType)>0) {
+					((Three) type).setAttachType(attachType);
+					return type;
+				}
+			}
+		}
+		// 无牌可带，寻求炸弹
+		if (info.bombCount > 0) {
+			for (CardType type : cardTypes) {
+				if (type instanceof Bomb || type instanceof Rocket) {
+					return type;
+				}
+			}
+		}
+		// 还是无牌，则不出
+		return null;
+	}
 	
 	//出牌前检查三条是否能带上单或对
-	private void optimizeThreeAttachments(Three three,
+	protected void optimizeThreeAttachments(Three three,
 			ArrayList<CardType> cardTypes) {
 		for (CardType tp : cardTypes) {
 			// XXX to be optimized: 2以上不带
@@ -150,29 +330,6 @@ final class AI {
 			}
 			// 否则不带
 		}
-	}
-	
-	//强制带牌，用于跟牌时使用。
-	private boolean forceAttachCards(Three before, Three current, 
-			ArrayList<CardType> cardTypes){
-		if (current.getAttachType()!=null){
-			Log.w(LOG_TAG, "this object has already attach cards before.");
-			return false;
-		}
-		CardType followType = before.getAttachType();
-		if (followType==null){
-			return true;
-		}
-		Class<? extends CardType> clz = followType.getClass();
-		for (CardType tp : cardTypes) {
-			if (tp.getClass().equals(clz)
-					&& tp.getCardList().get(0).getValue() < Card.CARD_VALUE_2) {
-				current.setAttachType(tp);
-				return true;
-			}
-			// 否则不带
-		}
-		return false;
 	}
 	
 	/**
