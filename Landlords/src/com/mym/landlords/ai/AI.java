@@ -28,7 +28,7 @@ import com.mym.util.LangUtils;
  */
 final class AI {
 	
-	private static final String LOG_TAG = "AI";
+	private final String LOG_TAG/* = "AI"*/;
 	/**
 	 * 保存关联的AI Player对象。
 	 */
@@ -37,6 +37,8 @@ final class AI {
 	//package access
 	AI(Player player){
 		bindPlayer = player;
+		LOG_TAG = (bindPlayer==null || bindPlayer.getPlayerName()==null)
+				? "AI" : bindPlayer.getPlayerName();
 	}
 	
 	/**

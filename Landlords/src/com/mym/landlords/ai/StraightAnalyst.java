@@ -88,7 +88,10 @@ final class StraightAnalyst {
 				}
 			}
 			if (tempCards.size()==follow.length){
-				forceStraights.add(new Straight(tempCards));
+				Straight straight = new Straight(tempCards);
+				if (straight.compareTo(follow) > 0){
+					forceStraights.add(straight);
+				}
 			}
 		}
 		return forceStraights;
