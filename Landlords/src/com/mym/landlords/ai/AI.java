@@ -203,6 +203,13 @@ final class AI {
 				}
 			}
 		}
+		//如果仅有两张牌且为对子，则拆牌单出（如果不是对子则必然在前面已经单出）
+		if (cardTypes.size()==1){
+			Card card = bindPlayer.getHandCards().get(0);
+			if (card.compareTo(followCard)>0){
+				return new Single(card);
+			}
+		}
 		// 无牌可出
 		return null;
 	}
