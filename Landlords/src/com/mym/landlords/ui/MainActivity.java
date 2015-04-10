@@ -83,6 +83,7 @@ public class MainActivity extends Activity implements GameScreen{
      */
     private class GameLogicThread extends PollingThread{
         private static final long LOGIC_THREAD_INTERVAL = 100;	//逻辑线程的间隔时间
+        private static final long SHOW_AICARDS_DURATION = 1500;	//展示AI手牌的时间
     	private Player currentPlayer = null;	//记录当前已经进行的循环值
     	private Player startPlayer;				//当前循环第一次操作的玩家
     	private Player tempLandlord = null;		//记录叫地主分数最高的玩家
@@ -120,6 +121,37 @@ public class MainActivity extends Activity implements GameScreen{
 			}
     	}
     	
+		private void performShowAiCards() {
+			currentGame.status = Status.ShowingAICards;
+			final boolean humanWonGame = winners.contains(playerHuman);
+			// 播放结束音效
+			soundPool.playSound(humanWonGame ? assets.soundPlayWin
+					: assets.soundPlayLose);
+			//等待一段时间后进入GameOver状态
+			handler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					// 重置各种变量
+					currentPlayer = null;
+					startPlayer = null;
+					tempLandlord = null;
+					currentType = null;
+					playerHuman.reset();
+					playerLeft.reset();
+					playerRight.reset();
+					handler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							currentGame.status = Status.Gameover;
+							showGameOverDialog(humanWonGame);
+						}
+					});
+				}
+			}, SHOW_AICARDS_DURATION);
+		}
+
     	private void playing(){
     		if (isWaitingForUser){
 //    			Log.v(LOG_TAG, "waiting for user...");
@@ -136,24 +168,8 @@ public class MainActivity extends Activity implements GameScreen{
 							? zeroCardPlayer.getPriorPlayer() 
 									: zeroCardPlayer.getNextPlayer());
     			}
-    			currentGame.status = Status.Gameover;
-    			final boolean humanWonGame = winners.contains(playerHuman);
-    			//播放结束音效
-				soundPool.playSound(humanWonGame ? assets.soundPlayWin
-						: assets.soundPlayLose);
-				//重置各种变量
-				currentPlayer = null;
-				startPlayer = null;
-				tempLandlord = null;
-				currentType = null;
-    			handler.post(new Runnable() {
-					
-					@Override
-					public void run() {
-		    			showGameOverDialog(humanWonGame);
-					}
-				});
     			Log.i(LOG_TAG, "winner:"+winners);
+    			performShowAiCards();
     			return ;
     		}
     		
@@ -822,9 +838,8 @@ public class MainActivity extends Activity implements GameScreen{
 			offsetY = 250;
 			graphics.drawTextUsingAlpha(canvas, playerHuman, "不出", offsetX, offsetY);
 		}
-		else if /*
 		//等待玩家操作时无需绘制玩家的手牌，否则会叠在按钮下面很不好看
-		if (playerHuman.getLastCards() != null && */(!isWaitingForUser) {
+		else if (!isWaitingForUser) {
 			ArrayList<Card> cards = playerHuman.getLastCards().getCardList();
 			int len = cards.size();
 			offsetX = (int) ((GameGraphics.BASE_SCREEN_WIDTH - len * 35) / 2);
@@ -903,6 +918,65 @@ public class MainActivity extends Activity implements GameScreen{
 		}
 	}
 	
+	// 绘制AI最后的手牌，为避免使用last造成歧义，采用Game over的描述。
+	private void drawAIGameoverCards(GameGraphics graphics, Canvas canvas) {
+		int offsetX, offsetY;
+		// draw left
+		ArrayList<Card> leftCards = playerLeft.getHandCards();
+		int leftCardsSize = leftCards == null ? 0 : leftCards.size();
+		if (leftCardsSize > 0) {
+			offsetX = 120;
+			offsetY = 100;
+			for (int i = 0; i < leftCardsSize; i++) {
+				Card card = leftCards.get(i);
+				LiveBitmap cardBitmap = assets.getCorrespondBitmap(card);
+				if (i < 6) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + i * 35,
+							offsetY, 63, 86);
+				} else if (i < 12) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + (i - 6)
+							* 35, offsetY + 25, 63, 86);
+				} else if (i < 18) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + (i - 12)
+							* 35, offsetY + 50, 63, 86);
+				} else {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX + (i - 18)
+							* 35, offsetY + 75, 63, 86);
+				}
+			}
+		}
+		// 绘制右边AI
+		ArrayList<Card> rightcards = playerRight.getHandCards();
+		int rightCardsSize = rightcards == null ? 0 : rightcards.size();
+		if (rightCardsSize > 0) {
+			offsetX = GameGraphics.BASE_SCREEN_WIDTH - 120 - 63;
+			offsetY = 100;
+			for (int i = 0; i < rightCardsSize; i++) {
+				Card card = rightcards.get(i);
+				LiveBitmap cardBitmap = assets.getCorrespondBitmap(card);
+				if (i < 6) {
+					if (rightCardsSize < 6) {
+						graphics.drawBitmap(canvas, cardBitmap, offsetX
+								- (rightCardsSize - 1 - i) * 35, offsetY, 63,
+								86);
+					} else {
+						graphics.drawBitmap(canvas, cardBitmap, offsetX
+								- (6 - 1 - i) * 35, offsetY, 63, 86);
+					}
+				} else if (i < 12) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX - 5 * 35
+							+ (i - 6) * 35, offsetY + 25, 63, 86);
+				} else if (i < 18) {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX - 5 * 35
+							+ (i - 12) * 35, offsetY + 50, 63, 86);
+				} else {
+					graphics.drawBitmap(canvas, cardBitmap, offsetX - 5 * 35
+							+ (i - 18) * 35, offsetY + 75, 63, 86);
+				}
+			}
+		}
+	}
+
 	//绘制出牌信息（无大牌或牌型错误）
     private void drawOutCardsMessage(GameGraphics graphics, Canvas canvas)
     {
@@ -999,6 +1073,9 @@ public class MainActivity extends Activity implements GameScreen{
 		if (currentGame.status == Status.Playing){
 			drawPlayerOutCards(graphics, canvas);
 			drawOutCardsMessage(graphics, canvas);	
+		}
+		else if (currentGame.status==Status.ShowingAICards){
+			drawAIGameoverCards(graphics, canvas);
 		}
 		drawActiveButtons(graphics, canvas);
 	}

@@ -52,6 +52,14 @@ public final class Player {
 		return new Player(false, name);
 	}
 	
+	/**
+	 * 重置Player的状态，包括：
+	 * <ul>
+	 * <li>重置地主标志位；</li>
+	 * <li>清空手牌；</li>
+	 * <li>重置最后打出的牌和叫的地主分数等。</li>
+	 * </ul>
+	 */
 	public synchronized final void reset(){
 		isLandlord = false;
 		handCards.clear();
