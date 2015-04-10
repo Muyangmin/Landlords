@@ -529,9 +529,21 @@ final class AI {
 			if (landCards instanceof Bomb || landCards instanceof Straight){
 				return true;
 			}
+			CardType partnerCards = bindPlayer.getNextPlayer().getLastCards();
 			//搭档上次没有跟牌，则打出
-			if (bindPlayer.getNextPlayer().getLastCards()==null){
+			if (partnerCards==null){
 				return true;
+			}
+			//如果当前的牌是搭档打出，默认不打
+			if (partnerCards == cardsToFollow) {
+				//作为地主下家对卡牌的大小可以小一些
+				if ((cardsToFollow instanceof Single && partnerCards
+						.getCardList().get(0).getValue() < Card.CARD_VALUE_Q)
+						|| (cardsToFollow instanceof Pair && partnerCards
+								.getCardList().get(0).getValue() < Card.CARD_VALUE_J)) {
+					return true;
+				}
+				return false;
 			}
 			//如果有独立的无需拆牌就能打的，则打出
 			ArrayList<CardType> cardTypes = bindPlayer.cardsInfo.cardTypes;
