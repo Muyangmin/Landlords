@@ -43,6 +43,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 
 public class MainActivity extends Activity implements GameScreen{
 	
@@ -517,6 +518,8 @@ public class MainActivity extends Activity implements GameScreen{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		graphics = GameGraphics.newInstance();
 		gameView = new GameView(this, graphics, this);
 		setContentView(gameView);
