@@ -49,7 +49,8 @@ final class StraightAnalyst {
 	 * @param cards 如果无牌可出，则返回null;否则返回一个所有可能点数情况的列表，这些对子的点数彼此可能有所重叠。
 	 * @return
 	 */
-	protected static ArrayList<Straight> forceGetStraights(Straight follow, ArrayList<Card> cards){
+	protected static ArrayList<Straight> forceGetStraights(Straight follow,
+			ArrayList<Card> cards) {
 		if (follow==null || cards.size()< follow.length){
 			return null;
 		}
@@ -60,11 +61,14 @@ final class StraightAnalyst {
 		for (int i=0; i<size-follow.length; i++){
 			lastCard=null;
 			tempCards.clear();
-			//一定比
 			for (int j=0; i+j < size ; j++){
 				Card thisCard = cards.get(i+j);
 				if (thisCard.getValue()>=Card.CARD_VALUE_2){
 					break;
+				}
+				//比较点数
+				if (thisCard.compareTo(follow.getCardList().get(0)) <= 0){
+					continue;
 				}
 				if (lastCard==null){
 					tempCards.add(thisCard);

@@ -49,7 +49,7 @@ final class AI {
 	 */
 	private final int callLandlord(ArrayList<Card> list){
 		//force sort 
-		Collections.sort(list);
+		Collections.sort(list, Card.COMPARATOR_WITH_SUIT);
 		int evaluateScore = 0;
 		int size = list.size();
 		//判断王炸和单张大小王
@@ -261,6 +261,7 @@ final class AI {
 		for (CardType type : cardTypes) {
 			if (type instanceof Three) {
 				Card card = ((Three) type).getBodyList().get(0);
+				//仅比较点数
 				if (card.compareTo(followCard) > 0) {
 					return new Pair(new ArrayList<Card>(((Three) type)
 							.getBodyList().subList(0, 2)));
@@ -412,7 +413,7 @@ final class AI {
 		//复制一个列表以便内部操作，避免直接操纵玩家手牌。
 		PlayerCardsInfo playerInfo = new PlayerCardsInfo();
 		ArrayList<Card> cloneList= new ArrayList<>(list);
-		Collections.sort(cloneList);
+		Collections.sort(cloneList, Card.COMPARATOR_WITH_SUIT);
 		//判断王炸是否存在。
 		ArrayList<Card> rocket = takeoutCards(new int[] {
 				Card.CARD_VALUE_JOKER_S, Card.CARD_VALUE_JOKER_B }, cloneList);

@@ -30,7 +30,7 @@ public final class Pair extends CardType implements NonBombType {
 		if (!(another instanceof Pair)) {
 			throw new ClassCastException("compare to wrong object.");
 		}
-		return cardList.get(0).compareIgnoreSuit(((Pair) another).cardList.get(1));
+		return cardList.get(0).compareTo(((Pair) another).cardList.get(0));
 	}
 
 	@Override

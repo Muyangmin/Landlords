@@ -25,7 +25,7 @@ public final class Bomb extends CardType implements BombType{
 		if ( !(another instanceof Bomb) ){
 			throw new ClassCastException("compare to wrong type:" + another.getClass().getSimpleName());
 		}
-		return cardList.get(0).compareTo(((Bomb)another).cardList.get(1));
+		return cardList.get(0).compareTo(((Bomb)another).cardList.get(0));
 	}
 
 	@Override

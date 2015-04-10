@@ -1,9 +1,15 @@
 package com.mym.landlords.card;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 /**
  * 单张卡牌实体类。
+ * <p>
+ * <h1>卡牌的比较</h1>
+ * 一般而言，在实现卡牌逻辑时只需要关心其大小；而在需要排序时往往还需要按照花色进行排序。
+ * 因此，在排序时使用 {@link #COMPARATOR_WITH_SUIT}，而在仅需要比较大小时请使用 {@link #compareTo(Card)}。
+ * </p>
  * @author Muyangmin
  * @create 2015-3-14
  */
@@ -35,6 +41,25 @@ public final class Card implements Serializable, Comparable<Card>, Pickable{
 	private int value;			//卡牌数值。即上面的大小值之一。
 	private String valueStr;	//卡牌数值的字符描述，主要用于提示或日志输出
 	private boolean isPicked; // 该卡牌是否被选中。
+	
+	/**
+	 * 按卡牌花色和点数排序的Comparator。
+	 */
+	public static final Comparator<Card> COMPARATOR_WITH_SUIT = new Comparator<Card>() {
+
+		@Override
+		public int compare(Card lhs, Card rhs) {
+			// 先比较大小
+			int compareResult = Integer.valueOf(lhs.value).compareTo(rhs.value);
+			if (compareResult == 0) {
+				// 如果大小相同则判断花色，保证手中所有大小相同的牌都按花色有序
+				compareResult = Integer.valueOf(lhs.suit.ordinal()).compareTo(
+						rhs.suit.ordinal());
+			}
+			return compareResult;
+		}
+
+	};
 
 	/**
 	 * 创建一张新的卡牌。
@@ -50,26 +75,26 @@ public final class Card implements Serializable, Comparable<Card>, Pickable{
 		this.valueStr = getValueLiteral(value);
 	}
 
-	@Override
-	public int compareTo(Card another) {
-		//先比较大小
-		int compareResult = Integer.valueOf(value).compareTo(another.value);
-		if (compareResult==0){
-			//如果大小相同则判断花色，保证手中所有大小相同的牌都按花色有序
-			compareResult = Integer.valueOf(suit.ordinal()).compareTo(another.suit.ordinal());
-		}
-		return compareResult;
-	}
+//	public int compareToXS(Card another) {
+//		//先比较大小
+//		int compareResult = Integer.valueOf(value).compareTo(another.value);
+//		if (compareResult==0){
+//			//如果大小相同则判断花色，保证手中所有大小相同的牌都按花色有序
+//			compareResult = Integer.valueOf(suit.ordinal()).compareTo(another.suit.ordinal());
+//		}
+//		return compareResult;
+//	}
 	
 	/**
 	 * 比较两张牌的点数大小，忽略花色。注意:不建议使用该方法比较大小王。
 	 */
-	public final int compareIgnoreSuit(Card another){
+	@Override
+	public final int compareTo(Card another){
 		return Integer.valueOf(value).compareTo(another.value);
 	}
 
 	/**
-	 * 比较两张牌的点数是否相同，该方法比 {@link #compareIgnoreSuit(Card)}方法更高效。
+	 * 比较两张牌的点数是否相同，该方法比 {@link #compareTo(Card)}方法更高效。
 	 * 注意:不建议使用该方法比较大小王。
 	 */
 	public final boolean isSameValueAs(Card another){

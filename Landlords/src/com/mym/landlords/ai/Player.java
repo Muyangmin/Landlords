@@ -168,7 +168,7 @@ public final class Player {
 		}
 		this.handCards = new ArrayList<>(handCards.size());
 		this.handCards.addAll(handCards);
-		Collections.sort(this.handCards);
+		Collections.sort(this.handCards, Card.COMPARATOR_WITH_SUIT);
 		if (isAiPlayer){
 			refreshCardsInfo();
 		}
@@ -196,7 +196,7 @@ public final class Player {
 			card.setPicked(true);
 			this.handCards.add(card);
 		}
-		Collections.sort(this.handCards);
+		Collections.sort(this.handCards, Card.COMPARATOR_WITH_SUIT);
 		
 		//对于 AI，重新组合手牌
 		if (isAiPlayer){

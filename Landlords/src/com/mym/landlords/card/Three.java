@@ -121,7 +121,7 @@ public final class Three extends CardType implements NonBombType{
 		this.attachType = attachType;
 		if (attachType!=null){
 			cardList.addAll(attachType.getCardList());
-			Collections.sort(cardList);
+			Collections.sort(cardList, Card.COMPARATOR_WITH_SUIT);
 		}
 	}
 	

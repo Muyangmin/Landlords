@@ -50,7 +50,7 @@ public abstract class CardType implements Comparable<CardType> {
 				return -1;
 			}
 			//按照牌的最小点数排序
-			return left.compareIgnoreSuit(right);
+			return left.compareTo(right);
 		}
 	};
 

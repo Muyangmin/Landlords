@@ -35,7 +35,7 @@ public final class Single extends CardType implements NonBombType {
 		if (!(another instanceof Single)){
 			throw new ClassCastException("compare to wrong object.");
 		}
-		return cardList.get(0).compareIgnoreSuit(
+		return cardList.get(0).compareTo(
 				((Single) another).cardList.get(0));
 	}
 

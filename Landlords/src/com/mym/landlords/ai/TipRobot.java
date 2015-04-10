@@ -70,9 +70,9 @@ public final class TipRobot {
 			if (realLength<4){
 				break;
 			}
-			if (tempBombCards[0].compareIgnoreSuit(tempBombCards[1])==0
-					&& tempBombCards[1].compareIgnoreSuit(tempBombCards[2])==0 
-					&& tempBombCards[2].compareIgnoreSuit(tempBombCards[3])==0){
+			if (tempBombCards[0].isSameValueAs(tempBombCards[1])
+					&& tempBombCards[1].isSameValueAs(tempBombCards[2])
+					&& tempBombCards[2].isSameValueAs(tempBombCards[3])){
 				ArrayList<Card> cards =new ArrayList<>(Arrays.asList(tempBombCards)); 
 				types.add(new Bomb(cards));
 				cloneList.removeAll(cards);
@@ -82,10 +82,9 @@ public final class TipRobot {
 		if (followType instanceof Single){
 			Card before = followType.getCardList().get(0);
 			for (Card card: cloneList){
-				if (card.compareIgnoreSuit(before)<=0){
-					continue;
+				if (card.compareTo(before) > 0){
+					types.add(new Single(card));
 				}
-				types.add(new Single(card));
 			}
 		}
 		//王炸可以拆开打单牌，但是对于其他情形就只能用作炸弹了
@@ -101,14 +100,14 @@ public final class TipRobot {
 			Card before = followType.getCardList().get(0);
 			for (int i=0, lastValue = 0; i+1<cloneList.size(); i++){
 				Card thisCard = handCards.get(i);	
-				if (thisCard.compareIgnoreSuit(before)<=0){
+				if (thisCard.compareTo(before)<=0){
 					continue;
 				}
 				if (thisCard.getValue()==lastValue){
 					continue;
 				}
 				Card nextCard = handCards.get(i+1);
-				if (thisCard.compareIgnoreSuit(nextCard)==0){
+				if (thisCard.isSameValueAs(nextCard)){
 					types.add(new Pair(createArrayList(thisCard, nextCard)));
 					//因可能存在三条的情形，为避免对同一点数提示两次，直接跳过已经找到的对子。
 					lastValue = thisCard.getValue();
@@ -120,7 +119,7 @@ public final class TipRobot {
 			for (int i=0, lastValue = 0; i<cloneList.size()-2; i++){
 				Card thisCard = handCards.get(i);
 				//跳过比原牌小的
-				if (thisCard.compareIgnoreSuit(before)<=0){
+				if (thisCard.compareTo(before)<=0){
 					continue;
 				}
 				if (thisCard.getValue()==lastValue){
@@ -128,8 +127,8 @@ public final class TipRobot {
 				}
 				Card nextCard = handCards.get(i+1);
 				Card thirdCard = handCards.get(i+2);
-				if (thisCard.compareIgnoreSuit(nextCard)==0 
-						&& nextCard.compareIgnoreSuit(thirdCard)==0){
+				if (thisCard.isSameValueAs(nextCard) 
+						&& nextCard.isSameValueAs(thirdCard)){
 					types.add(new Three(createArrayList(thisCard, nextCard, thirdCard)));
 				}
 				//因为已经在之前找出了炸弹，因此这里主要涉及没有组成三个的对子，跳过这些对子的第二张牌。
