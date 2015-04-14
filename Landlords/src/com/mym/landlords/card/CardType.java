@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import android.util.Log;
+
 /**
  * 牌型的抽象父类。每个该类及其子类的实例都代表一手符合牌型规则的牌。所有的牌型都必须实现 {@link BombType}和
  * {@link NonBombType}其中的一个且仅能实现一个。
@@ -30,6 +32,20 @@ import java.util.Comparator;
  */
 public abstract class CardType implements Comparable<CardType> {
 	
+	/**
+	 * <p>
+	 * <h1>保护性复制</h1>
+	 * 子类在实现 带有list参数的构造器时应当使用保护性复制。这是因为用作参数的列表可能是临时的，一旦在外部执行了clear操作，
+	 * 则会造成列表为空的后果。
+	 * </p>
+	 */
+	/* 
+	 * 参考代码：
+	 * ArrayList<Card> tempList = new ArrayList(2);
+	 * tempList.add(...);      //add 2 elements
+	 * CardType p = new Pair(tempList); //here p.getCardList().size()=2
+	 * tempList.clear(); //here p.getCardList().size()=0 !
+	 */
 	public CardType() {
 		if (!(this instanceof BombType || this instanceof NonBombType)) {
 			throw new RuntimeException(
@@ -85,6 +101,10 @@ public abstract class CardType implements Comparable<CardType> {
 		//assume list is sorted before this call
 //		Collections.sort(cardList);
 		//using getter method instead of field to check null pointer
+		ArrayList<Card> list = getCardList();
+		if (list.isEmpty()){
+			Log.i("", "card is empty."+this.toString());
+		}
 		return getCardList().get(0);
 	};
 	
@@ -202,7 +222,12 @@ public abstract class CardType implements Comparable<CardType> {
 			}
 		}
 		else if (cardCount>=5){
-			instance = createObject(cards, Straight.class);
+			if (cardCount %2 ==0){
+				instance = createObject(cards, DoubleStraight.class);
+			}
+			if (instance==null){
+				instance = createObject(cards, Straight.class);
+			}
 		}
 		return instance;
 	}

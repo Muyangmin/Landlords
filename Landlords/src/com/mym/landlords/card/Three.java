@@ -66,7 +66,8 @@ public final class Three extends CardType implements NonBombType{
 		else{
 			throw new IllegalArgumentException();
 		}
-		cardList = list;
+		//保护性复制
+		cardList = new ArrayList<>(list);
 		if (tmpListSize == 1) {
 			this.attachType = new Single(tempCardList);
 		} else if (tmpAttachSize == 2) {

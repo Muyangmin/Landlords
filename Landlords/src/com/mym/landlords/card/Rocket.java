@@ -8,7 +8,8 @@ public final class Rocket extends CardType implements BombType{
 			|| list.get(1).getSuit()!= CardSuit.Joker){
 			throw new IllegalArgumentException("this type must be 2 cards in joker suit!");
 		}
-		cardList = list;
+		//保护性复制
+		cardList = new ArrayList<>(list);
 	}
 	
 	/**

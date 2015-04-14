@@ -14,6 +14,7 @@ import com.mym.landlords.card.BombType;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardFactory;
 import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.DoubleStraight;
 import com.mym.landlords.card.Pair;
 import com.mym.landlords.card.Rocket;
 import com.mym.landlords.card.Single;
@@ -23,6 +24,7 @@ import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.res.LiveBitmap;
+//import com.mym.landlords.test.SpecifiedHandCardGen;
 import com.mym.landlords.widget.BitmapButton;
 import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameScreen;
@@ -592,6 +594,31 @@ public class MainActivity extends Activity implements GameScreen{
 		for (int i=0; i<5; i++){
 			Collections.shuffle(cardPack);
 		}
+		//test code begin
+//		playerLeft.setHandCards(SpecifiedHandCardGen.createHandCards(
+//				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
+//				Card.CARD_VALUE_4, Card.CARD_VALUE_4,
+//				Card.CARD_VALUE_5, Card.CARD_VALUE_5,
+//				Card.CARD_VALUE_6, Card.CARD_VALUE_6,
+//				
+//				Card.CARD_VALUE_7, Card.CARD_VALUE_7,
+//				Card.CARD_VALUE_J, Card.CARD_VALUE_J,
+//				Card.CARD_VALUE_Q, Card.CARD_VALUE_Q,
+//				Card.CARD_VALUE_K, Card.CARD_VALUE_K,
+//				Card.CARD_VALUE_2
+//				));
+//		playerHuman.setHandCards(SpecifiedHandCardGen.createHandCards(
+//				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
+//				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
+//				Card.CARD_VALUE_4, Card.CARD_VALUE_4,
+//				Card.CARD_VALUE_5, Card.CARD_VALUE_5,
+//				Card.CARD_VALUE_6, Card.CARD_VALUE_6,
+//				Card.CARD_VALUE_J, Card.CARD_VALUE_J,
+//				Card.CARD_VALUE_Q, Card.CARD_VALUE_Q,
+//				Card.CARD_VALUE_K, Card.CARD_VALUE_K,
+//				Card.CARD_VALUE_JOKER_B
+//				));
+		//test code end
 		playerLeft.setHandCards(cardPack.subList(0, 17));
 		playerHuman.setHandCards(cardPack.subList(17, 34));
 		playerRight.setHandCards(cardPack.subList(34, 51));
@@ -637,6 +664,9 @@ public class MainActivity extends Activity implements GameScreen{
 		}//end of Single
 		else if (type instanceof Straight){
 			soundPool.playSound(assets.soundTypeShun1);
+		}
+		else if (type instanceof DoubleStraight){
+			soundPool.playSound(assets.soundTypeShun2);
 		}
 		else if (type instanceof BombType){
 			if (type instanceof Bomb) {

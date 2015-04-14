@@ -8,6 +8,7 @@ import java.util.List;
 import com.mym.landlords.card.Bomb;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.DoubleStraight;
 import com.mym.landlords.card.Pair;
 import com.mym.landlords.card.Rocket;
 import com.mym.landlords.card.Single;
@@ -139,6 +140,13 @@ public final class TipRobot {
 		else if (followType instanceof Straight){
 			ArrayList<Straight> straights = StraightAnalyst.forceGetStraights(
 					(Straight) followType, cloneList);
+			if (straights!=null){
+				types.addAll(straights);	
+			}
+		}
+		else if (followType instanceof DoubleStraight){
+			ArrayList<DoubleStraight> straights = StraightAnalyst.forceGetDoubleStraights(
+					(DoubleStraight) followType, cloneList);
 			if (straights!=null){
 				types.addAll(straights);	
 			}

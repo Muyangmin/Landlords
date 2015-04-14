@@ -13,6 +13,7 @@ import com.mym.landlords.card.BombType;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardSuit;
 import com.mym.landlords.card.CardType;
+import com.mym.landlords.card.DoubleStraight;
 import com.mym.landlords.card.Pair;
 import com.mym.landlords.card.Rocket;
 import com.mym.landlords.card.Single;
@@ -126,6 +127,12 @@ final class AI {
 			else if (lastType instanceof Three){
 				decideType = followThree((Three) lastType, needToForce);
 			}
+			else if (lastType instanceof Straight){
+				decideType = followStraights((Straight) lastType, needToForce);
+			}
+			else if (lastType instanceof DoubleStraight){
+				decideType = followDoubleStraights((DoubleStraight)lastType, needToForce);
+			}
 			else {
 				for (CardType type : cardTypes) {
 					if (type.canAgainstType(lastType)) {
@@ -139,6 +146,68 @@ final class AI {
 	}
 
 	/**
+	 * 处理顺子的跟牌策略。
+	 */
+	private CardType followStraights(Straight followType, boolean needToForce){
+		PlayerCardsInfo info = bindPlayer.cardsInfo;
+		ArrayList<CardType> cardTypes = info.cardTypes;
+		// 如果有现成的单牌且比原来的大，则返回
+		for (CardType type : cardTypes) {
+			if (type instanceof Straight && type.canAgainstType(followType)) {
+				return type;
+			}
+		}
+		// 没有，则找炸弹
+		if (info.bombCount > 0) {
+			for (CardType type : cardTypes) {
+				if (type instanceof BombType) {
+					return type;
+				}
+			}
+		}
+		//如果不强制跟牌，则到此为止
+		if (!needToForce){
+			return null;
+		}
+		//拆牌跟
+		ArrayList<Straight> list = StraightAnalyst.forceGetStraights(
+				followType, bindPlayer.getHandCards());
+		return list==null || list.isEmpty()? null : list.get(0);
+	}
+	
+	/**
+	 * 处理连对的跟牌策略。
+	 */
+	private CardType followDoubleStraights(DoubleStraight followType, boolean needToForce){
+		Log.d(LOG_TAG, "followDoubleStraights:"+needToForce);
+		PlayerCardsInfo info = bindPlayer.cardsInfo;
+		ArrayList<CardType> cardTypes = info.cardTypes;
+		// 如果有现成的单牌且比原来的大，则返回
+		for (CardType type : cardTypes) {
+			if (type instanceof DoubleStraight && type.canAgainstType(followType)) {
+				return type;
+			}
+		}
+		// 没有，则找炸弹
+		if (info.bombCount > 0) {
+			for (CardType type : cardTypes) {
+				if (type instanceof BombType) {
+					return type;
+				}
+			}
+		}
+		//如果不强制跟牌，则到此为止
+		if (!needToForce){
+			return null;
+		}
+		Log.d(LOG_TAG, "force :"+bindPlayer.getHandCards());
+		//拆牌跟
+		ArrayList<DoubleStraight> list = StraightAnalyst.forceGetDoubleStraights(
+				followType, bindPlayer.getHandCards());
+		return list==null || list.isEmpty()? null : list.get(0);
+	}
+	
+	/**
 	 * 处理单牌的跟牌方案。
 	 * 
 	 * @param followType
@@ -147,7 +216,7 @@ final class AI {
 	 *            是否需要拆牌（强制跟牌）
 	 * @return 如果有牌可出，则返回这个牌型对象，否则返回null。注意：返回的不一定是Single对象，还可能是炸弹。
 	 */
-	protected CardType followSingle(Single followType, boolean needToForce) {
+	private CardType followSingle(Single followType, boolean needToForce) {
 		Card followCard = followType.getCardList().get(0); // 取出要跟的牌，便于比较
 		PlayerCardsInfo info = bindPlayer.cardsInfo;
 		ArrayList<CardType> cardTypes = info.cardTypes;
@@ -224,7 +293,7 @@ final class AI {
 	 *            是否需要拆牌（强制跟牌）
 	 * @return 如果有牌可出，则返回这个牌型对象，否则返回null。注意：返回的不一定是Pair对象，还可能是炸弹。
 	 */
-	protected CardType followPair(Pair followType, boolean needToForce) {
+	private CardType followPair(Pair followType, boolean needToForce) {
 		Card followCard = followType.getCardList().get(0); // 取出要跟的牌，便于比较
 		PlayerCardsInfo info = bindPlayer.cardsInfo;
 		ArrayList<CardType> cardTypes = info.cardTypes;
@@ -282,7 +351,7 @@ final class AI {
 	 *            是否需要拆牌（强制跟牌）
 	 * @return 如果有牌可出，则返回这个牌型对象，否则返回null。注意：返回的不一定是Three对象，还可能是炸弹。
 	 */
-	protected CardType followThree(Three followType, boolean needToForce) {
+	private CardType followThree(Three followType, boolean needToForce) {
 		PlayerCardsInfo info = bindPlayer.cardsInfo;
 		ArrayList<CardType> cardTypes = info.cardTypes;
 		// 先确定要带的牌，避免在循环中处理
@@ -453,6 +522,14 @@ final class AI {
 		}
 		playerInfo.cardTypes.addAll(straights);
 		
+		//找出所有的双顺
+		ArrayList<DoubleStraight> doubleStr = StraightAnalyst.getAllDoubleStraights(cloneList);
+		for (DoubleStraight ds: doubleStr){
+			Log.d(LOG_TAG, "ds:"+ds.toString());
+			playerInfo.cardTypes.add(ds);
+			cloneList.removeAll(ds.getCardList());
+		}
+		
 		//找出所有的三条
 		for (int i = 0, lastNotFoundValue=0; i < cloneList.size(); i++) {
 			int cardValue = cloneList.get(i).getValue();
@@ -572,7 +649,7 @@ final class AI {
 			if (type instanceof Rocket){
 				info.hasRocket = true;
 			}
-			else if (type instanceof Bomb){
+			else if (type instanceof BombType){
 				info.bombCount++;
 			}
 			else if (type instanceof Straight){

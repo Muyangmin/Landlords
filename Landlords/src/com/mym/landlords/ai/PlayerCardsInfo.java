@@ -14,13 +14,20 @@ public final class PlayerCardsInfo {
 	//hide accessibility
 	protected PlayerCardsInfo() {}
 
-	protected int singleCount = 0;		//单牌的张数
-	protected int pairCount = 0;		//对子的个数
-	protected int threeCount = 0;		//三条的个数
-	protected int straightCount = 0;	//顺子的个数 
-	protected int bombCount = 0;		//炸弹的个数（不含王炸）
-	protected int twoAndJokerCount = 0; //2和王的个数
-	protected boolean hasRocket = false;//是否有王炸
+	/**单牌的张数。 */
+	protected int singleCount = 0;		
+	/**独立的对子的个数。 */
+	protected int pairCount = 0;		
+	/**三条的个数。 */
+	protected int threeCount = 0;		
+	/**顺子的个数。 */
+	protected int straightCount = 0;	
+	/**炸弹的个数（含王炸）。*/
+	protected int bombCount = 0;		
+	/**2和王的个数。 */
+	protected int twoAndJokerCount = 0; 
+	/**是否有王炸。 */
+	protected boolean hasRocket = false;
 	protected int expectedRound = 0;	//预期几个回合能出完牌
 	protected ArrayList<CardType> cardTypes = new ArrayList<>();//牌型列表
 

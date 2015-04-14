@@ -13,7 +13,8 @@ public final class Pair extends CardType implements NonBombType {
 				|| (!(list.get(0).isSameValueAs(list.get(1))))) {
 			throw new IllegalArgumentException("A pair must be 2 same cards!");
 		}
-		cardList = list;
+		//保护性复制
+		cardList = new ArrayList<>(list);
 	}
 
 	/**

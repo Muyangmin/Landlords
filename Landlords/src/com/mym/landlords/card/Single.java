@@ -18,7 +18,8 @@ public final class Single extends CardType implements NonBombType {
 		if (cards==null || cards.size()>1){
 			throw new IllegalArgumentException("a single type cannot contain more than 1 card.");
 		}
-		cardList = cards;
+		//保护性复制
+		cardList = new ArrayList<>(cards);
 	}
 
 	/**

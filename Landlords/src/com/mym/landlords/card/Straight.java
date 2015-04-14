@@ -19,7 +19,8 @@ public class Straight extends CardType implements NonBombType{
 					"A straight must be made up of more than 5 continuous value."
 							+ list.toString());
 		}
-		this.cardList = list;
+		//保护性复制
+		this.cardList = new ArrayList<>(list);
 		this.startValue = list.get(0).getValue();
 		this.length = list.size();
 	}

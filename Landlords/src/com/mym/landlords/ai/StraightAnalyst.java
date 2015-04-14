@@ -10,6 +10,7 @@ import java.util.List;
 import android.util.Log;
 
 import com.mym.landlords.card.Card;
+import com.mym.landlords.card.DoubleStraight;
 import com.mym.landlords.card.Straight;
 
 //package access
@@ -44,10 +45,9 @@ final class StraightAnalyst {
 	}
 	
 	/**
-	 * 强行凑出对子。
-	 * @param follow 要跟牌的对子
-	 * @param cards 如果无牌可出，则返回null;否则返回一个所有可能点数情况的列表，这些对子的点数彼此可能有所重叠。
-	 * @return
+	 * 强行凑出顺子。
+	 * @param follow 要跟牌的顺子
+	 * @return 返回一个所有可能点数情况的列表，这些顺子的点数彼此可能有所重叠。如果无牌可出，则列表为空。
 	 */
 	protected static ArrayList<Straight> forceGetStraights(Straight follow,
 			ArrayList<Card> cards) {
@@ -93,6 +93,93 @@ final class StraightAnalyst {
 			}
 			if (tempCards.size()==follow.length){
 				Straight straight = new Straight(tempCards);
+				if (straight.compareTo(follow) > 0){
+					forceStraights.add(straight);
+				}
+			}
+		}
+		return forceStraights;
+	}
+
+	/**
+	 * 找出所有的最长双顺。
+	 * @param cards 手牌列表
+	 */
+	protected static ArrayList<DoubleStraight> getAllDoubleStraights(
+			ArrayList<Card> cards) {
+		ArrayList<DoubleStraight> doubleStraights = new ArrayList<>();
+		if (cards.size() >= 6) {
+			ArrayList<Card> tempCards = new ArrayList<>();
+			int size = cards.size();
+			for (int i = 0; i < size; i++) {
+				tempCards.clear();
+				for (int j = 0, lastValue = 0; i+j+1 < size;/* empty! */) {
+					Card card1 = cards.get(i + j);
+					if (card1.getValue() == lastValue) {
+						j++;
+						continue;
+					}
+					Card card2 = cards.get(i+j+1);
+					j += 2; // 执行变量自增
+					if (card1.isSameValueAs(card2) // 两张一样大
+							&& card1.getValue() < Card.CARD_VALUE_2 // 2以上不能组成连对
+							&& (lastValue == 0 || card1.getValue() == lastValue + 1) // 与前一个对子是连续的
+					) {
+						lastValue = card1.getValue();
+						tempCards.add(card1);
+						tempCards.add(card2);
+					} else {
+						break;
+					}
+				}
+				if (tempCards.size() >= 6) {
+					DoubleStraight ds = new DoubleStraight(tempCards);
+					doubleStraights.add(ds);
+				}
+			}
+		}
+		return doubleStraights;
+	}
+	
+	/**
+	 * 强行凑出双顺。
+	 * @param follow 要跟牌的双顺
+	 * @return 返回一个所有可能点数情况的列表，这些双顺的点数彼此可能有所重叠。如果无牌可出，则列表为空。
+	 */
+	protected static ArrayList<DoubleStraight> forceGetDoubleStraights(
+			DoubleStraight follow, ArrayList<Card> cards) {
+		if (follow==null || cards.size()< follow.length){
+			return null;
+		}
+		ArrayList<DoubleStraight> forceStraights = new ArrayList<>();
+		int size = cards.size();
+		ArrayList<Card> tempCards = new ArrayList<>(); 
+		for (int i=0; i<size-follow.length*2; i++){
+			tempCards.clear();
+			for (int j = 0, lastValue=0; i+j+1 < size;/*empty!*/) {
+				Card card1 = cards.get(i+j);
+				if (card1.getValue()==lastValue){
+					j++;
+					continue;
+				}
+				Card card2 = cards.get(i+j + 1);
+				j+=2;	//执行变量自增
+				if (card1.isSameValueAs(card2) 				//两张一样大
+						&& card1.getValue()<Card.CARD_VALUE_2	//2以上不能组成连对
+						&& (lastValue==0 || card1.getValue()==lastValue+1)	//与前一个对子是连续的
+						) {
+					lastValue = card1.getValue();
+					tempCards.add(card1);
+					tempCards.add(card2);
+					if (tempCards.size()==follow.length*2){
+						break;
+					}
+				} else {
+					break;
+				}
+			}
+			if (tempCards.size()==follow.length*2){
+				DoubleStraight straight = new DoubleStraight(tempCards);
 				if (straight.compareTo(follow) > 0){
 					forceStraights.add(straight);
 				}
