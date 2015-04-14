@@ -10,6 +10,7 @@ import com.mym.landlords.ai.TipRobot;
 import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.ai.Player;
 import com.mym.landlords.card.Bomb;
+import com.mym.landlords.card.BombType;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardFactory;
 import com.mym.landlords.card.CardType;
@@ -637,12 +638,13 @@ public class MainActivity extends Activity implements GameScreen{
 		else if (type instanceof Straight){
 			soundPool.playSound(assets.soundTypeShun1);
 		}
-		else if (type instanceof Bomb){
-			soundPool.playSound(assets.soundTypeBomb);
-			soundPool.playSound(assets.soundEffectBoom);
-		}
-		else if (type instanceof Rocket){
-			soundPool.playSound(assets.soundTypeRocket);
+		else if (type instanceof BombType){
+			if (type instanceof Bomb) {
+				soundPool.playSound(assets.soundTypeBomb);
+			}
+			else if (type instanceof Rocket) {
+				soundPool.playSound(assets.soundTypeRocket);
+			}
 			soundPool.playSound(assets.soundEffectBoom);
 		}
 		else if (type instanceof Three){

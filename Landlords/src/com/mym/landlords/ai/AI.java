@@ -9,6 +9,7 @@ import java.util.List;
 import android.util.Log;
 
 import com.mym.landlords.card.Bomb;
+import com.mym.landlords.card.BombType;
 import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardSuit;
 import com.mym.landlords.card.CardType;
@@ -171,7 +172,7 @@ final class AI {
 		// 没有，则找炸弹
 		if (info.bombCount > 0) {
 			for (CardType type : cardTypes) {
-				if (type instanceof Bomb || type instanceof Rocket) {
+				if (type instanceof BombType) {
 					return type;
 				}
 			}
@@ -247,7 +248,7 @@ final class AI {
 		// 没有，则找炸弹
 		if (info.bombCount > 0) {
 			for (CardType type : cardTypes) {
-				if (type instanceof Bomb || type instanceof Rocket) {
+				if (type instanceof BombType) {
 					return type;
 				}
 			}
@@ -321,7 +322,7 @@ final class AI {
 		// 无牌可带，寻求炸弹
 		if (info.bombCount > 0) {
 			for (CardType type : cardTypes) {
-				if (type instanceof Bomb || type instanceof Rocket) {
+				if (type instanceof BombType) {
 					return type;
 				}
 			}
@@ -511,9 +512,8 @@ final class AI {
 				return false;
 			}
 			//如果跟的牌是炸弹或顺子，不跟牌
-			if (partnerCards instanceof Bomb
-					|| partnerCards instanceof Straight
-					|| partnerCards instanceof Rocket) {
+			if (partnerCards instanceof BombType
+					|| partnerCards instanceof Straight) {
 				return false;
 			}
 			return true;
@@ -525,8 +525,8 @@ final class AI {
 			if (landCards==null){
 				return false;
 			}
-			//如果是炸弹或顺子，有牌必跟（不需要判断王炸）
-			if (landCards instanceof Bomb || landCards instanceof Straight){
+			//如果是炸弹或顺子，有牌必跟
+			if (landCards instanceof BombType || landCards instanceof Straight){
 				return true;
 			}
 			CardType partnerCards = bindPlayer.getNextPlayer().getLastCards();

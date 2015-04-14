@@ -44,6 +44,7 @@ public final class TipRobot {
 		//否则只能强制找出所有能组合出的适合当前牌型的牌
 		ArrayList<CardType> types = new ArrayList<>();
 		ArrayList<Card> cloneList = new ArrayList<>(handCards);
+		//王炸无法跟牌，直接返回空即可。
 		if (followType instanceof Rocket){
 			return types;
 		}

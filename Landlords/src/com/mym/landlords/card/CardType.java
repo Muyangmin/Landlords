@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
- * 牌型的抽象父类。每个该类及其子类的实例都代表一手符合牌型规则的牌。
+ * 牌型的抽象父类。每个该类及其子类的实例都代表一手符合牌型规则的牌。所有的牌型都必须实现 {@link BombType}和
+ * {@link NonBombType}其中的一个且仅能实现一个。
  * <p>
  * <h1>获取卡牌列表</h1>
  * 为程序统一起见，将所有的牌型都视为一个卡牌的列表，这个列表存储在 {@link #cardList} 字段中，客户端代码通过
@@ -18,14 +19,27 @@ import java.util.Comparator;
  * </p>
  * <p>
  * <h1>牌型的排序</h1>
- * CardType类自身实现了 {@link Comparable}接口，{@link #SORT_COMPARATOR}实现了 {@link Comparator}接口。<br/>
+ * CardType类自身实现了 {@link Comparable}接口，{@link #SORT_COMPARATOR}实现了
+ * {@link Comparator}接口。<br/>
  * 当需要对两手牌进行对比（例如出牌阶段下家和上家手牌大小的判断）时，使用 {@link CardType#compareTo(CardType)}方法；
- * 需要对不同手牌进行排序时（例如，出牌时总是希望先从包含最小卡牌的牌型开始），使用 {@link #SORT_COMPARATOR}进行排序。 
+ * 需要对不同手牌进行排序时（例如，出牌时总是希望先从包含最小卡牌的牌型开始），使用 {@link #SORT_COMPARATOR}进行排序。
  * </p>
+ * 
  * @author Muyangmin
  * @create 2015-3-23
  */
 public abstract class CardType implements Comparable<CardType> {
+	
+	public CardType() {
+		if (!(this instanceof BombType || this instanceof NonBombType)) {
+			throw new RuntimeException(
+					"Subclasses of CardType must implement either BombType or NonBombType!");
+		}
+		if (this instanceof BombType && this instanceof NonBombType) {
+			throw new RuntimeException(
+					"Subclasses of CardType must implement either BombType or NonBombType, not both!");
+		}
+	}
 	
 	/**
 	 * 用于实现所有牌型之间的排序。
@@ -212,13 +226,4 @@ public abstract class CardType implements Comparable<CardType> {
 		}
 		return null;
 	}
-}
-/**包级标记接口， 表示炸弹类型。 */
-interface NonBombType {
-	
-}
-
-/**包级标记接口， 表示炸弹类型。 */
-interface BombType {
-	
 }
