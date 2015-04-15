@@ -14,6 +14,7 @@ import com.mym.landlords.card.Card;
 import com.mym.landlords.card.CardSuit;
 import com.mym.landlords.card.CardType;
 import com.mym.landlords.card.DoubleStraight;
+import com.mym.landlords.card.NonBombType;
 import com.mym.landlords.card.Pair;
 import com.mym.landlords.card.Rocket;
 import com.mym.landlords.card.Single;
@@ -144,6 +145,18 @@ final class AI {
 		}
 		return decideType;
 	}
+	
+	private CardType findBombType(PlayerCardsInfo info, NonBombType followType){
+		ArrayList<CardType> cardTypes = info.cardTypes;
+		if (info.bombCount > 0) {
+			for (CardType type : cardTypes) {
+				if (type instanceof BombType) {
+					return type;
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * 处理顺子的跟牌策略。
@@ -158,12 +171,9 @@ final class AI {
 			}
 		}
 		// 没有，则找炸弹
-		if (info.bombCount > 0) {
-			for (CardType type : cardTypes) {
-				if (type instanceof BombType) {
-					return type;
-				}
-			}
+		CardType bomb = findBombType(info, followType);
+		if (bomb!=null){
+			return bomb;
 		}
 		//如果不强制跟牌，则到此为止
 		if (!needToForce){
@@ -189,12 +199,9 @@ final class AI {
 			}
 		}
 		// 没有，则找炸弹
-		if (info.bombCount > 0) {
-			for (CardType type : cardTypes) {
-				if (type instanceof BombType) {
-					return type;
-				}
-			}
+		CardType bomb = findBombType(info, followType);
+		if (bomb!=null){
+			return bomb;
 		}
 		//如果不强制跟牌，则到此为止
 		if (!needToForce){
@@ -239,12 +246,9 @@ final class AI {
 			}
 		}
 		// 没有，则找炸弹
-		if (info.bombCount > 0) {
-			for (CardType type : cardTypes) {
-				if (type instanceof BombType) {
-					return type;
-				}
-			}
+		CardType bomb = findBombType(info, followType);
+		if (bomb!=null){
+			return bomb;
 		}
 		// 如果不是强制跟牌，则到此为止
 		if (!needToForce) {
@@ -315,12 +319,9 @@ final class AI {
 			}
 		}
 		// 没有，则找炸弹
-		if (info.bombCount > 0) {
-			for (CardType type : cardTypes) {
-				if (type instanceof BombType) {
-					return type;
-				}
-			}
+		CardType bomb = findBombType(info, followType);
+		if (bomb!=null){
+			return bomb;
 		}
 		// 如果不是强制跟牌，则到此为止
 		if (!needToForce) {
@@ -388,13 +389,10 @@ final class AI {
 				}
 			}
 		}
-		// 无牌可带，寻求炸弹
-		if (info.bombCount > 0) {
-			for (CardType type : cardTypes) {
-				if (type instanceof BombType) {
-					return type;
-				}
-			}
+		// 没有牌可以带，则找炸弹
+		CardType bomb = findBombType(info, followType);
+		if (bomb!=null){
+			return bomb;
 		}
 		// 还是无牌，则不出
 		return null;
@@ -649,7 +647,7 @@ final class AI {
 			if (type instanceof Rocket){
 				info.hasRocket = true;
 			}
-			else if (type instanceof BombType){
+			if (type instanceof BombType){
 				info.bombCount++;
 			}
 			else if (type instanceof Straight){
