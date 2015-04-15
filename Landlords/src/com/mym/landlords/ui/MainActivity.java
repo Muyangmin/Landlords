@@ -136,13 +136,13 @@ public class MainActivity extends Activity implements GameScreen{
 				@Override
 				public void run() {
 					// 重置各种变量
-					currentPlayer = null;
-					startPlayer = null;
-					tempLandlord = null;
+					currentPlayer = startPlayer = tempLandlord =  null;
+					pickedTypeNotMatch = humanNoBiggerCards = isWaitingForUser = false;
 					currentType = null;
 					playerHuman.reset();
 					playerLeft.reset();
 					playerRight.reset();
+					landlordCards.clear();
 					handler.post(new Runnable() {
 
 						@Override
@@ -492,13 +492,20 @@ public class MainActivity extends Activity implements GameScreen{
 				for (Card card: currentPlayer.getHandCards()){
 					card.setPicked(false);
 				}
-				for (Card card: currentTips.get(tipIndex).getCardList()){
-					card.setPicked(true);
-				}
-//				tipIndex = (tipIndex+1)%currentTips.size();
-				tipIndex++;
-				if (tipIndex>=currentTips.size()){
-					tipIndex=0;
+				synchronized(currentTips){
+					if (tipIndex >= currentTips.size()) {
+						Log.w(LOG_TAG, "amazing tipIndex:" + tipIndex
+								+ ", currentTips=" + currentTips);
+						return;
+					}
+					for (Card card: currentTips.get(tipIndex).getCardList()){
+						card.setPicked(true);
+					}
+					tipIndex++;
+//					tipIndex = (tipIndex+1)%currentTips.size();
+					if (tipIndex>=currentTips.size()){
+						tipIndex=0;
+					}
 				}
 			}
     		
@@ -563,12 +570,6 @@ public class MainActivity extends Activity implements GameScreen{
 	//重置游戏结束后的各项属性。
 	private void resetGame() {
 		currentGame = Game.newGame();
-		pickedTypeNotMatch = humanNoBiggerCards = isWaitingForUser = false;
-		logicThread.startPlayer = logicThread.currentPlayer = logicThread.tempLandlord = null;
-		logicThread.currentType = null;
-		playerHuman.reset();
-		playerLeft.reset();
-		playerRight.reset();
 	}
 	
 	//初始化玩家并分配座位
@@ -622,7 +623,8 @@ public class MainActivity extends Activity implements GameScreen{
 		playerLeft.setHandCards(cardPack.subList(0, 17));
 		playerHuman.setHandCards(cardPack.subList(17, 34));
 		playerRight.setHandCards(cardPack.subList(34, 51));
-		landlordCards = cardPack.subList(51, 54);
+		//保护性复制，避免执行clear()操作后原始卡牌包丢失卡牌出现异常
+		landlordCards = new ArrayList<>(cardPack.subList(51, 54));
 	}
 	
 	private Random randomSoundGenerator = new Random();
@@ -752,7 +754,7 @@ public class MainActivity extends Activity implements GameScreen{
     		}
 			break;
 		case Playing:
-		case Gameover:
+		case ShowingAICards:
 			offset = 30 + 3;
     		for (int i = 0; i < 3; i++)
     		{
@@ -760,6 +762,7 @@ public class MainActivity extends Activity implements GameScreen{
     			 g.drawBitmap(canvas, assets.getCorrespondSmallBitmap(card), 300 + i * offset, 5, 30, 40);
     		}
 			break;
+		case Gameover://draw nothing.
 		default:
 			break;
 		}
@@ -1101,7 +1104,10 @@ public class MainActivity extends Activity implements GameScreen{
 					GameGraphics.AIPLAYER_CARDNUM_MARGIN_Y);
 		}
 		drawPlayers(graphics, canvas);
-		drawHumanPlayerCards(graphics, canvas);
+		if (currentGame.status!= Status.Gameover){
+			drawActiveButtons(graphics, canvas);
+			drawHumanPlayerCards(graphics, canvas);	
+		}
 		if (currentGame.status == Status.Playing){
 			drawPlayerOutCards(graphics, canvas);
 			drawOutCardsMessage(graphics, canvas);	
@@ -1109,7 +1115,6 @@ public class MainActivity extends Activity implements GameScreen{
 		else if (currentGame.status==Status.ShowingAICards){
 			drawAIGameoverCards(graphics, canvas);
 		}
-		drawActiveButtons(graphics, canvas);
 	}
 	
 }
