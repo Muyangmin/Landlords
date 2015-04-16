@@ -147,7 +147,7 @@ public abstract class CardType implements Comparable<CardType> {
 	 */
 	public final ArrayList<Card> getCardList() {
 		if (cardList==null){
-			throw new NullPointerException("subclass"
+			throw new NullPointerException("subclass "
 					+ getClass().getSimpleName()
 					+ " must init cardList in constructor!");
 		}
@@ -227,6 +227,9 @@ public abstract class CardType implements Comparable<CardType> {
 			}
 			if (instance==null){
 				instance = createObject(cards, Straight.class);
+			}
+			if (instance==null){
+				instance = createObject(cards, Airplane.class);
 			}
 		}
 		return instance;

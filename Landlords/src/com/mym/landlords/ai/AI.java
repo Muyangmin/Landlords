@@ -544,6 +544,8 @@ final class AI {
 				lastNotFoundValue = cardValue;
 			}
 		}
+		//AI暂不支持出飞机。
+		
 		//找出所有的对子
 		//对子无需使用lastNotFound来优化
 		for (int i = 0; i < cloneList.size(); i++) {

@@ -9,6 +9,7 @@ import com.mym.landlords.ai.Game;
 import com.mym.landlords.ai.TipRobot;
 import com.mym.landlords.ai.Game.Status;
 import com.mym.landlords.ai.Player;
+import com.mym.landlords.card.Airplane;
 import com.mym.landlords.card.Bomb;
 import com.mym.landlords.card.BombType;
 import com.mym.landlords.card.Card;
@@ -24,7 +25,6 @@ import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.res.LiveBitmap;
-//import com.mym.landlords.test.SpecifiedHandCardGen;
 import com.mym.landlords.widget.BitmapButton;
 import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameScreen;
@@ -612,8 +612,8 @@ public class MainActivity extends Activity implements GameScreen{
 //				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
 //				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
 //				Card.CARD_VALUE_4, Card.CARD_VALUE_4,
+//				Card.CARD_VALUE_4, Card.CARD_VALUE_5,
 //				Card.CARD_VALUE_5, Card.CARD_VALUE_5,
-//				Card.CARD_VALUE_6, Card.CARD_VALUE_6,
 //				Card.CARD_VALUE_J, Card.CARD_VALUE_J,
 //				Card.CARD_VALUE_Q, Card.CARD_VALUE_Q,
 //				Card.CARD_VALUE_K, Card.CARD_VALUE_K,
@@ -691,6 +691,9 @@ public class MainActivity extends Activity implements GameScreen{
 				soundPool.playSound(assets.soundTypeThree);
 			}
 		}
+		else if (type instanceof Airplane){
+			soundPool.playSound(assets.soundTypePlane);
+ 		}
 		else {
 			//默认出牌音效
 			soundPool.playSound(assets.soundTypeSingle);

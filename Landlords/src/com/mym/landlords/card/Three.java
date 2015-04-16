@@ -17,12 +17,40 @@ public final class Three extends CardType implements NonBombType{
 	private CardType attachType = null;
 	private ArrayList<Card> bodyList;
 	
+	/**
+	 * 使用指定的卡牌列表进行带牌，程序将自动判断牌的组成。
+	 * @param list 要执行的卡牌列表；长度必须大于3.
+	 */
 	public Three(ArrayList<Card> list) {
 		try {
 			divideListAndCreate(list);
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("wrong cards:" + list.toString());
 		}
+	}
+	
+	/**
+	 * 强制使用指定的三条进行带牌。
+	 * @param bodyList 三条的主体，列表长度必须为3。
+	 * @param attachment 带的牌，列表长度必须小于3。
+	 */
+	public Three(ArrayList<Card> bodyList, ArrayList<Card> attachment){
+		if (bodyList!=null && attachment!=null && bodyList.size()==3 && attachment.size()<3){
+			bodyList = new ArrayList<>(bodyList);
+			cardList = new ArrayList<>(bodyList);
+			if (attachment!=null){
+				if (attachment.size()==1){
+					attachType= new Single(attachment);
+				}
+				else{
+					attachType = new Pair(attachment);
+				}
+				cardList.addAll(attachment);
+			}
+			return ;
+		}
+		throw new IllegalArgumentException("cannot makeup a three:body="
+				+ bodyList + ", attachment=" + attachment);
 	}
 	
 	/**
