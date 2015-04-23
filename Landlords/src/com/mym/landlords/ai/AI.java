@@ -505,8 +505,6 @@ final class AI {
 			if (bombCards != null) {
 				lastFoundValue = cardValue;
 				bombs.add(new Bomb(bombCards));
-//				playerInfo.cardTypes.add(new Bomb(bombs));
-//				cloneList.removeAll(bombs);
 			}
 			else{
 				lastNotFoundValue = cardValue;
@@ -524,21 +522,12 @@ final class AI {
 			if (tempList != null){
 				Straight tempStr = new Straight(tempList);
 				straights.add(tempStr);
-//				cloneList.removeAll(tempList);
 			}
 		}
 		for (Straight str:straights){
 			playerInfo.cardTypes.add(str);
 			cloneList.removeAll(str.getCardList());
 		}
-//		
-//		//找出所有的双顺
-//		ArrayList<DoubleStraight> doubleStr = StraightAnalyst.getAllDoubleStraights(cloneList);
-//		for (DoubleStraight ds: doubleStr){
-//			Log.d(LOG_TAG, "ds:"+ds.toString());
-//			playerInfo.cardTypes.add(ds);
-//			cloneList.removeAll(ds.getCardList());
-//		}
 		
 		//找出所有的三条
 		ArrayList<Three> threesWithNoAirplane = new ArrayList<>();
@@ -551,9 +540,7 @@ final class AI {
 			ArrayList<Card> threes = takeoutCards(threePattern, cloneList);
 			if (threes != null) {
 				lastFoundValue = cardValue;
-//				playerInfo.cardTypes.add(new Three(threes));
 				threesWithNoAirplane.add(new Three(threes));
-//				cloneList.removeAll(threes);
 			}
 			else{
 				lastNotFoundValue = cardValue;
@@ -618,7 +605,6 @@ final class AI {
 		ArrayList<Three> toBeRemoved = new ArrayList<>();
 		for (Three tr : threes) {
 			int thisValue = tr.getBodyList().get(0).getValue();
-//			Log.i(LOG_TAG, "thisValue="+thisValue+", lastValue="+lastValue+",tr="+tr.toString());
 			//飞机不会包含2以上的数字
 			if (thisValue>=Card.CARD_VALUE_2){
 				break;
@@ -642,7 +628,6 @@ final class AI {
 				lastValue = thisValue;
 				tempAirThreeRef.add(tr);
 			}
-//			Log.i(LOG_TAG, "on this loop time , tempAirThreeRef="+tempAirThreeRef);
 		}
 		//循环结束进行最后的判断。由于过程中不连续的已经被剔除，所以这里一定是连续的。
 		if (tempAirThreeRef.size() >= 2) {

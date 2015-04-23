@@ -25,7 +25,7 @@ import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.GameGraphics;
 import com.mym.landlords.res.GlobalSoundPool;
 import com.mym.landlords.res.LiveBitmap;
-import com.mym.landlords.test.SpecifiedHandCardGen;
+//import com.mym.landlords.test.SpecifiedHandCardGen;
 import com.mym.landlords.widget.BitmapButton;
 import com.mym.landlords.widget.BitmapButton.onClickListener;
 import com.mym.landlords.widget.GameScreen;
@@ -597,18 +597,18 @@ public class MainActivity extends Activity implements GameScreen{
 			Collections.shuffle(cardPack);
 		}
 		//test code begin
-		playerLeft.setHandCards(SpecifiedHandCardGen.createHandCards(
-				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
-				Card.CARD_VALUE_3, Card.CARD_VALUE_4,
-				Card.CARD_VALUE_4, Card.CARD_VALUE_5,
-				Card.CARD_VALUE_5, Card.CARD_VALUE_6,
-				
-				Card.CARD_VALUE_6, Card.CARD_VALUE_Q,
-				Card.CARD_VALUE_Q, Card.CARD_VALUE_Q,
-				Card.CARD_VALUE_K, Card.CARD_VALUE_K,
-				Card.CARD_VALUE_K, Card.CARD_VALUE_JOKER_S,
-				Card.CARD_VALUE_JOKER_B
-				));
+//		playerLeft.setHandCards(SpecifiedHandCardGen.createHandCards(
+//				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
+//				Card.CARD_VALUE_3, Card.CARD_VALUE_4,
+//				Card.CARD_VALUE_4, Card.CARD_VALUE_5,
+//				Card.CARD_VALUE_5, Card.CARD_VALUE_6,
+//				
+//				Card.CARD_VALUE_6, Card.CARD_VALUE_Q,
+//				Card.CARD_VALUE_Q, Card.CARD_VALUE_Q,
+//				Card.CARD_VALUE_K, Card.CARD_VALUE_K,
+//				Card.CARD_VALUE_K, Card.CARD_VALUE_JOKER_S,
+//				Card.CARD_VALUE_JOKER_B
+//				));
 //		playerHuman.setHandCards(SpecifiedHandCardGen.createHandCards(
 //				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
 //				Card.CARD_VALUE_3, Card.CARD_VALUE_3,
