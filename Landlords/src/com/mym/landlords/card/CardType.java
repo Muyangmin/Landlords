@@ -171,17 +171,17 @@ public abstract class CardType implements Comparable<CardType> {
 		}
 		//否则需要类型相同且大于参数值。
 		return getClass().equals(before.getClass())
-				&& isSameConcreteSubclass(before)
+				&& (getCardList().size()==before.getCardList().size())
 				&& (this.compareTo(before) > 0);
 	}
-	
-	/**
-	 * 用于标记当前的两个对象是否是完全一致的子类型，（例如，长度为5的顺子和长度为9的顺子并不完全一样）。
-	 * @return 如果两个对象的子类型一样（即逻辑上可以在同一轮中由不同玩家打出），则返回true。
-	 */
-	protected boolean isSameConcreteSubclass(CardType another){
-		return true;
-	}
+//	
+//	/**
+//	 * 用于标记当前的两个对象是否是完全一致的子类型，（例如，长度为5的顺子和长度为9的顺子并不完全一样）。
+//	 * @return 如果两个对象的子类型一样（即逻辑上可以在同一轮中由不同玩家打出），则返回true。
+//	 */
+//	protected boolean isSameConcreteSubclass(CardType another){
+//		return true;
+//	}
 	
 	/**
 	 * 简单的工厂方法，用于把特定的卡牌列表转换为一个合适的类型。

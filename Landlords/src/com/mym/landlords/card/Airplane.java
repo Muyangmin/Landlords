@@ -81,6 +81,13 @@ public class Airplane extends CardType implements NonBombType {
 		}
 		//bodyLists & attachLists must be same size.
 		int size = bodyLists.size();
+		//补充不带牌的情况
+		if (attachLists.size()<size){
+			int sub = size-attachLists.size();
+			for (int i=0; i<sub; i++){
+				attachLists.add(null);
+			}
+		}
 		ArrayList<Three> tempThrees = new ArrayList<>();
 		for (int i=0; i<size; i++ ){
 			tempThrees.add(new Three(bodyLists.get(i), attachLists.get(i)));
@@ -95,7 +102,7 @@ public class Airplane extends CardType implements NonBombType {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Airplane [cardList=").append(cardList).append("]");
+		builder.append("Airplane ").append(cardList);
 		return builder.toString();
 	}
 }

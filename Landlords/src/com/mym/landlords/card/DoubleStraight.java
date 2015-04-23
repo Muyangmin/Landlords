@@ -72,13 +72,13 @@ public class DoubleStraight extends CardType implements NonBombType {
 				((DoubleStraight) another).startValue);
 	}
 	
-	@Override
-	protected boolean isSameConcreteSubclass(CardType another) {
-		if (another instanceof DoubleStraight){
-			return length == ((DoubleStraight)another).length;
-		}
-		return false;
-	}
+//	@Override
+//	protected boolean isSameConcreteSubclass(CardType another) {
+//		if (another instanceof DoubleStraight){
+//			return length == ((DoubleStraight)another).length;
+//		}
+//		return false;
+//	}
 
 	public ArrayList<Pair> getPairs() {
 		return pairs;
@@ -87,8 +87,7 @@ public class DoubleStraight extends CardType implements NonBombType {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DoubleStraight [pairs=").append(pairs)
-				.append(", startValue=").append(startValue).append(", length=")
+		builder.append("DoubleStraight [startValue=").append(startValue).append(", length=")
 				.append(length).append(", cardList=").append(cardList)
 				.append("]");
 		return builder.toString();

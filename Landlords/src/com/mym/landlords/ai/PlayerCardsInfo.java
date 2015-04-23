@@ -79,7 +79,9 @@ public final class PlayerCardsInfo {
 	}
 	
 	protected final void recycle(){
-		cardTypes.clear();
+		if (cardTypes!=null){
+			cardTypes.clear();
+		}
 		cardTypes = null;
 	}
 }

@@ -35,7 +35,7 @@ public final class Three extends CardType implements NonBombType{
 	 * @param attachment 带的牌，列表长度必须小于3。
 	 */
 	public Three(ArrayList<Card> bodyList, ArrayList<Card> attachment){
-		if (bodyList!=null && attachment!=null && bodyList.size()==3 && attachment.size()<3){
+		if (bodyList!=null && bodyList.size()==3){
 			bodyList = new ArrayList<>(bodyList);
 			cardList = new ArrayList<>(bodyList);
 			if (attachment!=null){

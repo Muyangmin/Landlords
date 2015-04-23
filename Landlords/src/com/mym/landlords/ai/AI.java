@@ -8,6 +8,7 @@ import java.util.List;
 
 import android.util.Log;
 
+import com.mym.landlords.card.Airplane;
 import com.mym.landlords.card.Bomb;
 import com.mym.landlords.card.BombType;
 import com.mym.landlords.card.Card;
@@ -478,6 +479,7 @@ final class AI {
 		if (list==null || list.size()==0){
 			return null;
 		}
+		Log.d(LOG_TAG, "cards before make: "+list.toString());
 		//复制一个列表以便内部操作，避免直接操纵玩家手牌。
 		PlayerCardsInfo playerInfo = new PlayerCardsInfo();
 		ArrayList<Card> cloneList= new ArrayList<>(list);
@@ -491,21 +493,28 @@ final class AI {
 		}
 		//找出所有的炸弹。通常情况下，炸弹也是不会进行拆分处理的。
 		//注意：这里使用lastNotFoundValue跳过相同点数的数值，避免无谓的循环。
-		for (int i = 0, lastNotFoundValue=0; i < cloneList.size(); i++) {
+		ArrayList<Bomb> bombs = new ArrayList<>();
+		for (int i = 0, lastNotFoundValue=0, lastFoundValue=0; i < cloneList.size(); i++) {
 			int cardValue = cloneList.get(i).getValue();
-			if (lastNotFoundValue==cardValue){
+			if (lastNotFoundValue==cardValue || lastFoundValue==cardValue){
 				continue ;
 			}
 			int[] bombPattern = new int[] { cardValue, cardValue, cardValue,
 					cardValue };
-			ArrayList<Card> bombs = takeoutCards(bombPattern, cloneList);
-			if (bombs != null) {
-				playerInfo.cardTypes.add(new Bomb(bombs));
-				cloneList.removeAll(bombs);
+			ArrayList<Card> bombCards = takeoutCards(bombPattern, cloneList);
+			if (bombCards != null) {
+				lastFoundValue = cardValue;
+				bombs.add(new Bomb(bombCards));
+//				playerInfo.cardTypes.add(new Bomb(bombs));
+//				cloneList.removeAll(bombs);
 			}
 			else{
 				lastNotFoundValue = cardValue;
 			}
+		}
+		for (Bomb bomb: bombs){
+			cloneList.removeAll(bomb.getCardList());
+			playerInfo.cardTypes.add(bomb);
 		}
 		//找出所有的顺子
 		List<StraightNumbers> numbers = StraightAnalyst.getAllStraights(cloneList);
@@ -515,57 +524,188 @@ final class AI {
 			if (tempList != null){
 				Straight tempStr = new Straight(tempList);
 				straights.add(tempStr);
-				cloneList.removeAll(tempList);
+//				cloneList.removeAll(tempList);
 			}
 		}
-		playerInfo.cardTypes.addAll(straights);
-		
-		//找出所有的双顺
-		ArrayList<DoubleStraight> doubleStr = StraightAnalyst.getAllDoubleStraights(cloneList);
-		for (DoubleStraight ds: doubleStr){
-			Log.d(LOG_TAG, "ds:"+ds.toString());
-			playerInfo.cardTypes.add(ds);
-			cloneList.removeAll(ds.getCardList());
+		for (Straight str:straights){
+			playerInfo.cardTypes.add(str);
+			cloneList.removeAll(str.getCardList());
 		}
+//		
+//		//找出所有的双顺
+//		ArrayList<DoubleStraight> doubleStr = StraightAnalyst.getAllDoubleStraights(cloneList);
+//		for (DoubleStraight ds: doubleStr){
+//			Log.d(LOG_TAG, "ds:"+ds.toString());
+//			playerInfo.cardTypes.add(ds);
+//			cloneList.removeAll(ds.getCardList());
+//		}
 		
 		//找出所有的三条
-		for (int i = 0, lastNotFoundValue=0; i < cloneList.size(); i++) {
+		ArrayList<Three> threesWithNoAirplane = new ArrayList<>();
+		for (int i = 0, lastNotFoundValue=0, lastFoundValue=0; i < cloneList.size(); i++) {
 			int cardValue = cloneList.get(i).getValue();
-			if (lastNotFoundValue==cardValue){
+			if (lastNotFoundValue==cardValue || lastFoundValue==cardValue){
 				continue ;
 			}
 			int[] threePattern = new int[] { cardValue, cardValue, cardValue};
 			ArrayList<Card> threes = takeoutCards(threePattern, cloneList);
 			if (threes != null) {
-				playerInfo.cardTypes.add(new Three(threes));
-				cloneList.removeAll(threes);
+				lastFoundValue = cardValue;
+//				playerInfo.cardTypes.add(new Three(threes));
+				threesWithNoAirplane.add(new Three(threes));
+//				cloneList.removeAll(threes);
 			}
 			else{
 				lastNotFoundValue = cardValue;
 			}
 		}
-		//AI暂不支持出飞机。
-		
-		//找出所有的对子
-		//对子无需使用lastNotFound来优化
-		for (int i = 0; i < cloneList.size(); i++) {
-			int cardValue = cloneList.get(i).getValue();
-			int[] threePattern = new int[] { cardValue, cardValue};
-			ArrayList<Card> pairs = takeoutCards(threePattern, cloneList);
-			if (pairs != null) {
-				playerInfo.cardTypes.add(new Pair(pairs));
-				cloneList.removeAll(pairs);
+		for (Three thr: threesWithNoAirplane){
+			cloneList.removeAll(thr.getCardList());
+		}
+		//优化为飞机后再加入三条列表
+		if (threesWithNoAirplane.size()>2){
+			ArrayList<Airplane> planes = makeAirplaneUsingThree(threesWithNoAirplane);
+			for (Airplane air:planes){
+				playerInfo.cardTypes.add(air);
+				threesWithNoAirplane.removeAll(air.getBodyThrees());
 			}
 		}
+		playerInfo.cardTypes.addAll(threesWithNoAirplane);
+		
+		//找出所有的对子
+		ArrayList<Pair> pairsSeparately = new ArrayList<>();
+		for (int i = 0, lastFoundValue=0; i < cloneList.size(); i++) {
+			int cardValue = cloneList.get(i).getValue();
+			if (cardValue==lastFoundValue){
+				continue;
+			}
+			int[] pairPattern = new int[] { cardValue, cardValue};
+			ArrayList<Card> pairs = takeoutCards(pairPattern, cloneList);
+			if (pairs != null) {
+				lastFoundValue = cardValue;
+				pairsSeparately.add(new Pair(pairs));
+			}
+		}
+		for (Pair pair: pairsSeparately){
+			cloneList.removeAll(pair.getCardList());
+		}
+		if (pairsSeparately.size()>2){
+			ArrayList<DoubleStraight> dbs = makeDoubleStraightUsingPairs(pairsSeparately);
+			for (DoubleStraight db: dbs){
+				playerInfo.cardTypes.add(db);
+			}
+		}
+		playerInfo.cardTypes.addAll(pairsSeparately);
+		
 		//剩下的都是单牌
 		Iterator<Card> singleIterator = cloneList.iterator();
 		while (singleIterator.hasNext()){
 			playerInfo.cardTypes.add(new Single(singleIterator.next()));
 			singleIterator.remove();
 		}
-		statPlayerCardsInfo(playerInfo);
 		Collections.sort(playerInfo.cardTypes, CardType.SORT_COMPARATOR);
+		statPlayerCardsInfo(playerInfo);
 		return playerInfo;
+	}
+	
+	/**
+	 * 使用三条组装飞机。注意：如果能组成飞机，则所有组成飞机的三条都将被移除。
+	 */
+	private ArrayList<Airplane> makeAirplaneUsingThree(ArrayList<Three> threes){
+		int lastValue=0;
+		ArrayList<Three> tempAirThreeRef = new ArrayList<>();
+		ArrayList<Airplane> tempAirplanes = new ArrayList<>();
+		ArrayList<Three> toBeRemoved = new ArrayList<>();
+		for (Three tr : threes) {
+			int thisValue = tr.getBodyList().get(0).getValue();
+//			Log.i(LOG_TAG, "thisValue="+thisValue+", lastValue="+lastValue+",tr="+tr.toString());
+			//飞机不会包含2以上的数字
+			if (thisValue>=Card.CARD_VALUE_2){
+				break;
+			}
+			// 两个或更多三条可以组成飞机
+			if (lastValue != 0 && (thisValue - lastValue != 1) && tempAirThreeRef.size() >= 2) {
+				ArrayList<Card> cards = new ArrayList<>();
+				for (Three airThr : tempAirThreeRef) {
+					toBeRemoved.add(airThr);
+					cards.addAll(airThr.getCardList());
+				}
+				tempAirplanes.add(new Airplane(cards));
+				lastValue = 0;
+				tempAirThreeRef.clear();
+			}
+			//否则，如果不连续则清空后加入，连续则直接加入
+			else{
+				if (lastValue!=0 && thisValue-lastValue!=1){
+					tempAirThreeRef.clear();
+				}
+				lastValue = thisValue;
+				tempAirThreeRef.add(tr);
+			}
+//			Log.i(LOG_TAG, "on this loop time , tempAirThreeRef="+tempAirThreeRef);
+		}
+		//循环结束进行最后的判断。由于过程中不连续的已经被剔除，所以这里一定是连续的。
+		if (tempAirThreeRef.size() >= 2) {
+			ArrayList<Card> cards = new ArrayList<>();
+			for (Three airThr : tempAirThreeRef) {
+				toBeRemoved.add(airThr);
+				cards.addAll(airThr.getCardList());
+			}
+			tempAirplanes.add(new Airplane(cards));
+			tempAirThreeRef.clear();
+		}
+		threes.removeAll(toBeRemoved);
+		return tempAirplanes;
+	}
+	
+	/**
+	 * 使用对子组装连对。注意：如果能组成连对，则所有组成连对的对子都将被移除。
+	 */
+	private ArrayList<DoubleStraight> makeDoubleStraightUsingPairs(
+			ArrayList<Pair> pairs) {
+		int lastValue = 0;
+		ArrayList<Pair> tempPairRef = new ArrayList<>();
+		ArrayList<DoubleStraight> tempDoubles = new ArrayList<>();
+		ArrayList<Pair> toBeRemoved = new ArrayList<>();
+		for (Pair tr : pairs) {
+			int thisValue = tr.getCardList().get(0).getValue();
+			//如果列表中的对子不再连续或遇到2，且能组成连对
+			if (lastValue != 0
+					&& ((thisValue - lastValue != 1) || thisValue >= Card.CARD_VALUE_2)) {
+				// 三个或更多对子可以组成连对
+				if (tempPairRef.size() >= 3) {
+					ArrayList<Card> cards = new ArrayList<>();
+					for (Pair airThr : tempPairRef) {
+						toBeRemoved.add(airThr);
+						cards.addAll(airThr.getCardList());
+					}
+					tempDoubles.add(new DoubleStraight(cards));
+					tempPairRef.clear();
+				}
+			}
+			//否则，如果不连续则清空，连续则加入
+			else if (lastValue!=0 && thisValue-lastValue!=1){
+				tempPairRef.clear();
+			}
+			else{
+				tempPairRef.add(tr);
+			}
+			// 无论是不是，都更新最新的值
+			lastValue = thisValue;
+		}
+		//循环结束进行最后的判断。由于过程中不连续的已经被剔除，所以这里一定是连续的。
+		if (tempPairRef.size() >= 3) {
+			//判断其中装的是不是一样的
+			ArrayList<Card> cards = new ArrayList<>();
+			for (Pair airThr : tempPairRef) {
+				toBeRemoved.add(airThr);
+				cards.addAll(airThr.getCardList());
+			}
+			tempDoubles.add(new DoubleStraight(cards));
+			tempPairRef.clear();
+		}
+		pairs.removeAll(toBeRemoved);
+		return tempDoubles;
 	}
 	
 	//判断是否需要跟牌

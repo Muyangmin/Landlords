@@ -8,7 +8,7 @@ public final class Bomb extends CardType implements BombType{
 		if (list==null || list.size()!=4 || (!list.get(0).isSameValueAs(list.get(1)))
 			|| (!list.get(1).isSameValueAs(list.get(2)))
 			|| (!list.get(2).isSameValueAs(list.get(3)))){
-			throw new IllegalArgumentException("this type must be 4 same cards!");
+			throw new IllegalArgumentException("this type must be 4 same cards!" + list.toString());
 		}
 		//保护性复制
 		cardList = new ArrayList<>(list);

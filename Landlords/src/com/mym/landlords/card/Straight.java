@@ -55,15 +55,15 @@ public class Straight extends CardType implements NonBombType{
 		return Integer.valueOf(startValue).compareTo(
 				((Straight) another).startValue);
 	}
-	
-	@Override
-	protected boolean isSameConcreteSubclass(CardType another) {
-		if (another instanceof Straight){
-			return length == ((Straight)another).length;
-		}
-		return false;
-	}
-	
+//	
+//	@Override
+//	protected boolean isSameConcreteSubclass(CardType another) {
+//		if (another instanceof Straight){
+//			return length == ((Straight)another).length;
+//		}
+//		return false;
+//	}
+//	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
