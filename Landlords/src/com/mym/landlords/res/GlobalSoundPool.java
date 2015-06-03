@@ -2,6 +2,8 @@ package com.mym.landlords.res;
 
 import java.io.IOException;
 
+import com.mym.landlords.ui.Settings;
+
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
@@ -53,6 +55,8 @@ public final class GlobalSoundPool {
 	 * @param soundId 通过load方法加载得到的soundId。
 	 */
 	public void playSound(int soundId){
-		soundPool.play(soundId, 0.5F, 0.5F, 0, 0, 1.0F);
+		if (Settings.isVoiceEnabled()){
+			soundPool.play(soundId, 0.5F, 0.5F, 0, 0, 1.0F);
+		}
 	}
 }

@@ -2,15 +2,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bkg_table"
     tools:context="${relativePackage}.${activityClass}" >
 
-    <ProgressBar
-        android:id="@+id/loading_prg"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_centerVertical="true"
-        android:layout_width="match_parent" 
+    <ImageView
+        android:id="@+id/loading_img_icon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/ic_launcher" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:max="100"
-        />
+        android:layout_below="@id/loading_img_icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp" >
+
+        <ProgressBar
+            android:id="@+id/loading_prg"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:max="100" />
+
+        <LinearLayout
+            android:id="@+id/loading_ll_btns"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible">
+
+            <ToggleButton
+                android:id="@+id/loading_tgb_voice"
+                style="@style/LoadingMenuBtn"
+                android:textOff="@string/loading_voice_disable"
+                android:textOn="@string/loading_voice_enable"
+                android:checked="true" />
+
+            <Button
+                android:id="@+id/loading_btn_startgame"
+                style="@style/LoadingMenuBtn"
+                android:text="@string/loading_start_game" />
+
+            <Button
+                android:id="@+id/loading_btn_share"
+                style="@style/LoadingMenuBtn"
+                android:text="@string/loading_share" />
+        </LinearLayout>
+    </FrameLayout>
 
 </RelativeLayout>

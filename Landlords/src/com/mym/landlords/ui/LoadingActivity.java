@@ -7,12 +7,17 @@ import com.mym.landlords.res.Assets;
 import com.mym.landlords.res.Assets.LoadingProgressListener;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ProgressBar;
+import android.widget.ToggleButton;
 
 public class LoadingActivity extends Activity {
 
@@ -43,9 +48,9 @@ public class LoadingActivity extends Activity {
 		
 		protected void onPostExecute(Void result) {
 			Log.d(LOG_TAG, "loading completed.");
-			startActivity(MainActivity.getIntent(LoadingActivity.this));
-			finish();
-			
+			//隐藏进度条，并将按钮组展示出来。
+			progressBar.setVisibility(View.INVISIBLE);
+			findViewById(R.id.loading_ll_btns).setVisibility(View.VISIBLE);
 		};
 	};
 
@@ -56,6 +61,15 @@ public class LoadingActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_loading);
 		progressBar = (ProgressBar) findViewById(R.id.loading_prg);
+		ToggleButton tgb = (ToggleButton) findViewById(R.id.loading_tgb_voice);
+		tgb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				Settings.setVoiceEnabled(isChecked);
+			}
+		});
+		Settings.setVoiceEnabled(tgb.isChecked());
 		handler.sendEmptyMessageDelayed(LoadHandler.MSG_START_LOADING, 1000);//Splash显示时间
 	}
 	
@@ -74,6 +88,25 @@ public class LoadingActivity extends Activity {
 			if (msg.what==MSG_START_LOADING && activity!=null){
 				activity.loadTask.execute();
 			}
+		}
+	}
+	
+	public void onClick(View v){
+		switch (v.getId()) {
+		case R.id.loading_btn_startgame:
+			startActivity(MainActivity.getIntent(LoadingActivity.this));
+			finish();
+			break;
+		case R.id.loading_btn_share:
+			Intent intent=new Intent(Intent.ACTION_SEND); 
+			intent.setType("text/plain"); 
+			intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.default_share_title)); 
+			intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.default_share_content));  
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+			startActivity(Intent.createChooser(intent, getString(R.string.default_share_title)));
+			break;
+		default:
+			break;
 		}
 	}
 }
